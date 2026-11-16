@@ -44,6 +44,15 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--
 #notice,#interact{position:absolute;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap;font-weight:800;text-shadow:0 2px 5px #000}#notice{top:17%;font-size:clamp(15px,2.8vw,24px);color:var(--acid)}#interact{bottom:21%;color:var(--acid);background:#12160edc;padding:8px 11px}#interact:empty{display:none}
 #effects{background:radial-gradient(ellipse,transparent 31%,#af261b 100%);opacity:0}
 .centerScreen{place-items:center;background:#0f140fc4;backdrop-filter:blur(5px)}
+#tactical{place-items:center;padding:12px;background:#071318dd}
+.tacticalPanel{display:grid;grid-template-columns:minmax(0,1fr) minmax(155px,200px);align-items:center;gap:clamp(14px,3vw,30px);width:min(720px,100%);max-height:100%;padding:clamp(10px,2vw,20px);overflow:auto;background:#0e1c20;border:1px solid #547477;border-top:2px solid var(--acid);box-shadow:0 18px 72px #0008}
+#overview{display:block;width:min(100%,78vh);max-width:100%;height:auto;aspect-ratio:1;justify-self:center;border:1px solid #496269;background:#0c2024}
+.tacticalInfo h2{font-size:clamp(20px,3.2vw,33px);line-height:1.15;margin:0 0 6px}.tacticalInfo p{margin:0 0 16px;color:#b0c6c4;line-height:1.45}
+.tacticalLegend{display:grid;gap:9px;margin:0 0 20px}.tacticalLegend span{display:flex;align-items:center;gap:9px}.tacticalLegend i{width:12px;height:12px;display:inline-block;flex:none}.legendPlayer{background:#f3f6e5;clip-path:polygon(50% 0,100% 100%,50% 76%,0 100%)}.legendGate{background:#e6b668;height:4px!important}.legendSupply{background:#bfe873;transform:rotate(45deg) scale(.75)}.legendUsed{border:1px solid #95ad83;transform:rotate(45deg) scale(.75)}
+#tacticalClose{min-width:unset;min-height:39px;width:max-content}
+.controls #touchMap{right:83px;top:9px;width:58px;height:29px}
+@media(max-width:580px) and (orientation:portrait){.tacticalPanel{grid-template-columns:1fr;gap:12px;max-width:410px}#overview{width:min(100%,52vh)}.tacticalLegend{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}.tacticalInfo p{margin-bottom:10px}}
+@media(max-height:460px) and (orientation:landscape){.tacticalInfo h2{font-size:23px}.tacticalInfo p{margin-bottom:12px}.tacticalLegend{gap:6px;margin-bottom:12px}}
 .dialog{max-width:480px;width:100%;background:#171c15;border:1px solid #677052;padding:clamp(18px,4vw,36px);border-top:2px solid var(--acid);box-shadow:0 24px 110px #0008}
 .dialog h2{font-size:clamp(30px,6vw,56px);line-height:1;margin:12px 0 16px}.dialog p{color:#b7bfaa;line-height:1.65;margin:0 0 24px}
 .controls{position:absolute;inset:0;pointer-events:none}.controls button{pointer-events:auto;position:absolute;height:44px;width:58px;touch-action:none;border:1px solid var(--line);background:#141c16bc;color:var(--paper);font-weight:800}.controls #touchFire{right:20px;bottom:105px;height:64px;width:74px;color:var(--acid)}.controls #touchReload{right:103px;bottom:110px}.controls #touchSwap{right:20px;bottom:177px}.controls #touchSupply{right:103px;bottom:160px}.controls #touchPause{right:13px;top:9px;width:64px;height:29px}.controls #stick{pointer-events:auto;position:absolute;left:16px;bottom:102px;width:116px;height:116px;border:1px solid #b8c4a762;border-radius:50%;background:#0e140c6b;touch-action:none}.controls #stick i{position:absolute;left:36px;top:36px;width:42px;height:42px;border-radius:50%;background:#b6c99088}
@@ -131,8 +140,8 @@ body{background:#0b1c23}
       <button type="button" class="mapChoice" data-map="hospital" aria-pressed="false"><small>22</small><b>医院</b></button>
       <button type="button" class="mapChoice" data-map="prison" aria-pressed="false"><small>18</small><b>监狱</b></button>
     </div>
-    <div class="instructions" id="desktopHelp"><span><b class="key">WASD</b>移动</span><span><b class="key">鼠标</b>瞄准 / 射击</span><span><b class="key">R</b>换弹</span><span><b class="key">1–5 / Q</b>切枪</span><span><b class="key">E</b>补给</span></div>
-    <div class="instructions" id="touchHelp" hidden>左摇杆移动 · 滑动战场瞄准 · 右侧按钮射击</div>
+    <div class="instructions" id="desktopHelp"><span><b class="key">WASD</b>移动</span><span><b class="key">鼠标</b>瞄准 / 射击</span><span><b class="key">R</b>换弹</span><span><b class="key">1–5 / Q</b>切枪</span><span><b class="key">E</b>补给</span><span><b class="key">M</b>地图</span></div>
+    <div class="instructions" id="touchHelp" hidden>左摇杆移动 · 滑动战场瞄准 · 右侧按钮射击 · 右上角打开地图</div>
   </div>
   <div class="mapTag"><small class="mono" id="sectorTag">SECTOR 07 / 43 × 43</small><b id="sectorName">雨夜货运港</b></div>
   <footer class="menuFoot"><span id="footSector">SECTOR 07 / 雨夜货运港</span><span id="best"></span></footer>
@@ -142,9 +151,22 @@ body{background:#0b1c23}
   <div class="cross" id="cross"><i></i><i></i><i></i><i></i></div><div id="feed" aria-hidden="true"></div><div id="killRing" aria-hidden="true"></div><div id="notice"></div><div id="interact"></div>
   <div class="hudBottom"><div class="plate"><div class="label">生命 / HP</div><strong id="health">100</strong><div class="healthBar"><i id="life"></i></div></div><div class="plate inventory"><div class="label" id="weapon"></div><strong id="mag"></strong> <small id="reserve"></small><br><small id="kills"></small></div></div>
 </div>
-<div class="controls" id="touch" hidden><div id="stick" aria-label="移动摇杆"><i></i></div><button id="touchPause">暂停</button><button id="touchSwap">切枪</button><button id="touchSupply">补给</button><button id="touchReload">换弹</button><button id="touchFire">开火</button></div>
+<div class="controls" id="touch" hidden><div id="stick" aria-label="移动摇杆"><i></i></div><button id="touchPause">暂停</button><button id="touchMap">地图</button><button id="touchSwap">切枪</button><button id="touchSupply">补给</button><button id="touchReload">换弹</button><button id="touchFire">开火</button></div>
 <section class="screen centerScreen" id="modal" hidden aria-labelledby="modalTitle">
   <div class="dialog"><div class="label" id="modalLabel"></div><h2 id="modalTitle"></h2><p id="modalText"></p><div class="actions"><button class="primary" id="modalAction"></button><button class="subtle" id="home">返回主菜单</button></div></div>
+</section>
+<section class="screen" id="tactical" role="dialog" aria-modal="true" aria-labelledby="tacticalTitle" hidden>
+ <div class="tacticalPanel">
+  <canvas id="overview" width="516" height="516" role="img" aria-label="战区地图，标出当前位置、南区入口和补给"></canvas>
+  <div class="tacticalInfo">
+   <h2 id="tacticalTitle"></h2><p id="tacticalZone"></p>
+   <div class="tacticalLegend">
+    <span><i class="legendPlayer"></i>当前位置</span><span><i class="legendGate"></i>南区入口</span>
+    <span><i class="legendSupply"></i>可领取补给</span><span><i class="legendUsed"></i>本波已领取</span>
+   </div>
+   <button class="primary" id="tacticalClose">继续战斗</button>
+  </div>
+ </div>
 </section>
 <dialog class="guide" id="guide" aria-labelledby="guideTitle">
  <header><h2 id="guideTitle">感染者图鉴</h2><button class="subtle" id="closeGuide" autofocus>关闭</button></header>
@@ -167,7 +189,9 @@ body{background:#0b1c23}
 'use strict';
 const $ = id => document.getElementById(id);
 const W = $('world'), ctx = W.getContext('2d', {alpha:false});
-const radar = $('radar').getContext('2d'), keys = new Set();
+const radar=$('radar').getContext('2d'),overview=$('overview').getContext('2d'),keys=new Set();
+const radarTerrain=document.createElement('canvas').getContext('2d');
+let radarMap=null;
 const mobile = matchMedia('(pointer:coarse)').matches;
 $('desktopHelp').hidden = mobile;
 $('touchHelp').hidden = !mobile;
@@ -1137,12 +1161,13 @@ function setMode(next) {
  if(mode==='menu'||mode==='over') stopAmbience();
  $('menu').hidden=mode!=='menu';$('hud').hidden=mode!=='play';
  $('touch').hidden=mode!=='play'||!mobile;
- $('modal').hidden=mode==='menu'||mode==='play';
+ $('modal').hidden=mode==='menu'||mode==='play'||mode==='map';
+ $('tactical').hidden=mode!=='map';
  if(mode!=='play') {
   $('feed').className='';$('killRing').className='';
   keys.clear();firing=false;aimPointer=null;joyId=null;joyX=joyY=0;
   $('stick').firstElementChild.style.transform='none';
-  if (document.pointerLockElement===W) document.exitPointerLock();
+  if(document.pointerLockElement===W) {pressed=false;document.exitPointerLock();}
  }
  if(mode==='menu') syncMenu();
 }
@@ -1250,6 +1275,16 @@ function modal(next,label,title,body,action) {
 }
 function pause() {
  if(mode==='play') modal('pause','行动暂停 / PAUSED','暂停','按 Esc 或点击继续，返回当前波次。','继续战斗');
+}
+function toggleTactical() {
+ if(mode==='map') {setMode('play');lockAim();return;}
+ if(mode!=='play') return;
+ setMode('map');
+ $('tacticalTitle').textContent=MAP.name;
+ $('tacticalZone').textContent=zone(player.x,player.y);
+ drawMapTerrain(overview,true);
+ drawMapMarkers(overview,true);
+ $('tacticalClose').focus();
 }
 function nextWave() {
  wave++;
@@ -3253,23 +3288,64 @@ function paintGun() {
  }
  ctx.restore();
 }
-function paintRadar() {
- const size=radar.canvas.width,scale=size/Math.max(columns,rows),off=(size-rows*scale)/2;
- radar.clearRect(0,0,size,size);
- radar.fillStyle='#d9af64';
- for(const [lo,hi] of ANNEXES[selectedMap].gates) radar.fillRect(lo*scale,off+(ROWS-.4)*scale,(hi-lo+1)*scale,1.6);
- radar.fillStyle='#66735b7d';
- for(let y=0;y<rows;y++) for(let x=0;x<columns;x++) if(solid(x,y)) radar.fillRect(x*scale,off+y*scale,scale-.6,scale-.6);
+function drawMapTerrain(target,detailed) {
+ const size=target.canvas.width,scale=size/Math.max(columns,rows),off=(size-rows*scale)/2;
+ target.clearRect(0,0,size,size);
+ if(detailed) {
+  target.fillStyle='#112a2e';target.fillRect(0,0,size,size);
+  target.fillStyle='#1b3838';target.fillRect(0,off+ROWS*scale,size,(rows-ROWS)*scale);
+  target.fillStyle='#abbfb921';
+  for(let i=5;i<Math.max(columns,rows);i+=5) {
+   target.fillRect(i*scale,off,1,rows*scale);
+   target.fillRect(0,off+i*scale,columns*scale,1);
+  }
+ }
+ for(let y=0;y<rows;y++) for(let x=0;x<columns;x++) {
+  const tile=cell(x,y);
+  if(tile==='.') continue;
+  target.fillStyle=detailed?(tile==='W'||tile==='C'?'#4c6961':'#587780'):'#66735b7d';
+  target.fillRect(x*scale,off+y*scale,scale-.6,scale-.6);
+ }
+ target.fillStyle='#e6b668';
+ for(const [lo,hi] of ANNEXES[selectedMap].gates) {
+  target.fillRect(lo*scale,off+(ROWS-.4)*scale,(hi-lo+1)*scale,detailed?4:1.6);
+ }
+}
+function drawMapMarkers(target,detailed) {
+ const size=target.canvas.width,scale=size/Math.max(columns,rows),off=(size-rows*scale)/2;
+ const waveIndex=supplyWave();
  for(let i=0;i<supplies.length;i++) {
-  radar.fillStyle=used[i]===supplyWave()?'#6b7c52':'#b9d65b';
-  radar.fillRect(supplies[i][0]*scale-1.5,off+supplies[i][1]*scale-1.5,3,3);
+  const x=supplies[i][0]*scale,y=off+supplies[i][1]*scale,collected=used[i]===waveIndex;
+  if(!detailed) {
+   target.fillStyle=collected?'#6b7c52':'#b9d65b';
+   target.fillRect(x-1.5,y-1.5,3,3);
+   continue;
+  }
+  target.beginPath();target.moveTo(x,y-5.2);target.lineTo(x+5.2,y);target.lineTo(x,y+5.2);target.lineTo(x-5.2,y);target.closePath();
+  if(collected) {target.lineWidth=1.7;target.strokeStyle='#95ad83';target.stroke();}
+  else {target.fillStyle='#bfe873';target.fill();}
  }
- for(const z of enemies) {
+ if(!detailed) for(const z of enemies) {
   if(Math.hypot(z.x-player.x,z.y-player.y)>9) continue;
-  radar.fillStyle=z.type==='shield'?'#8dafcc':z.type==='spitter'?'#d8ef8a':z.type==='screamer'?'#ee9ca5':'#fb935d';radar.fillRect(z.x*scale-1.4,off+z.y*scale-1.4,2.8,2.8);
+  target.fillStyle=z.type==='shield'?'#8dafcc':z.type==='spitter'?'#d8ef8a':z.type==='screamer'?'#ee9ca5':'#fb935d';
+  target.fillRect(z.x*scale-1.4,off+z.y*scale-1.4,2.8,2.8);
  }
- radar.save();radar.translate(player.x*scale,off+player.y*scale);radar.rotate(player.angle);
- polygon(radar,[5,0,-3,3,-2,0,-3,-3],'#f3f6e5');radar.restore();
+ target.save();
+ target.translate(player.x*scale,off+player.y*scale);target.rotate(player.angle);
+ if(detailed) target.scale(2.25,2.25);
+ polygon(target,[5,0,-3,3,-2,0,-3,-3],'#f3f6e5');
+ target.restore();
+}
+function paintRadar() {
+ const size=radar.canvas.width;
+ if(radarMap!==MAP||radarTerrain.canvas.width!==size) {
+  radarMap=MAP;
+  radarTerrain.canvas.width=radarTerrain.canvas.height=size;
+  drawMapTerrain(radarTerrain,false);
+ }
+ radar.clearRect(0,0,size,size);
+ radar.drawImage(radarTerrain.canvas,0,0);
+ drawMapMarkers(radar,false);
 }
 function paintHud() {
  const item=currentGun(),rounds=currentRounds();
@@ -3320,6 +3396,14 @@ $('modalAction').onclick=()=>{
 };
 addEventListener('keydown',event=>{
  const code=event.code;
+ if(mode==='map') {
+  if((code==='Escape'||code==='KeyM')&&!event.repeat) {event.preventDefault();toggleTactical();}
+  return;
+ }
+ if(code==='KeyM'&&mode==='play') {
+  if(!event.repeat) {event.preventDefault();toggleTactical();}
+  return;
+ }
  if(code==='Escape') {
   if(mode==='play'&&document.pointerLockElement!==W) pause();
   else if(mode==='pause') $('modalAction').click();
@@ -3383,6 +3467,7 @@ $('touchSwap').onclick=()=>switchGun((gun+1)%Math.max(1,ownedWeapons().length));
 $('touchReload').onclick=reload;
 $('touchSupply').onclick=resupply;
 $('touchPause').onclick=pause;
+$('touchMap').onclick=$('tacticalClose').onclick=toggleTactical;
 const requestedMap=new URLSearchParams(location.search).get('map') || location.hash.replace(/^#/,'');
 if(MAPS[requestedMap] && requestedMap!=='yard') applyMap(requestedMap,true);
 setMode('menu');
