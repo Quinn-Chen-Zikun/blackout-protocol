@@ -31,6 +31,8 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--
 .mapChoice{display:flex;align-items:center;gap:7px;min-height:38px;padding:5px 10px;border:1px solid var(--line);background:#0f1e218f;color:#c8d4cf;font-weight:750;letter-spacing:.03em}
 .mapChoice small{font:800 9px ui-monospace,monospace;color:#8faeaa;letter-spacing:.12em}.mapChoice b{font-size:12px}
 .mapChoice:hover{background:#263b3e}.mapChoice.active{border-color:var(--acid);background:var(--acid);color:#11170b}.mapChoice.active small{color:#3f4a22}
+.modeRow{display:flex;gap:6px;margin-top:8px}.modeChoice{min-height:31px;padding:4px 10px;border:1px solid var(--line);background:#0f1e218f;color:#b9c9c4;font:750 11px ui-monospace,monospace;letter-spacing:.05em}
+.modeChoice.active{border-color:#ffcf7a;background:#ffcf7a;color:#181207}
 .mapTag{position:absolute;right:5vw;bottom:13vh;border-right:2px solid var(--orange);padding-right:13px;text-align:right;color:#f2e3cd;background:#1c1813a8;padding-left:12px}.mapTag b{display:block;margin-top:4px;font-size:14px;letter-spacing:.15em}
 #hud{padding:22px clamp(12px,3vw,36px) 23px;display:flex;flex-direction:column;justify-content:space-between}
 .hudTop,.hudBottom{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -157,6 +159,10 @@ body{background:#0b1c23}
       <button type="button" class="mapChoice" data-map="hospital" aria-pressed="false"><small>22</small><b>医院</b></button>
       <button type="button" class="mapChoice" data-map="prison" aria-pressed="false"><small>18</small><b>监狱</b></button>
     </div>
+    <div class="modeRow" role="group" aria-label="游戏模式">
+      <button type="button" class="modeChoice active" id="modeStandard" aria-pressed="true">标准 8 波</button>
+      <button type="button" class="modeChoice" id="modeEndless" aria-pressed="false">无尽生存</button>
+    </div>
     <div class="instructions" id="desktopHelp"><span><b class="key">WASD</b>移动</span><span><b class="key">鼠标</b>瞄准 / 射击</span><span><b class="key">右键</b>机瞄</span><span><b class="key">R</b>换弹</span><span><b class="key">1–5 / Q</b>切枪</span><span><b class="key">F</b>近战</span><span><b class="key">G</b>投雷</span><span><b class="key">E</b>补给</span><span><b class="key">M</b>地图</span></div>
     <div class="instructions" id="touchHelp" hidden>左摇杆移动 · 滑动战场瞄准 · 右侧按钮射击 · 右上角打开地图</div>
   </div>
@@ -164,7 +170,7 @@ body{background:#0b1c23}
   <footer class="menuFoot"><span id="footSector">SECTOR 07 / 雨夜货运港</span><span id="best"></span></footer>
 </section>
 <div id="hud" hidden aria-label="战斗状态">
-  <div class="hudTop"><div class="plate"><div class="label">感染波次</div><strong id="wave">01</strong> <small>/ 08</small><br><small id="remaining"></small></div><div class="mapHud"><canvas id="radar" width="144" height="144" aria-label="小地图"></canvas><span class="label" id="zone"></span></div></div>
+  <div class="hudTop"><div class="plate"><div class="label">感染波次</div><strong id="wave">01</strong> <small id="waveMax">/ 08</small><br><small id="remaining"></small></div><div class="mapHud"><canvas id="radar" width="144" height="144" aria-label="小地图"></canvas><span class="label" id="zone"></span></div></div>
   <div id="bossHud" hidden><span id="bossName">暴君 · TYRANT</span><div class="bossTrack"><i id="bossFill"></i></div></div>
   <div class="cross" id="cross"><i></i><i></i><i></i><i></i></div><div id="feed" aria-hidden="true"></div><div id="killRing" aria-hidden="true"></div><div id="notice"></div><div id="interact"></div>
   <div class="hudBottom"><div class="plate"><div class="label">生命 / HP</div><strong id="health">100</strong><div class="healthBar"><i id="life"></i></div></div><div class="plate inventory"><div class="label" id="weapon"></div><strong id="mag"></strong> <small id="reserve"></small><br><small id="nades"></small><br><small id="kills"></small></div></div>
@@ -976,6 +982,7 @@ let muted=read('blackout-muted','0')==='1';
 let sensitivity=Math.min(2,Math.max(.5,Number(read('blackout-sens','1'))||1));
 let fovScale=Math.min(1.15,Math.max(.85,Number(read('blackout-fov','1'))||1));
 let effectsOn=read('blackout-fx','1')!=='0';
+let gameMode=read('blackout-mode','standard')==='endless'?'endless':'standard';
 let depth, rays, focal, sky, floor;
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 function read(key,fallback) { try {return localStorage.getItem(key) || fallback;} catch {return fallback;} }
@@ -1226,6 +1233,10 @@ function syncMenu() {
  $('footSector').textContent=def.name+' · 南侧通往'+ANNEXES[selectedMap].name;
  $('best').textContent=best?'最佳纪录 / 通过 '+best+' 波':'最佳纪录 / —';
  $('menuCredits').textContent='₡ '+credits;
+ $('modeStandard').classList.toggle('active',gameMode==='standard');
+ $('modeEndless').classList.toggle('active',gameMode==='endless');
+ $('modeStandard').setAttribute('aria-pressed',String(gameMode==='standard'));
+ $('modeEndless').setAttribute('aria-pressed',String(gameMode==='endless'));
  for(const button of document.querySelectorAll('.mapChoice')) {
   const on=button.dataset.map===selectedMap;
   button.classList.toggle('active',on);
@@ -1316,6 +1327,11 @@ function renderArmory() {
  detail.querySelectorAll('[data-skin]').forEach(button=>button.onclick=()=>buyOrEquipSkin(def.id,button.dataset.skin));
  detail.querySelectorAll('[data-equip]').forEach(button=>button.onclick=()=>buyEquipment(button.dataset.equip));
 }
+function setGameMode(mode) {
+ gameMode=mode==='endless'?'endless':'standard';
+ save('blackout-mode',gameMode);syncMenu();
+ tone(300,.1,'triangle',.05,460);
+}
 function selectMap(id) {
  if(!MAPS[id]||id===selectedMap) return;
  applyMap(id,true);
@@ -1360,11 +1376,14 @@ function toggleTactical() {
 }
 function nextWave() {
  wave++;
- const count=4+wave*2, specialists=waveSpecials[wave-1]??[];
+ const endless=gameMode==='endless';
+ const count=endless?Math.min(30,4+wave*2):4+wave*2;
+ const specialists=waveSpecials[wave-1]??(endless?['runner','shield','brute','spitter','screamer','shield','runner','brute']:[]);
  spawnQueue=Array(count).fill('walker');
  specialists.forEach((type,index)=>{spawnQueue[Math.floor((index+1)*count/(specialists.length+1))]=type;});
  spawnClock=.8;waveTime=0;
- if(wave===MAX_WAVE) {spawnQueue.push('boss');setNotice('第 8 波 · 暴君出现 · 守住最后一阵',3.2);}
+ const bossWave=endless?(wave>=8&&wave%4===0):wave===MAX_WAVE;
+ if(bossWave) {spawnQueue.push('boss');setNotice('第 '+wave+' 波 · 暴君出现'+(endless?' · 无尽生存':''),3.2);}
  else setNotice('第 '+wave+' 波 · '+(firstContact[wave]??'感染者接近')+(wave>=4?' · 精英混入':''),2.4);
  alarm=MAP.theme.alarmWaves?2.4:0;
  tone(190,.22,'triangle',.13,76);
@@ -1429,7 +1448,7 @@ function waveCleared() {
  acidShots.length=0;
  if (best<wave) {best=wave;save(bestKey(selectedMap),best);}
  const bonus=80+wave*45;earn(bonus);
- if (wave===MAX_WAVE) {
+ if (gameMode!=='endless' && wave===MAX_WAVE) {
   modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'再打一局',true);
   return;
  }
@@ -3664,6 +3683,7 @@ function paintRadar() {
 function paintHud() {
  const item=currentGun(),rounds=currentRounds();
  $('wave').textContent=String(wave).padStart(2,'0');
+ $('waveMax').textContent='/'+(gameMode==='endless'?'∞':'08');
  $('health').textContent=player.hp;
  $('life').style.width=player.hp+'%';
  $('life').style.background=player.hp<28?'#ec815c':'';
@@ -3700,6 +3720,8 @@ $('start').onclick=start;
 for(const button of document.querySelectorAll('.mapChoice')) button.onclick=()=>{
  if(mode==='menu') selectMap(button.dataset.map);
 };
+$('modeStandard').onclick=()=>{if(mode==='menu')setGameMode('standard');};
+$('modeEndless').onclick=()=>{if(mode==='menu')setGameMode('endless');};
 $('openGuide').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 $('openArmory').onclick=()=>{shopWeapon=ownedWeapons()[0]?.id||'rifle';renderArmory();$('armory').showModal();};
