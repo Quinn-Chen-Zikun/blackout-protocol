@@ -122,6 +122,11 @@ body{background:#0b1c23}
 .buyWide{width:100%;margin-top:8px}
 @media(max-width:760px){.weaponDetail{grid-template-columns:1fr}.statGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.weaponTabs{gap:5px}.weaponTab{padding:4px 8px;min-height:35px}.upgradeRow{grid-template-columns:62px 1fr auto}}
+#bossHud{position:absolute;left:50%;top:16px;transform:translateX(-50%);width:min(430px,58vw);pointer-events:none;text-align:center}
+#bossHud span{display:inline-block;margin-bottom:5px;font:800 11px ui-monospace,monospace;letter-spacing:.18em;color:#ffd4a3;text-shadow:0 2px 6px #000}
+.bossTrack{height:9px;border:1px solid #ff9b7455;background:#2a1717cc;box-shadow:0 3px 12px #0008}
+.bossTrack i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5d43,#ffb35e);transition:width .12s linear}
+@media(max-width:650px){#bossHud{top:8px;width:48vw}#bossHud span{font-size:9px}}
 </style>
 </head>
 <body>
@@ -148,6 +153,7 @@ body{background:#0b1c23}
 </section>
 <div id="hud" hidden aria-label="战斗状态">
   <div class="hudTop"><div class="plate"><div class="label">感染波次</div><strong id="wave">01</strong> <small>/ 08</small><br><small id="remaining"></small></div><div class="mapHud"><canvas id="radar" width="144" height="144" aria-label="小地图"></canvas><span class="label" id="zone"></span></div></div>
+  <div id="bossHud" hidden><span id="bossName">暴君 · TYRANT</span><div class="bossTrack"><i id="bossFill"></i></div></div>
   <div class="cross" id="cross"><i></i><i></i><i></i><i></i></div><div id="feed" aria-hidden="true"></div><div id="killRing" aria-hidden="true"></div><div id="notice"></div><div id="interact"></div>
   <div class="hudBottom"><div class="plate"><div class="label">生命 / HP</div><strong id="health">100</strong><div class="healthBar"><i id="life"></i></div></div><div class="plate inventory"><div class="label" id="weapon"></div><strong id="mag"></strong> <small id="reserve"></small><br><small id="nades"></small><br><small id="kills"></small></div></div>
 </div>
@@ -903,12 +909,13 @@ function gunStats(item){
 function currentGun(){const list=ownedWeapons();return gunStats(list[Math.min(gun,list.length-1)]||WEAPONS[0]);}
 function currentRounds(){return ammo[currentGun().id];}
 function upgradeCost(id,key){const w=WEAPON_BY_ID[id];return Math.round(UPGRADE_DEFS[key].base*(w?w.tier:1)*Math.pow(upgradesOf(id)[key]+1,1.35));}
-function killValue(type,critical){return ({walker:8,runner:10,shield:14,spitter:14,screamer:16,brute:24}[type]||8)+(critical?4:0);}
+function killValue(type,critical){return ({walker:8,runner:10,shield:14,spitter:14,screamer:16,brute:24,boss:150}[type]||8)+(critical?4:0);}
 function earn(amount){credits+=amount;runCredits+=amount;armory.credits=credits;saveArmory();}
 const types = {
  walker:{speed:1.17,hp:76,damage:11,height:1.75,shirt:'#5b5947',skin:'#a0a073'},
  runner:{speed:2.4,hp:58,damage:8,height:1.62,shirt:'#6f3f34',skin:'#bb906b'},
  brute:{speed:.88,hp:218,damage:21,height:2.04,shirt:'#454658',skin:'#a8a286'},
+ boss:{speed:.72,hp:1500,damage:34,height:2.7,shirt:'#4a2b29',skin:'#8f7d63'},
  shield:{speed:1.04,hp:104,damage:12,height:1.84,shirt:'#343c4a',skin:'#a6a48d'},
  spitter:{speed:1.03,hp:82,damage:8,height:1.71,shirt:'#6b613a',skin:'#a3a879'},
  screamer:{speed:1.28,hp:88,damage:9,height:1.78,shirt:'#753f40',skin:'#b29c8e'}
@@ -1038,7 +1045,7 @@ function polygon(g,points,fill) {
 function zombieImage(type,phase,flash=false) {
  const canvas=document.createElement('canvas');canvas.width=80;canvas.height=126;
  const g=canvas.getContext('2d'), style=types[type], stride=Math.sin(phase/6*TAU)*7;
- const b=type==='brute'||type==='shield'?4:0;
+ const b=type==='boss'?7:type==='brute'||type==='shield'?4:0;
  g.fillStyle='#171913';g.beginPath();g.ellipse(40,121,28,4,0,0,TAU);g.fill();
  polygon(g,[24-b,72,40,72,36+stride,116,21+stride,119,19+stride,114],'#242724');
  polygon(g,[39,74,54+b,72,58-stride,114,54-stride,120,44-stride,118],'#343630');
@@ -1129,10 +1136,10 @@ function zombieFrame(z,advance=0) {
  return sprites[z.type][z.flash>0?6:Math.floor(z.anim+advance)%6];
 }
 function setNotice(message,time=1.9) {noticeText=message;noticeTime=time;}
-function hitFeedback(critical,killed,armored=false,elite=false) {
+function hitFeedback(critical,killed,armored=false,elite=false,boss=false) {
  if(!critical&&!killed&&!armored) return;
  const feed=$('feed'),ring=$('killRing');
- feed.textContent=killed?(elite?'精英击倒':critical?'爆头 · 击倒':'击倒'):armored?'盾牌挡弹':'爆头';
+ feed.textContent=killed?(boss?'暴君击倒':elite?'精英击倒':critical?'爆头 · 击倒':'击倒'):armored?'盾牌挡弹':'爆头';
  feed.className=critical||elite?'head':armored?'armor':'';
  if(killed) feed.classList.add('kill');
  void feed.offsetWidth;feed.classList.add('show');
@@ -1293,7 +1300,9 @@ function nextWave() {
  const count=4+wave*2, specialists=waveSpecials[wave-1]??[];
  spawnQueue=Array(count).fill('walker');
  specialists.forEach((type,index)=>{spawnQueue[Math.floor((index+1)*count/(specialists.length+1))]=type;});
- spawnClock=.8;waveTime=0;setNotice('第 '+wave+' 波 · '+(firstContact[wave]??'感染者接近')+(wave>=4?' · 精英混入':''),2.4);
+ spawnClock=.8;waveTime=0;
+ if(wave===MAX_WAVE) {spawnQueue.push('boss');setNotice('第 8 波 · 暴君出现 · 守住最后一阵',3.2);}
+ else setNotice('第 '+wave+' 波 · '+(firstContact[wave]??'感染者接近')+(wave>=4?' · 精英混入':''),2.4);
  alarm=MAP.theme.alarmWaves?2.4:0;
  tone(190,.22,'triangle',.13,76);
 }
@@ -1334,9 +1343,10 @@ function spawn(type) {
  }
  if(!chosen) chosen=candidates.sort((a,b)=>b.distance-a.distance)[0] || {index:0,x:spawnPoints[0][0],y:spawnPoints[0][1]};
  lastSpawn=chosen.index;spawnHistory.unshift(chosen.index);spawnHistory.length=Math.min(4,spawnHistory.length);
- const elite=wave>=4&&Math.random()<Math.min(.34,.05+wave*.028);
- const hp=(types[type].hp+Math.max(wave-3,0)*5)*(elite?1.8:1);
- enemies.push({type,x:chosen.x,y:chosen.y,hp,attack:.55,anim:Math.random()*6,flash:0,specialCooldown:1.2+Math.random()*.8,specialWindup:0,specialAim:null,rage:0,elite,damageScale:elite?1.3:1,speedScale:elite?1.1:1});
+ const boss=type==='boss';
+ const elite=boss||(wave>=4&&Math.random()<Math.min(.34,.05+wave*.028));
+ const hp=boss?types[type].hp:(types[type].hp+Math.max(wave-3,0)*5)*(elite?1.8:1);
+ enemies.push({type,x:chosen.x,y:chosen.y,hp,maxHp:hp,attack:.55,anim:Math.random()*6,flash:0,specialCooldown:1.2+Math.random()*.8,specialWindup:0,specialAim:null,rage:0,elite,boss,damageScale:boss?1.35:elite?1.3:1,speedScale:boss?1:elite?1.1:1});
 }
 function updateRoute() {
  const root=Math.floor(player.y)*columns+Math.floor(player.x);
@@ -1407,7 +1417,7 @@ function traceShot(dx,dy,slope) {
   const sx=Math.floor(canvas.width/2-side*canvas.height/height);
   const sy=Math.floor((1-gunHeight/height)*canvas.height);
   if(sx<0||sx>=canvas.width||sy<0||sy>=119||pixels[(sy*canvas.width+sx)*4+3]<160) continue;
-  const headMargin=z.type==='brute'?4:0;
+  const headMargin=z.type==='boss'?7:z.type==='brute'?4:0;
   target=z;targetDepth=distance;critical=sy<=40&&sx>=25-headMargin&&sx<=54+headMargin;
   const facing=z.yaw??Math.atan2(-y,-x);
   armored=z.type==='shield'&&sy>=43&&sy<=93&&Math.abs(sx-40)<22&&(-x*Math.cos(facing)-y*Math.sin(facing))>Math.hypot(x,y)*.52;
@@ -1437,21 +1447,22 @@ function fire() {
  }
  shotSound(item.kind);
  if(!hits.size) return;
- let anyCritical=false,anyArmored=false,killed=0,killedElite=false;
+ let anyCritical=false,anyArmored=false,killed=0,killedElite=false,killedBoss=false;
  for(const [target,hit] of hits) {
   target.hp-=hit.damage;target.flash=hit.armored?.045:.12;
   anyCritical=anyCritical||hit.critical;anyArmored=anyArmored||hit.armored;
   if(target.hp<=0) {
    enemies.splice(enemies.indexOf(target),1);kills++;killed++;
    const gain=killValue(target.type,hit.critical)*(target.elite?3:1);
-   earn(gain);killedElite=killedElite||target.elite;
-   if(target.elite) setNotice('精英感染者击倒 · 军费 +₡'+gain,1.6);
+   earn(gain);killedElite=killedElite||target.elite;killedBoss=killedBoss||target.boss;
+   if(target.boss) setNotice('暴君击倒 · 军费 +₡'+gain,2.2);
+   else if(target.elite) setNotice('精英感染者击倒 · 军费 +₡'+gain,1.6);
    tone(hit.critical?530:270,.11,'triangle',.08,110);
   }
  }
  hitTime=.17;headshot=anyCritical;
  if(anyArmored) tone(368,.11,'triangle',.15,106);
- hitFeedback(anyCritical,killed>0,anyArmored,killedElite);
+ hitFeedback(anyCritical,killed>0,anyArmored,killedElite,killedBoss);
 }
 function throwGrenade() {
  if(mode!=='play'||grenadeCooldown>0||grenadeCount<=0) return;
@@ -1491,7 +1502,7 @@ function explodeGrenade(g) {
  if(pd<3.4) damagePlayer(Math.round(30*(1-pd/4)),'爆炸冲击',{x:g.x,y:g.y});
  if(killed.length) {
   hitTime=.17;headshot=false;
-  hitFeedback(false,true,false,killed.some(z=>z.elite));
+  hitFeedback(false,true,false,killed.some(z=>z.elite),killed.some(z=>z.boss));
  }
 }
 function updateGrenades(dt) {
@@ -1649,7 +1660,7 @@ function enemyFootstep(z,distance,beat) {
  const dx=(z.x-player.x)/distance,dy=(z.y-player.y)/distance;
  const pan=clamp((dy*Math.cos(player.angle)-dx*Math.sin(player.angle))*.92,-.92,.92);
  const clear=ray(player.x,player.y,dx,dy,0).dist>distance-.05;
- const heavy=z.type==='brute'||z.type==='shield';
+ const heavy=z.type==='brute'||z.type==='boss'||z.type==='shield';
  const rate=z.type==='runner'?1.20:heavy?.72:1;
  const volume=(heavy?.17:.13)*(clear?1:.34)/(1+distance*distance*.12);
  footstep(volume,pan,!clear,rate,beat);
@@ -1796,11 +1807,11 @@ function update(dt) {
   z.attack-=dt;z.flash=Math.max(0,z.flash-dt);z.attackPose=Math.max(0,(z.attackPose??0)-dt);
   z.rage=Math.max(0,(z.rage??0)-dt);
   if(specialAttack(z,dist,dt)) continue;
-  if(dist<.83 && visible(z.x,z.y,player.x,player.y)) {
+  if(dist<(z.boss?1.55:.83) && visible(z.x,z.y,player.x,player.y)) {
    turnZombie(z,player.x,player.y,dt);
    if(z.attack<=0) {
     z.attackPose=.36;
-    z.attack=(z.type==='brute'?1.2:.89)/((z.rage>0?1.22:1)*(z.elite?1.12:1));
+    z.attack=(z.boss?1.05:z.type==='brute'?1.2:.89)/((z.rage>0?1.22:1)*(z.elite?1.12:1));
     damagePlayer(kind.damage*(z.damageScale||1),'',{x:z.x,y:z.y});
     if(mode!=='play') return;
    }
@@ -1844,7 +1855,7 @@ function update(dt) {
 }
 
 function zombiePose(z,view,advance=0) {
- const kind=types[z.type], heavy=z.type==='brute', quick=z.type==='runner';
+ const kind=types[z.type], heavy=z.type==='brute'||z.type==='boss', quick=z.type==='runner';
  const shield=z.type==='shield',spitter=z.type==='spitter',screamer=z.type==='screamer';
  const scale=kind.height/1.75, width=heavy?1.26:shield?1.12:quick||spitter?.89:1;
  const yaw=z.yaw??Math.atan2(view.y-z.y,view.x-z.x);
@@ -3170,23 +3181,25 @@ function paintYard() {
    if(forward<.8||forward>24) continue;
    const sx=w/2+(wz*dx-wx*dy)*focal/forward;
    const gy=h*(.5+look)+1.35*focal/forward;
-   const size=clamp(58/forward,9,42);
+   const size=clamp((z.boss?84:58)/forward,9,z.boss?54:42);
    const glow=ctx.createRadialGradient(sx,gy,0,sx,gy,size);
-   glow.addColorStop(0,'rgba(255,196,96,.42)');glow.addColorStop(.55,'rgba(255,150,60,.14)');glow.addColorStop(1,'rgba(255,120,40,0)');
+   glow.addColorStop(0,z.boss?'rgba(255,96,66,.50)':'rgba(255,196,96,.42)');
+   glow.addColorStop(.55,z.boss?'rgba(255,72,46,.17)':'rgba(255,150,60,.14)');
+   glow.addColorStop(1,'rgba(255,120,40,0)');
    ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(sx,gy,size,size*.34,0,0,TAU);ctx.fill();
-   ctx.strokeStyle='rgba(255,208,116,.38)';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(sx,gy,size*.72,size*.24,0,0,TAU);ctx.stroke();
+   ctx.strokeStyle=z.boss?'rgba(255,132,96,.48)':'rgba(255,208,116,.38)';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(sx,gy,size*.72,size*.24,0,0,TAU);ctx.stroke();
    const bodyY=h*(.5+look)+(1.35-types[z.type].height*.56)*focal/forward;
    const bodyGlow=ctx.createRadialGradient(sx,bodyY,0,sx,bodyY,clamp(64/forward,9,44));
-   bodyGlow.addColorStop(0,'rgba(255,168,72,.16)');bodyGlow.addColorStop(.6,'rgba(255,140,54,.055)');bodyGlow.addColorStop(1,'rgba(255,120,40,0)');
+   bodyGlow.addColorStop(0,z.boss?'rgba(255,102,74,.20)':'rgba(255,168,72,.16)');bodyGlow.addColorStop(.6,z.boss?'rgba(255,70,44,.07)':'rgba(255,140,54,.055)');bodyGlow.addColorStop(1,'rgba(255,120,40,0)');
    ctx.fillStyle=bodyGlow;ctx.fillRect(sx-clamp(64/forward,9,44),bodyY-clamp(64/forward,9,44),clamp(128/forward,18,88),clamp(128/forward,18,88));
    const hy=h*(.5+look)+(1.35-types[z.type].height-.16)*focal/forward;
    const pulse=1.5+Math.sin(frames*.18)*1.2;
-   ctx.fillStyle='rgba(255,222,138,.78)';ctx.beginPath();ctx.moveTo(sx,hy-5-pulse);ctx.lineTo(sx+5+pulse,hy);ctx.lineTo(sx,hy+5+pulse);ctx.lineTo(sx-5-pulse,hy);ctx.closePath();ctx.fill();
+   ctx.fillStyle=z.boss?'rgba(255,168,132,.88)':'rgba(255,222,138,.78)';ctx.beginPath();ctx.moveTo(sx,hy-5-pulse);ctx.lineTo(sx+5+pulse,hy);ctx.lineTo(sx,hy+5+pulse);ctx.lineTo(sx-5-pulse,hy);ctx.closePath();ctx.fill();
    ctx.fillStyle='rgba(255,246,190,.95)';ctx.fillRect(sx-1,hy-1,2,2);
    if(forward<18) {
     const fs=clamp(70/forward,7,13);
     ctx.font=`800 ${fs}px ui-monospace,monospace`;ctx.textAlign='center';
-    ctx.fillStyle='rgba(255,214,126,.72)';ctx.fillText('精英',sx,hy-11-fs);
+    ctx.fillStyle=z.boss?'rgba(255,170,132,.86)':'rgba(255,214,126,.72)';ctx.fillText(z.boss?'暴君':'精英',sx,hy-11-fs);
    }
   }
  }
@@ -3515,10 +3528,10 @@ function drawMapMarkers(target,detailed) {
  }
  if(!detailed) for(const z of enemies) {
   if(Math.hypot(z.x-player.x,z.y-player.y)>9) continue;
-  target.fillStyle=z.elite?'#ffd45e':z.type==='shield'?'#8dafcc':z.type==='spitter'?'#d8ef8a':z.type==='screamer'?'#ee9ca5':'#fb935d';
-  const s=z.elite?4.2:2.8;
+  target.fillStyle=z.boss?'#ff6a4a':z.elite?'#ffd45e':z.type==='shield'?'#8dafcc':z.type==='spitter'?'#d8ef8a':z.type==='screamer'?'#ee9ca5':'#fb935d';
+  const s=z.boss?5.6:z.elite?4.2:2.8;
   target.fillRect(z.x*scale-s/2,off+z.y*scale-s/2,s,s);
-  if(z.elite) {target.strokeStyle='#fff0a8';target.lineWidth=1;target.strokeRect(z.x*scale-s/2-.8,off+z.y*scale-s/2-.8,s+1.6,s+1.6);}
+  if(z.elite) {target.strokeStyle=z.boss?'#ffd0b8':'#fff0a8';target.lineWidth=1;target.strokeRect(z.x*scale-s/2-.8,off+z.y*scale-s/2-.8,s+1.6,s+1.6);}
  }
  target.save();
  target.translate(player.x*scale,off+player.y*scale);target.rotate(player.angle);
@@ -3553,6 +3566,9 @@ function paintHud() {
  $('reserve').textContent='/ '+rounds.reserve;
  $('nades').textContent='手雷 '+grenadeCount;
  $('kills').textContent='击倒 '+kills+' · ₡'+runCredits;
+ const boss=enemies.find(z=>z.boss);
+ $('bossHud').hidden=!boss;
+ if(boss) $('bossFill').style.width=Math.max(0,boss.hp/boss.maxHp*100)+'%';
  $('cross').classList.toggle('hit',hitTime>0);
  $('cross').classList.toggle('head',hitTime>0&&headshot);
  $('effects').style.opacity=wounded;
