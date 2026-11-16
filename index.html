@@ -121,6 +121,7 @@ body{background:#0b1c23}
 .skinSwatch small{color:var(--acid);font:800 9px ui-monospace,monospace}
 .armoryHint{margin:13px 0 0;color:#93aaad;font-size:11px;line-height:1.6}
 .buyWide{width:100%;margin-top:8px}
+.equipCard{grid-column:1/-1}
 @media(max-width:760px){.weaponDetail{grid-template-columns:1fr}.statGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.weaponTabs{gap:5px}.weaponTab{padding:4px 8px;min-height:35px}.upgradeRow{grid-template-columns:62px 1fr auto}}
 #bossHud{position:absolute;left:50%;top:16px;transform:translateX(-50%);width:min(430px,58vw);pointer-events:none;text-align:center}
@@ -880,11 +881,16 @@ const SKINS={
  arctic:{name:'极地',price:520,body:'#33454f',metal:'#8fa6ad',accent:'#bfe8f2'},
  neon:{name:'霓虹',price:680,body:'#1d2a2e',metal:'#4b6a70',accent:'#d6f56f'}
 };
+const EQUIPMENT_DEFS={
+ grenades:{name:'手雷携行',max:2,base:320,effect:'每级 +1 枚，补给上限 +1'},
+ grenadeDamage:{name:'手雷装药',max:3,base:260,effect:'每级 +15% 爆炸伤害'},
+ armor:{name:'防弹护具',max:3,base:360,effect:'每级 -8% 受到伤害'}
+};
 const SAVE_KEY='blackout-armory-v1';
 function makeWeaponState(){return {upgrades:{damage:0,capacity:0,reload:0,control:0},skins:['default'],skin:'default'};}
 function defaultArmory(){
  const weapons={};for(const def of WEAPONS) weapons[def.id]=makeWeaponState();
- return {credits:0,owned:['rifle','pistol'],weapons};
+ return {credits:0,owned:['rifle','pistol'],weapons,equipment:{grenades:0,grenadeDamage:0,armor:0}};
 }
 function loadArmory(){
  let data=null;
@@ -906,7 +912,10 @@ function loadArmory(){
   if(!st.skins.includes(st.skin)) st.skin='default';
   weapons[def.id]=st;
  }
- return {credits:Math.max(0,Number(data.credits)||0),owned,weapons};
+ const equipment={};
+ for(const key of Object.keys(EQUIPMENT_DEFS))
+  equipment[key]=Math.min(EQUIPMENT_DEFS[key].max,Math.max(0,Number(data.equipment&&data.equipment[key])||0));
+ return {credits:Math.max(0,Number(data.credits)||0),owned,weapons,equipment};
 }
 const armory=loadArmory();
 let credits=armory.credits,runCredits=0,shopWeapon='rifle';
@@ -914,6 +923,10 @@ function saveArmory(){try {localStorage.setItem(SAVE_KEY,JSON.stringify(armory))
 function ownedWeapons(){return WEAPONS.filter(w=>armory.owned.includes(w.id));}
 function ensureWeaponState(id){if(!armory.weapons[id]) armory.weapons[id]=makeWeaponState();}
 function upgradesOf(id){ensureWeaponState(id);return armory.weapons[id].upgrades;}
+function equipmentLevel(key){return armory.equipment?.[key]||0;}
+function equipmentCost(key){return Math.round(EQUIPMENT_DEFS[key].base*Math.pow(equipmentLevel(key)+1,1.22));}
+function grenadeCapacity(){return 3+equipmentLevel('grenades');}
+function grenadeStartCount(){return 2+equipmentLevel('grenades');}
 function skinOf(id){ensureWeaponState(id);return SKINS[armory.weapons[id].skin]||SKINS.default;}
 function gunStats(item){
  const up=upgradesOf(item.id);
@@ -1185,7 +1198,7 @@ function reset() {
  reloadTime=cooldown=recoil=muzzle=wounded=hitTime=step=noticeTime=pitch=routeClock=0;
  noticeText='';headshot=false;route=[];lastSpawn=-1;spawnHistory=[];
  specialGate.spitter=specialGate.screamer=enemyStepCooldown=0;damageTime=0;damageDir=0;
- grenadeCount=2;grenadeCooldown=0;grenadeLive.length=0;explosions.length=0;blast=0;meleeCooldown=0;meleeFlash=0;setAiming(false);
+ grenadeCount=grenadeStartCount();grenadeCooldown=0;grenadeLive.length=0;explosions.length=0;blast=0;meleeCooldown=0;meleeFlash=0;setAiming(false);
  runShots=runHits=runHeadshots=runGrenadeKills=runMeleeKills=runEliteKills=runBossKills=runDamage=0;
 }
 reset();
@@ -1232,6 +1245,13 @@ function buyUpgrade(id,key) {
  credits-=cost;armory.credits=credits;upgradesOf(id)[key]=level+1;saveArmory();
  tone(500,.13,'triangle',.08,760);renderArmory();syncMenu();
 }
+function buyEquipment(key) {
+ const def=EQUIPMENT_DEFS[key];if(!def) return;
+ const level=equipmentLevel(key);if(level>=def.max) return;
+ const cost=equipmentCost(key);if(credits<cost) return;
+ credits-=cost;armory.credits=credits;armory.equipment[key]=level+1;saveArmory();
+ tone(460,.14,'triangle',.08,700);renderArmory();syncMenu();
+}
 function buyOrEquipSkin(id,key) {
  if(!armory.owned.includes(id)||!SKINS[key]) return;
  const state=armory.weapons[id];
@@ -1261,6 +1281,10 @@ function renderArmory() {
   const level=up[key],max=level>=u.max,cost=upgradeCost(def.id,key);
   return `<div class="upgradeRow"><span>${u.name} · ${u.effect}</span><span class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<level?'on':''}"></i>`).join('')}</span><button type="button" data-up="${key}" ${!owned||max||credits<cost?'disabled':''}>${max?'满级':'₡ '+cost}</button></div>`;
  }).join('');
+ const equipRows=Object.entries(EQUIPMENT_DEFS).map(([key,u])=>{
+  const level=equipmentLevel(key),max=level>=u.max,cost=equipmentCost(key);
+  return `<div class="upgradeRow"><span>${u.name} · ${u.effect}</span><span class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<level?'on':''}"></i>`).join('')}</span><button type="button" data-equip="${key}" ${max||credits<cost?'disabled':''}>${max?'满级':'₡ '+cost}</button></div>`;
+ }).join('');
  const skins=Object.entries(SKINS).map(([key,s])=>{
   const has=armory.weapons[def.id].skins.includes(key),equipped=armory.weapons[def.id].skin===key;
   return `<button type="button" class="skinSwatch${equipped?' active':''}" data-skin="${key}" ${!owned||(!has&&credits<s.price)?'disabled':''}><i style="background:${s.body};box-shadow:inset 0 0 0 4px ${s.accent}"></i>${s.name}${!has?`<small>₡ ${s.price}</small>`:equipped?'<small>使用中</small>':''}</button>`;
@@ -1285,10 +1309,12 @@ function renderArmory() {
    <div class="upgradeList">${owned?upgradeRows:'<p class="tagline">购买武器后解锁伤害、弹匣、装填与稳定四类配件。</p>'}</div>
    <h3 style="margin-top:15px">涂装</h3>
    <div class="skinList">${owned?skins:'<p class="tagline">购买武器后可用军费解锁制式、都市迷彩、余烬、极地和霓虹涂装。</p>'}</div>
-  </div>`;
+  </div>
+  <div class="weaponCard equipCard"><h3>装备升级</h3><div class="upgradeList">${equipRows}</div><p class="tagline" style="margin-top:10px">装备升级对所有武器生效：更多手雷、更高爆炸伤害和更低受到伤害。</p></div>`;
  detail.querySelectorAll('[data-buy]').forEach(button=>button.onclick=()=>buyWeapon(button.dataset.buy));
  detail.querySelectorAll('[data-up]').forEach(button=>button.onclick=()=>buyUpgrade(def.id,button.dataset.up));
  detail.querySelectorAll('[data-skin]').forEach(button=>button.onclick=()=>buyOrEquipSkin(def.id,button.dataset.skin));
+ detail.querySelectorAll('[data-equip]').forEach(button=>button.onclick=()=>buyEquipment(button.dataset.equip));
 }
 function selectMap(id) {
  if(!MAPS[id]||id===selectedMap) return;
@@ -1424,7 +1450,7 @@ function resupply() {
   rounds.reserve=Math.min(stats.maxReserve,rounds.reserve+Math.max(24,Math.round(stats.startReserve*.4)));
  }
  player.hp=Math.min(100,player.hp+24);
- grenadeCount=Math.min(3,grenadeCount+1);
+ grenadeCount=Math.min(grenadeCapacity(),grenadeCount+1);
  setNotice('补给已领取 · 弹药、生命与手雷',1.5);tone(480,.18,'triangle',.09,730);
 }
 function reload() {
@@ -1561,7 +1587,7 @@ function explodeGrenade(g) {
  for(const z of [...enemies]) {
   const d=Math.hypot(z.x-g.x,z.y-g.y);
   if(d>radius||!visible(g.x,g.y,z.x,z.y)) continue;
-  z.hp-=230*(1-d/(radius+.9));z.flash=.2;
+  z.hp-=230*(1+.15*equipmentLevel('grenadeDamage'))*(1-d/(radius+.9));z.flash=.2;
   if(z.hp<=0) {
    enemies.splice(enemies.indexOf(z),1);kills++;killed.push(z);runGrenadeKills++;
    if(z.boss) runBossKills++;else if(z.elite) runEliteKills++;
@@ -1753,6 +1779,7 @@ function turnZombie(z,x,y,dt) {
 }
 function damagePlayer(amount,message='',source=null) {
  wounded=.85;damageTime=.95;
+ amount=Math.max(1,Math.round(amount*(1-.08*equipmentLevel('armor'))));
  if(source) damageDir=Math.atan2(source.y-player.y,source.x-player.x);
  runDamage+=Math.min(player.hp,amount);
  player.hp=Math.max(0,player.hp-amount);
