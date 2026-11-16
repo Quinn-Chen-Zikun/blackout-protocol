@@ -1867,6 +1867,27 @@ function updateAcid(dt) {
  }
 }
 function specialAttack(z,dist,dt) {
+ if(z.boss) {
+  z.specialCooldown=Math.max(0,(z.specialCooldown??0)-dt);
+  const inRange=dist<5.4&&visible(z.x,z.y,player.x,player.y);
+  if(z.specialWindup>0) {
+   if(!inRange) {z.specialWindup=0;z.specialCooldown=.8;return false;}
+   turnZombie(z,player.x,player.y,dt);
+   z.specialWindup=Math.max(0,z.specialWindup-dt);
+   if(z.specialWindup>0) return true;
+   z.specialCooldown=6.2;z.attackPose=.5;blast=.5;
+   explosions.push({x:z.x,y:z.y,t:.5,max:.5});
+   tone(58,.5,'sawtooth',.18,26);
+   if(dist<4.4) damagePlayer(Math.round(24*(z.damageScale||1)),'暴君震荡',{x:z.x,y:z.y});
+   return true;
+  }
+  if(z.specialCooldown===0&&inRange) {
+   z.specialWindup=.72;z.specialCooldown=.5;
+   tone(70,.28,'triangle',.12,48);
+   return true;
+  }
+  return false;
+ }
  const spit=z.type==='spitter';
  if(!spit&&z.type!=='screamer') return false;
  z.specialCooldown=Math.max(0,(z.specialCooldown??0)-dt);
