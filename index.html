@@ -213,6 +213,7 @@ body{background:#0b1c23}
  <header><h2 id="settingsTitle">设置 / OPTIONS</h2><button class="subtle" id="closeSettings">关闭</button></header>
  <div class="settingRow"><label for="sens">鼠标灵敏度</label><output id="sensVal">1.00</output><input id="sens" type="range" min="0.5" max="2" step="0.05" value="1"></div>
  <div class="settingRow"><label for="fov">视野</label><output id="fovVal">1.00×</output><input id="fov" type="range" min="0.85" max="1.15" step="0.01" value="1"></div>
+ <div class="settingRow"><label for="vol">音量</label><output id="volVal">80%</output><input id="vol" type="range" min="0" max="1" step="0.05" value="0.8"></div>
  <div class="settingRow"><label for="fxToggle">动态特效</label><output id="fxVal">开</output><input id="fxToggle" type="checkbox" checked></div>
  <p class="armoryHint">设置会保存在浏览器中。降低视野或关闭动态特效可提升低配设备的帧率。</p>
 </dialog>
@@ -979,7 +980,7 @@ let mode = 'menu', player, enemies, acidShots, ammo, used, wave, waveTime, spawn
 let reloadTime, cooldown, recoil, muzzle, wounded, hitTime, headshot, step, noticeTime, noticeText;
 let firing=false, aimPointer=null, joyId=null, joyX=0, joyY=0, pressed=false, pitch=0;
 let frames=0, last=performance.now(), routeClock=0, route=[], lastSpawn=-1, spawnHistory=[], audio=null, noise=null;
-let ambience=null, ambientBuffer=null;
+let ambience=null, ambientBuffer=null, audioMaster=null;
 let alarm=0, lightning=0, nextLightning=600, enemyStepCooldown=0, damageTime=0, damageDir=0;
 let grenadeCount=2, grenadeCooldown=0, grenadeLive=[], explosions=[], blast=0, aiming=false;
 let meleeCooldown=0, meleeFlash=0;
@@ -989,6 +990,7 @@ let muted=read('blackout-muted','0')==='1';
 let sensitivity=Math.min(2,Math.max(.5,Number(read('blackout-sens','1'))||1));
 let fovScale=Math.min(1.15,Math.max(.85,Number(read('blackout-fov','1'))||1));
 let effectsOn=read('blackout-fx','1')!=='0';
+let masterVolume=Math.min(1,Math.max(0,Number(read('blackout-vol','.8'))||.8));
 let gameMode=read('blackout-mode','standard')==='endless'?'endless':'standard';
 let depth, rays, focal, sky, floor;
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
@@ -1603,7 +1605,7 @@ function explosionSound() {
  source.buffer=noise;filter.type='lowpass';filter.frequency.setValueAtTime(1500,now);
  filter.frequency.exponentialRampToValueAtTime(180,now+.55);
  gain.gain.setValueAtTime(.55,now);gain.gain.exponentialRampToValueAtTime(.006,now+.6);
- source.connect(filter).connect(gain).connect(audio.destination);source.start();
+ source.connect(filter).connect(gain).connect(audioMaster);source.start();
  tone(62,.7,'sawtooth',.28,22);
 }
 function explodeGrenade(g) {
@@ -1652,6 +1654,8 @@ function activateAudio() {
    const data=noise.getChannelData(0);
    for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length);
   }
+  if(!audioMaster) {audioMaster=audio.createGain();audioMaster.gain.value=masterVolume;audioMaster.connect(audio.destination);}
+  audioMaster.gain.value=masterVolume;
   audio.resume().catch(()=>{});
  } catch {}
 }
@@ -1692,7 +1696,7 @@ function startAmbience() {
  stopAmbience();
  if(!audio||muted) return;
  const kind=MAP.theme.ambientSound||'yard';
- const master=audio.createGain();master.gain.value=0;master.connect(audio.destination);
+ const master=audio.createGain();master.gain.value=0;master.connect(audioMaster);
  const sources=[];let timer=null;
  if(kind==='rain') {
   sources.push(...ambientLoop('rain','lowpass',1450,.040,master));
@@ -1757,7 +1761,7 @@ function tone(freq,length,type,volume,end) {
  oscillator.type=type;oscillator.frequency.setValueAtTime(freq,now);
  oscillator.frequency.exponentialRampToValueAtTime(end,now+length);
  gain.gain.setValueAtTime(volume,now);gain.gain.exponentialRampToValueAtTime(.001,now+length);
- oscillator.connect(gain).connect(audio.destination);oscillator.start();oscillator.stop(now+length);
+ oscillator.connect(gain).connect(audioMaster);oscillator.start();oscillator.stop(now+length);
 }
 const footstepSurfaces={
  yard:[910,.123],subway:[730,.105],tunnel:[540,.143],hospital:[1170,.093],prison:[660,.134]
@@ -1772,8 +1776,8 @@ function footstep(volume,pan,muffled,rate,beat) {
  gain.gain.exponentialRampToValueAtTime(.001,now+length);
  const panNode=typeof audio.createStereoPanner==='function'?audio.createStereoPanner():null;
  source.connect(filter).connect(gain);
- if(panNode) {panNode.pan.value=pan;gain.connect(panNode).connect(audio.destination);}
- else gain.connect(audio.destination);
+ if(panNode) {panNode.pan.value=pan;gain.connect(panNode).connect(audioMaster);}
+ else gain.connect(audioMaster);
  source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();panNode?.disconnect();};
  source.start(now,beat%3*.019);
  source.stop(now+length);
@@ -1794,7 +1798,7 @@ function shotSound(kind) {
  source.buffer=noise;filter.type='lowpass';filter.frequency.value=shotgun?1700:smg?3400:dmr?2200:kind==='rifle'?2600:3900;
  gain.gain.setValueAtTime(shotgun?.44:smg?.24:dmr?.38:.32,now);
  gain.gain.exponentialRampToValueAtTime(.006,now+(shotgun?.22:.16));
- source.connect(filter).connect(gain).connect(audio.destination);source.start();
+ source.connect(filter).connect(gain).connect(audioMaster);source.start();
  tone(shotgun?68:dmr?92:smg?165:kind==='rifle'?115:170,shotgun?.2:smg?.09:.13,'triangle',shotgun?.32:.24,36);
 }
 function turnZombie(z,x,y,dt) {
@@ -3736,12 +3740,14 @@ $('closeArmory').onclick=()=>$('armory').close();
 function applySettings() {
  $('sens').value=sensitivity;$('sensVal').textContent=sensitivity.toFixed(2);
  $('fov').value=fovScale;$('fovVal').textContent=fovScale.toFixed(2)+'×';
+ $('vol').value=masterVolume;$('volVal').textContent=Math.round(masterVolume*100)+'%';
  $('fxToggle').checked=effectsOn;$('fxVal').textContent=effectsOn?'开':'关';
 }
 $('openSettings').onclick=()=>{applySettings();$('settings').showModal();};
 $('closeSettings').onclick=()=>$('settings').close();
 $('sens').oninput=event=>{sensitivity=Number(event.target.value)||1;save('blackout-sens',sensitivity);applySettings();};
 $('fov').oninput=event=>{fovScale=Number(event.target.value)||1;save('blackout-fov',fovScale);applySettings();resize();};
+$('vol').oninput=event=>{masterVolume=Number(event.target.value);save('blackout-vol',masterVolume);if(audioMaster)audioMaster.gain.value=masterVolume;applySettings();};
 $('fxToggle').onchange=event=>{effectsOn=event.target.checked;save('blackout-fx',effectsOn?'1':'0');applySettings();};
 applySettings();
 $('mute').onclick=toggleMute;
