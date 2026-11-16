@@ -111,8 +111,8 @@ body{background:#0b1c23}
   <article><small>第 2 波起</small><h3>疾跑者</h3><p>移动最快，容易追上落单玩家。优先处理。</p></article>
   <article><small>第 3 波起</small><h3>盾卫</h3><p>正面盾牌会挡弹。打露出的头部，或绕到侧后方。</p></article>
   <article><small>第 4 波起</small><h3>巨化感染者</h3><p>体型大、血量高，近战伤害重。绕开它的攻击距离。</p></article>
-  <article><small>第 5 波起</small><h3>喷吐者</h3><p>停下蓄力喷出酸液。横移躲开，或用墙和货箱挡住。</p></article>
-  <article><small>第 6 波起</small><h3>尖啸者</h3><p>让附近感染者暂时变快。看到它蓄力时优先击倒。</p></article>
+  <article><small>第 5 波起</small><h3>喷吐者</h3><p>蓄力起手时锁定酸液射向，头顶亮起绿色标记。趁蓄力横移可躲，墙和货箱也能挡住酸液。</p></article>
+  <article><small>第 6 波起</small><h3>尖啸者</h3><p>只加速能互相看见的附近感染者。蓄力时头顶亮起暖红色标记，优先击倒。</p></article>
  </div>
 </dialog>
 <script>
@@ -193,6 +193,7 @@ let mode = 'menu', player, enemies, acidShots, ammo, used, wave, waveTime, spawn
 let reloadTime, cooldown, recoil, muzzle, wounded, hitTime, headshot, step, noticeTime, noticeText;
 let firing=false, aimPointer=null, joyId=null, joyX=0, joyY=0, pressed=false, pitch=0;
 let frames=0, last=performance.now(), routeClock=0, route=[], lastSpawn=-1, spawnHistory=[], audio=null, noise=null;
+const specialGate={spitter:0,screamer:0};
 let muted=read('blackout-muted','0')==='1';
 let best=Number(read('blackout-best','0')) || 0;
 let depth, rays, focal, sky, floor;
@@ -228,6 +229,9 @@ function ray(x,y,dx,dy,shotSlope=null) {
 function visible(x,y,tx,ty) {
  const dx=tx-x,dy=ty-y,dist=Math.hypot(dx,dy);
  return dist<.01 || ray(x,y,dx/dist,dy/dist).dist>dist-.03;
+}
+function mutuallyVisible(a,b) {
+ return visible(a.x,a.y,b.x,b.y)&&visible(b.x,b.y,a.x,a.y);
 }
 function walkableLine(x,y,tx,ty,radius,stopShort=0) {
  const dx=tx-x,dy=ty-y,distance=Math.hypot(dx,dy);
@@ -346,6 +350,37 @@ acidSprite.width=acidSprite.height=48;
 function acidDrawables() {
  return acidShots.map(a=>({x:a.x,y:a.y,base:1.02,height:.27,img:acidSprite,kind:2}));
 }
+function warningImage(kind) {
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
+ const g=canvas.getContext('2d'),spitter=kind==='spitter';
+ const color=spitter?'#8df06a':'#ff7959',core=spitter?'#e4ffc4':'#ffe0cf';
+ g.translate(32,32);
+ g.fillStyle=spitter?'#17300fdd':'#3b140fdd';
+ g.beginPath();g.arc(0,0,22,0,TAU);g.fill();
+ g.strokeStyle=color;g.lineWidth=3;g.beginPath();g.arc(0,0,19,0,TAU);g.stroke();
+ g.strokeStyle=core;g.lineWidth=3;g.lineCap='round';g.lineJoin='round';
+ if(spitter) {
+  g.beginPath();g.moveTo(-9,-7);g.lineTo(0,4);g.lineTo(9,-7);g.stroke();
+  g.beginPath();g.moveTo(-9,5);g.lineTo(0,16);g.lineTo(9,5);g.stroke();
+ } else {
+  g.beginPath();g.moveTo(0,-17);g.lineTo(16,13);g.lineTo(-16,13);g.closePath();g.stroke();
+  g.fillStyle=core;g.fillRect(-2.2,-6,4.4,11);
+  g.beginPath();g.arc(0,10,2.3,0,TAU);g.fill();
+ }
+ return canvas;
+}
+const warningImages={spitter:warningImage('spitter'),screamer:warningImage('screamer')};
+function warningDrawables(source) {
+ const out=[];
+ for(const z of source) {
+  if(!(z.specialWindup>0)||!visible(player.x,player.y,z.x,z.y)) continue;
+  const img=warningImages[z.type];
+  if(!img) continue;
+  const pulse=.90+.10*Math.sin(frames*.55+z.x*1.7+z.y*2.3);
+  out.push({x:z.x,y:z.y,base:types[z.type].height+.07,height:.42*pulse,img,kind:2});
+ }
+ return out;
+}
 const usedSupplySprite=document.createElement('canvas');
 usedSupplySprite.width=supplySprite.width;usedSupplySprite.height=supplySprite.height;
 {
@@ -374,6 +409,7 @@ function reset() {
  used=supplies.map(()=>0);wave=0;waveTime=0;spawnQueue=[];spawnClock=0;kills=0;gun=0;
  reloadTime=cooldown=recoil=muzzle=wounded=hitTime=step=noticeTime=pitch=routeClock=0;
  noticeText='';headshot=false;route=[];lastSpawn=-1;spawnHistory=[];
+ specialGate.spitter=specialGate.screamer=0;
 }
 reset();
 function setMode(next) {
@@ -449,7 +485,7 @@ function spawn(type) {
  }
  if(!chosen) chosen=candidates.sort((a,b)=>b.distance-a.distance)[0] || {index:0,x:spawnPoints[0][0],y:spawnPoints[0][1]};
  lastSpawn=chosen.index;spawnHistory.unshift(chosen.index);spawnHistory.length=Math.min(4,spawnHistory.length);
- enemies.push({type,x:chosen.x,y:chosen.y,hp:types[type].hp+Math.max(wave-3,0)*5,attack:.55,anim:Math.random()*6,flash:0,specialCooldown:1.2+Math.random()*.8,specialWindup:0,rage:0});
+ enemies.push({type,x:chosen.x,y:chosen.y,hp:types[type].hp+Math.max(wave-3,0)*5,attack:.55,anim:Math.random()*6,flash:0,specialCooldown:1.2+Math.random()*.8,specialWindup:0,specialAim:null,rage:0});
 }
 function updateRoute() {
  const root=Math.floor(player.y)*columns+Math.floor(player.x);
@@ -600,30 +636,43 @@ function specialAttack(z,dist,dt) {
  z.specialCooldown=Math.max(0,(z.specialCooldown??0)-dt);
  const inRange=dist>=(spit?2.1:.84)&&dist<=(spit?9.5:7)&&visible(z.x,z.y,player.x,player.y);
  if(!inRange) {
-  if(z.specialWindup>0) {z.specialWindup=0;z.specialCooldown=.55;}
+  if(z.specialWindup>0) {
+   // 目标被墙挡住或离开射程：取消本次蓄力，短暂宽限后再判断。
+   z.specialWindup=0;z.specialAim=null;z.specialCooldown=.55;
+  }
   return false;
  }
  if(z.specialWindup>0) {
-  turnZombie(z,player.x,player.y,dt);
+  if(spit&&z.specialAim) turnZombie(z,z.x+z.specialAim.dx,z.y+z.specialAim.dy,dt);
+  else turnZombie(z,player.x,player.y,dt);
   z.specialWindup=Math.max(0,z.specialWindup-dt);
   if(z.specialWindup>0) return true;
   z.specialCooldown=spit?2.85:6.8;
   z.attackPose=.36;
   if(spit) {
-   const dx=(player.x-z.x)/dist,dy=(player.y-z.y)/dist;
+   // 只使用起手瞬间锁定的方向；蓄力中玩家横移即可离开酸液路径。
+   const fallback=Math.hypot(player.x-z.x,player.y-z.y)||1;
+   const dx=z.specialAim?.dx??(player.x-z.x)/fallback,dy=z.specialAim?.dy??(player.y-z.y)/fallback;
+   z.specialAim=null;
    acidShots.push({x:z.x+dx*.25,y:z.y+dy*.25,dx,dy,life:1.85});
    tone(290,.16,'sawtooth',.083,75);
   } else {
+   let boosted=false;
    for(const other of enemies) {
-    if(other!==z&&other.type!=='screamer'&&Math.hypot(z.x-other.x,z.y-other.y)<=5) other.rage=3.4;
+    if(other===z||other.type==='screamer'||Math.hypot(z.x-other.x,z.y-other.y)>5||!mutuallyVisible(z,other)) continue;
+    other.rage=3.4;boosted=true;
    }
-   setNotice('尖啸者强化了附近感染者',1.25);tone(610,.32,'sawtooth',.095,180);
+   if(boosted) setNotice('尖啸者强化了附近感染者',1.25);
+   tone(610,.32,'sawtooth',.095,180);
   }
   return true;
  }
- if(z.specialCooldown===0&&(spit||enemies.some(a=>a!==z&&a.type!=='screamer'&&Math.hypot(z.x-a.x,z.y-a.y)<5))) {
+ const canShriek=!spit&&enemies.some(a=>a!==z&&a.type!=='screamer'&&Math.hypot(z.x-a.x,z.y-a.y)<5&&mutuallyVisible(z,a));
+ if(z.specialCooldown===0&&(spit||canShriek)&&specialGate[z.type]<=0) {
   turnZombie(z,player.x,player.y,dt);
   z.specialWindup=spit?.55:.60;
+  z.specialAim=spit?{dx:(player.x-z.x)/dist,dy:(player.y-z.y)/dist}:null;
+  specialGate[z.type]=spit?.24:.30;
   tone(spit?168:310,.20,'triangle',.07,spit?240:670);
   return true;
  }
@@ -638,6 +687,7 @@ function update(dt) {
  }
  cooldown=Math.max(0,cooldown-dt);muzzle=Math.max(0,muzzle-dt);
  wounded=Math.max(0,wounded-dt*2.15);hitTime=Math.max(0,hitTime-dt);
+ specialGate.spitter=Math.max(0,specialGate.spitter-dt);specialGate.screamer=Math.max(0,specialGate.screamer-dt);
  recoil*=Math.exp(-dt*13);noticeTime=Math.max(0,noticeTime-dt);
  if(reloadTime>0) {
   reloadTime=Math.max(0,reloadTime-dt);
@@ -1330,7 +1380,7 @@ function yardActors(demo) {
   const [x,y]=supplies[i];
   out.push({x,y,height:.59,img:!demo&&used[i]===supplyWave()?usedSupplySprite:supplySprite,kind:1});
  }
- if(!demo) out.push(...acidDrawables());
+ if(!demo) out.push(...warningDrawables(enemies),...acidDrawables());
  return out;
 }
 function paintSky(view,look) {
@@ -1429,7 +1479,7 @@ function paintLegacy() {
  for(let i=0;i<supplies.length;i++) {
   const [x,y]=supplies[i];drawables.push({x,y,height:.56,img:supplySprite,dim:!demo&&used[i]===supplyWave()});
  }
- if(!demo) drawables.push(...acidDrawables());
+ if(!demo) drawables.push(...warningDrawables(enemies),...acidDrawables());
  for(const item of drawables) {
   const x=item.x-view.x,y=item.y-view.y;
   item.z=x*dx+y*dy;item.side=y*dx-x*dy;
