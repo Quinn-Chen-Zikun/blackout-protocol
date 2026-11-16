@@ -691,6 +691,7 @@ const ANNEXES={
  yard:{name:'南货栈',sub:'SOUTH FREIGHT DEPOT',gates:[[8,10],[32,34]],
   blocks:[[3,33,6,36,'#'],[11,35,18,36,'M'],[24,33,29,34,'#'],[34,36,38,37,'M'],[17,39,22,40,'#'],[4,39,7,40,'M']],
   cover:[[9,35,'C'],[12,38,'C'],[22,35,'C'],[26,38,'C'],[32,40,'C'],[39,33,'C']],
+  facilities:[[9,35,'freight'],[22,35,'freight'],[26,38,'freight'],[39,33,'freight']],
   supply:[[7,38],[36,39]],spawns:[[2,34],[9,40],[20,32],[31,35],[40,40],[23,40]],
   lights:[[9.5,32.3,3.1,2.65],[20.8,36.5,3.3,-2.55],[33.4,34.4,3.1,2.3],[35.8,40.0,3.1,-2.55]],
   markings:[[8.4,29.7,.18,7.6],[33.25,29.7,.18,4.5]],label:[9.5,31.05,2.77]
@@ -698,6 +699,8 @@ const ANNEXES={
  subway:{name:'列车检修库',sub:'TRAIN SERVICE DEPOT',gates:[[14,16],[27,29]],
   blocks:[[4,34,10,36,'T'],[19,33,25,35,'T'],[29,37,37,39,'T'],[4,39,8,40,'#'],[13,38,18,39,'M'],[37,33,39,34,'#']],
   cover:[[12,34,'C'],[17,35,'C'],[27,35,'W'],[26,39,'C'],[11,40,'C'],[39,39,'C']],
+  facilities:[[12,34,'cart'],[17,35,'cart'],[27,35,'cart'],[39,39,'cart']],
+  props:[{t:'rails',x:16.2,z:36.94,len:24.5}],
   supply:[[12,37],[33,35]],spawns:[[2,39],[10,32],[20,39],[30,33],[39,40],[24,41]],
   lights:[[15.5,32,3.0,-2.7],[9.5,37,3.1,-2.2],[28.5,35.4,3.0,2.4],[27.6,40,3.1,-2.65]],
   markings:[[6,36.55,20,.1],[6,37.29,20,.1],[28.22,30.1,.14,5]],label:[15.5,31.05,2.79]
@@ -705,6 +708,10 @@ const ANNEXES={
  tunnel:{name:'深层泵房',sub:'LOWER PUMP CHAMBER',gates:[[5,7],[34,36]],cutFrom:29,
   blocks:[[3,34,7,35,'#'],[10,32,15,35,'#'],[19,34,23,36,'M'],[29,32,33,35,'#'],[36,37,39,39,'#'],[10,38,15,40,'M'],[23,39,27,40,'#']],
   cover:[[8,33,'C'],[16,36,'C'],[18,39,'C'],[27,34,'C'],[34,39,'C'],[40,35,'C']],
+  facilities:[[8,33,'pump'],[16,36,'pump'],[27,34,'pump'],[34,39,'pump']],
+  props:[{t:'pipe',x:13,z:36.025,y:2.38,len:5.4,r:.073,color:[.29,.46,.38]},
+   {t:'pipe',x:31.5,z:36.025,y:2.25,len:4.5,r:.078,color:[.37,.47,.35]},
+   {t:'puddle',x:17.82,z:36.64,w:4.1,d:.72}],
   supply:[[6,38],[31,38]],spawns:[[2,37],[9,36],[18,32],[28,37],[39,33],[22,41]],
   lights:[[6.45,31.9,2.75,2.75],[15.9,37.4,2.7,2.5],[27.7,37.5,2.74,-2.1],[35.1,32,2.78,2.65]],
   markings:[[6.2,29.2,.13,4.4],[35.1,29.2,.13,5.7],[2.4,37.05,32,.14]],label:[6.5,31.03,2.58]
@@ -712,6 +719,8 @@ const ANNEXES={
  hospital:{name:'急诊留观区',sub:'EMERGENCY OBSERVATION',gates:[[12,14],[28,30]],
   blocks:[[5,33,9,35,'#'],[15,35,18,36,'#'],[22,32,25,35,'#'],[32,34,37,35,'#'],[4,39,9,40,'#'],[31,39,37,40,'#']],
   cover:[[11,34,'W'],[12,35,'W'],[13,36,'W'],[20,37,'W'],[28,36,'W'],[29,37,'W'],[20,40,'C'],[14,39,'C'],[39,37,'W']],
+  facilities:[[11,34,'bed'],[12,35,'bed'],[13,36,'bed'],[20,37,'bed'],[28,36,'bed'],[29,37,'bed'],[39,37,'bed']],
+  props:[{t:'cable',x:14.86,z:34.12,y:3.16,len:5.2,dir:1}],
   supply:[[11,38],[28,40]],spawns:[[2,35],[10,32],[16,39],[21,33],[30,32],[39,36],[37,41]],
   lights:[[13.5,32,3.05,-2.75],[12.4,37.3,3.05,-2.65],[24.2,37.9,3.08,-2.8],[29.5,33,3.05,2.1]],
   markings:[[13.11,30.15,.12,5.7],[29.12,30.15,.12,5.4],[10.5,37.05,24,.12]],label:[13.5,31.06,2.69]
@@ -719,6 +728,8 @@ const ANNEXES={
  prison:{name:'二号放风场',sub:'EXERCISE YARD TWO',gates:[[5,6],[34,34]],
   blocks:[[4,33,12,34,'#'],[16,34,23,35,'#'],[29,33,32,35,'#'],[36,34,40,36,'#'],[5,39,8,40,'#'],[28,39,32,40,'#']],
   cover:[[13,32,'W'],[17,38,'C'],[22,39,'C'],[26,36,'C'],[34,37,'W'],[37,40,'C'],[11,39,'W']],
+  facilities:[[13,32,'exercise'],[17,38,'exercise'],[26,36,'exercise'],[34,37,'exercise']],
+  props:[{t:'court',x:29.8,z:38.96}],
   supply:[[10,37],[34,40]],spawns:[[2,37],[10,32],[19,32],[24,40],[34,32],[40,39]],
   lights:[[5.8,31.8,3.36,2.7],[14.5,36.7,4.0,-2.9],[27.4,38,3.85,-2.7],[34.5,32.2,3.33,2.55]],
   markings:[[5.48,29.7,.15,3.1],[34.42,29.7,.15,3.4],[9.2,37.0,28,.13]],label:[5.95,31.04,2.85]
@@ -738,6 +749,8 @@ for(const [id,annex] of Object.entries(ANNEXES)) {
  def.rows=expanded.map(row=>row.join(''));
  def.supplies.push(...centered(annex.supply));
  def.spawnPoints.push(...centered(annex.spawns));
+ def.facilities=new Map(annex.facilities.map(([x,z,kind])=>[z*COLS+x,kind]));
+ def.props.push(...(annex.props??[]));
  def.zones.push({name:annex.name,x0:0,y0:ROWS,x1:COLS-1,y1:41});
  def.lights.push(...annex.lights);
  def.decor.push(...annex.markings.map(box=>[...box,[.61,.55,.33]]));
@@ -1831,7 +1844,7 @@ function makeViewMesh(kind,up) {
  if(!pistol) {
   block(-.052,-.053,-.23,.104,.115,.236,body);
   block(-.061,-.076,-.245,.122,.16,.037,rubber);
-  block(-.059,.034,-.16,.118,.028,.17,rubber);
+  block(-.059,.035,-.16,.118,.033,.17,rubber);
  }
  block(-.058,-.018,.003,.116,.105,coreEnd,body);
  block(-.049,.078,.02,.098,.025,coreEnd-.033,steel);
@@ -1907,7 +1920,7 @@ function makeViewMesh(kind,up) {
  return new Float32Array(data);
 }
 
-function makeViewPass(gl,program) {
+function makeViewPass(gl,program,playerLight) {
  const shader=program(`
  attribute vec3 aPoint,aShadeNormal;
  attribute float aSurface,aPart;
@@ -1934,7 +1947,7 @@ function makeViewPass(gl,program) {
   vLocal=aPoint;vNormal=n;vSurface=aSurface;
   gl_Position=vec4(p.x*uScale.x,p.y*uScale.y,p.z*1.038-.082,p.z);
  }`, `precision highp float;
- uniform vec3 uBody,uMetal,uAccent,uEnvironment;
+ uniform vec3 uBody,uMetal,uAccent,uEnvironment,uPlayerLight;
  uniform float uFire;
  varying vec3 vNormal,vLocal;
  varying float vSurface;
@@ -1958,14 +1971,15 @@ function makeViewPass(gl,program) {
   float s=grain(floor(vLocal.xz*720.));
   float seam=sin(vLocal.z*170.)*sin(vLocal.y*220.);
   float tex=vSurface>2.5&&vSurface<4.5?.88+.09*seam+.13*s:.92+.07*s;
-  vec3 lit=c*tex*(vec3(.40,.43,.43)+uEnvironment*.49+sheen*.53+bounce*.15);
-  if(vSurface<1.5)lit+=pow(sheen,14.)*vec3(.14,.15,.16);
+  vec3 local=uPlayerLight*(.40+.60*max(0.,n.y));
+  vec3 lit=c*tex*(vec3(.40,.43,.43)+uEnvironment*.49+local+sheen*.53+bounce*.15);
+  if(vSurface<1.5)lit+=pow(sheen,14.)*(vec3(.14,.15,.16)+local*.16);
   if(vSurface>5.5)lit+=pow(bounce,13.)*vec3(.045,.11,.10);
   lit+=uFire*vec3(.16,.071,.033)*(.42+sheen*.5);
   gl_FragColor=vec4(lit,1.);
  }`);
  const p=shader.p,attributes=['aPoint','aShadeNormal','aSurface','aPart'].map(name=>gl.getAttribLocation(p,name));
- const u=Object.fromEntries(['uScale','uRest','uSway','uBob','uKick','uLoad','uBody','uMetal','uAccent','uEnvironment','uFire'].map(name=>[name,gl.getUniformLocation(p,name)]));
+ const u=Object.fromEntries(['uScale','uRest','uSway','uBob','uKick','uLoad','uBody','uMetal','uAccent','uEnvironment','uPlayerLight','uFire'].map(name=>[name,gl.getUniformLocation(p,name)]));
  const buffers=new Map();
  const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255);
  return function drawWeapon(item) {
@@ -1987,7 +2001,8 @@ function makeViewPass(gl,program) {
   gl.uniform1f(u.uBob,Math.sin(step)*(motion?.013:.004));
   gl.uniform1f(u.uKick,recoil);gl.uniform1f(u.uLoad,Math.sin(Math.PI*reloadTime/item.reload));
   gl.uniform3fv(u.uBody,rgb(skin.body));gl.uniform3fv(u.uMetal,rgb(skin.metal));gl.uniform3fv(u.uAccent,rgb(skin.accent));
-  gl.uniform3fv(u.uEnvironment,MAP.theme.ambient);gl.uniform1f(u.uFire,Math.min(1,muzzle/.055));
+  gl.uniform3fv(u.uEnvironment,MAP.theme.ambient);gl.uniform3fv(u.uPlayerLight,playerLight);
+  gl.uniform1f(u.uFire,Math.min(1,muzzle/.055));
   for(const [i,n,pos] of [[0,3,0],[1,3,12],[2,1,24],[3,1,28]]) {
    gl.enableVertexAttribArray(attributes[i]);gl.vertexAttribPointer(attributes[i],n,gl.FLOAT,false,32,pos);
   }
@@ -2170,18 +2185,36 @@ function makeYardRenderer() {
   if(yardPhotography[name]) photo.src=yardPhotography[name];
  }
  const verts=[], lights=[];
- const lightData=new Float32Array(48), lightFrame=new Float32Array(48);
+ const lightFrame=new Float32Array(48),playerLight=new Float32Array(3);
+ const lightOrder=[],lightDistances=[];
  const steel=[.37,.48,.50], black=[.23,.27,.28], hazard=[.78,.56,.27];
  const signObjects=[];
  function face(a,b,c,d,n,color,mat) {
   for(const pt of [a,b,c,a,c,d]) verts.push(...pt,...n,...color,mat);
  }
- function box(x,y,z,w,h,d,mat,color) {
+ const TOP=1,BOTTOM=2,NORTH=4,SOUTH=8,WEST=16,EAST=32,ALL_FACES=63;
+ function box(x,y,z,w,h,d,mat,color,faces=ALL_FACES) {
   const X=x+w,Y=y+h,Z=z+d;
   const a=[x,y,z],b=[X,y,z],c=[X,y,Z],d0=[x,y,Z],e=[x,Y,z],f=[X,Y,z],g=[X,Y,Z],h0=[x,Y,Z];
-  face(e,f,g,h0,[0,1,0],color,mat);face(d0,c,b,a,[0,-1,0],color,mat);
-  face(a,b,f,e,[0,0,-1],color,mat);face(c,d0,h0,g,[0,0,1],color,mat);
-  face(d0,a,e,h0,[-1,0,0],color,mat);face(b,c,g,f,[1,0,0],color,mat);
+  if(faces&TOP) face(e,f,g,h0,[0,1,0],color,mat);
+  if(faces&BOTTOM) face(d0,c,b,a,[0,-1,0],color,mat);
+  if(faces&NORTH) face(a,b,f,e,[0,0,-1],color,mat);
+  if(faces&SOUTH) face(c,d0,h0,g,[0,0,1],color,mat);
+  if(faces&WEST) face(d0,a,e,h0,[-1,0,0],color,mat);
+  if(faces&EAST) face(b,c,g,f,[1,0,0],color,mat);
+ }
+ function tileOccludes(x,z,height) {
+  if(x<0||z<0||x>=columns||z>=rows) return true;
+  const tile=cell(x,z);
+  return (tile==='#'||tile==='M'||tile==='T')&&coverHeight(x,z)>=height;
+ }
+ function tileSides(x,z,height) {
+  let faces=0;
+  if(!tileOccludes(x,z-1,height)) faces|=NORTH;
+  if(!tileOccludes(x,z+1,height)) faces|=SOUTH;
+  if(!tileOccludes(x-1,z,height)) faces|=WEST;
+  if(!tileOccludes(x+1,z,height)) faces|=EAST;
+  return faces;
  }
  function paintLine(x,z,w,d,color) {
   face([x,.010,z],[x+w,.010,z],[x+w,.010,z+d],[x,.010,z+d],[0,1,0],color,5);
@@ -2193,9 +2226,101 @@ function makeYardRenderer() {
   const w=dir?wid:len, d=dir?len:wid;
   box(x-w/2,y,z-d/2,w,h,d,mat,color);
  }
+
+ function drawFacility(kind,x,z,h) {
+  // The existing cover tile owns collision. Keep every piece inside that tile and its height.
+  const add=(a,b,c,w,d,e,mat,color)=>box(x+a,b*h,z+c,w,d*h,e,mat,color);
+  if(kind==='freight') {
+   add(0,0,0,1,.13,1,3,[.34,.26,.16]);
+   add(.03,.13,.03,.94,.82,.94,3,[.57,.42,.28]);
+   add(.01,.95,.01,.98,.05,.98,3,[.40,.29,.17]);
+   for(const offset of [.17,.77]) {
+    add(offset,.13,.01,.06,.87,.025,5,[.24,.26,.21]);
+    add(offset,.13,.965,.06,.87,.025,5,[.24,.26,.21]);
+    add(offset,.983,.01,.06,.017,.98,5,[.24,.26,.21]);
+   }
+   for(const end of [.032,.958]) {
+    add(.28,.51,end,.41,.24,.008,8,[.65,.56,.41]);
+    for(const offset of [.32,.39,.46,.53,.60]) add(offset,.55,end<.5?end-.006:end+.008,.025,.13,.005,5,[.29,.25,.18]);
+   }
+  } else if(kind==='cart') {
+   add(0,0,0,1,.12,1,5,black);
+   add(.04,.12,.05,.92,.54,.90,2,[.62,.44,.16]);
+   for(const y of [.19,.34,.49]) {
+    add(.13,y,.025,.74,.11,.03,5,[.28,.22,.13]);
+    add(.39,y+.04,.01,.22,.029,.03,5,steel);
+    add(.13,y,.945,.74,.11,.03,5,[.28,.22,.13]);
+    add(.39,y+.04,.96,.22,.029,.03,5,steel);
+   }
+   add(0,.66,0,1,.074,1,5,[.19,.24,.24]);
+   add(.09,.734,.15,.34,.135,.42,2,[.34,.35,.33]);
+   add(.55,.734,.23,.32,.095,.14,3,[.56,.37,.19]);
+   for(const a of [.11,.83]) add(a,.734,.82,.06,.266,.06,2,steel);
+   add(.11,.95,.81,.78,.05,.065,5,steel);
+  } else if(kind==='pump') {
+   add(0,0,0,1,.18,1,1,[.36,.42,.38]);
+   add(.04,.18,.04,.92,.11,.92,5,hazard);
+   add(.10,.29,.21,.80,.43,.55,2,[.25,.50,.46]);
+   add(.26,.72,.23,.47,.20,.51,2,[.31,.56,.49]);
+   add(.39,.92,.33,.21,.08,.29,5,black);
+   for(const a of [.16,.25,.34,.43,.52,.61,.70,.79]) {
+    add(a,.40,.18,.035,.29,.03,5,[.16,.27,.25]);
+    add(a,.40,.75,.035,.29,.035,5,[.16,.27,.25]);
+   }
+   for(const a of [.02,.86]) {
+    add(a,.33,.37,.12,.30,.25,5,[.19,.26,.23]);
+    add(a+.015,.40,.34,.07,.17,.31,2,steel);
+   }
+   add(.29,.70,.195,.09,.045,.03,6,[.67,.83,.59]);
+   add(.45,.70,.195,.04,.046,.03,6,[.95,.49,.30]);
+  } else if(kind==='bed') {
+   add(.03,0,.12,.94,.16,.76,2,black);
+   add(.12,.16,.18,.76,.25,.64,2,steel);
+   add(.02,.41,.08,.96,.15,.84,2,[.35,.52,.52]);
+   add(.03,.56,.09,.94,.15,.82,7,[.71,.79,.76]);
+   add(.07,.71,.14,.25,.095,.71,7,[.88,.88,.82]);
+   add(.34,.709,.115,.60,.054,.77,7,[.32,.57,.55]);
+   for(const a of [.055,.89]) add(a,.41,.05,.05,.51,.90,5,steel);
+   for(const a of [.052,.90]) {
+    add(.09,.59,a,.046,.35,.05,5,steel);
+    add(.77,.59,a,.046,.35,.05,5,steel);
+    add(.09,.90,a,.726,.051,.05,5,steel);
+   }
+   add(.02,.80,.12,.081,.20,.76,2,[.27,.40,.40]);
+  } else if(kind==='exercise') {
+   add(0,0,0,1,.14,1,1,[.33,.38,.36]);
+   add(.065,.14,.09,.87,.42,.82,2,[.38,.44,.42]);
+   add(.06,.52,.083,.88,.055,.834,5,black);
+   for(const a of [.17,.76]) {
+    add(a,.57,.12,.065,.40,.08,2,steel);
+    add(a,.57,.80,.065,.40,.08,2,steel);
+   }
+   add(.155,.943,.12,.686,.057,.08,2,steel);
+   add(.155,.943,.80,.686,.057,.08,2,steel);
+   add(.21,.20,.085,.58,.17,.02,4,hazard);
+  }
+ }
  function drawProp(item) {
   const t=item.t,dir=item.dir||0,x=item.x,z=item.z;
-  if(t==='bench') {
+  if(t==='rails') {
+   for(const dz of [-.25,.25]) part(x,z+dz,item.len,.042,.013,.036,0,2,[.43,.48,.48]);
+   for(let dx=.5-item.len/2;dx<item.len/2;dx+=.87)
+    part(x+dx,z,.70,.096,.011,.014,1,5,[.27,.30,.29]);
+  } else if(t==='court') {
+   const line=[.57,.49,.36];
+   paintLine(x-2.69,z-2.46,5.38,.07,line);paintLine(x-2.69,z-.13,5.38,.07,line);
+   paintLine(x-2.69,z-2.46,.07,2.39,line);paintLine(x+2.62,z-2.46,.07,2.39,line);
+   paintLine(x-.94,z-1.46,1.88,.053,line);
+   for(const a of [-.93,.88]) paintLine(x+a,z-1.46,.054,1.34,line);
+   box(x-.055,2.75,z-.057,.11,.14,.082,5,steel);
+   box(x-.54,2.60,z-.074,1.08,.57,.070,5,[.65,.63,.54]);
+   box(x-.24,2.70,z-.085,.48,.30,.012,5,[.48,.27,.18]);
+   box(x-.206,2.73,z-.094,.412,.238,.011,5,[.62,.60,.52]);
+   const rim=[.63,.32,.14];
+   for(const a of [-.233,.208]) box(x+a,2.61,z-.54,.025,.032,.45,5,rim);
+   for(const dz of [-.54,-.115]) box(x-.21,2.61,z+dz,.42,.032,.025,5,rim);
+   for(const dx of [-.16,-.085,0,.085,.16]) box(x+dx,2.43,z-.536,.012,.18,.012,7,[.63,.60,.48]);
+  } else if(t==='bench') {
    part(x,z,1.55,.5,.42,.10,dir,3,[.45,.35,.24]);
    part(x,z,1.55,.5,.52,.07,dir,5,[.24,.27,.26]);
    part(x-(dir?0:.24),z-(dir?.24:0),1.55,.07,.52,.40,dir,5,[.31,.35,.34]);
@@ -2371,15 +2496,20 @@ function makeYardRenderer() {
  }
  const metalColors=[[.31,.48,.47],[.42,.45,.51],[.53,.30,.248],[.52,.43,.305],[.32,.36,.42]];
  const mesh=gl.createBuffer();
+ let vertexCount=0;
  function rebuild() {
   verts.length=0;signObjects.length=0;lights.length=0;
   const theme=MAP.theme,style=theme.style,rand=rng(90210);
   lights.push(...MAP.lights);
+  lightOrder.length=0;
+  for(let i=0;i<lights.length;i++) lightOrder.push(i);
   face([1,0,1],[columns-1,0,1],[columns-1,0,rows-1],[1,0,rows-1],[0,1,0],theme.ground,0);
   for(let y=0;y<rows;y++) for(let x=0;x<columns;x++) {
    const tile=cell(x,y);
    if(tile==='.'||tile==='V') continue;
    const wallHeight=coverHeight(x,y),out=x===0||y===0||x===columns-1||y===rows-1;
+   const facility=MAP.facilities.get(y*columns+x);
+   if(facility) {drawFacility(facility,x,y,wallHeight);continue;}
    const edgeNorth=!solid(x,y-1),edgeSouth=!solid(x,y+1),edgeEast=!solid(x+1,y),edgeWest=!solid(x-1,y);
    if(tile==='C') {
     if(style==='yard') {
@@ -2416,11 +2546,14 @@ function makeYardRenderer() {
     continue;
    }
    if(tile==='T') {
-    box(x,0,y,1,wallHeight,1,2,theme.train);
-    for(const [bx,bz,bw,bd] of [[x-.014,y,.019,1],[x+.995,y,.019,1],[x,y-.014,1,.019],[x,y+.995,1,.019]])
-     box(bx,1.42,bz,bw,.58,bd,5,[.10,.14,.15]);
-    for(const [bx,bz,bw,bd] of [[x-.016,y,.022,1],[x+.994,y,.022,1],[x,y-.016,1,.022],[x,y+.994,1,.022]])
-     box(bx,2.72,bz,bw,.09,bd,5,steel);
+    box(x,0,y,1,wallHeight,1,2,theme.train,TOP|tileSides(x,y,wallHeight));
+    const exposed=tileSides(x,y,2.81);
+    for(const [side,bx,bz,bw,bd] of [[WEST,x-.014,y,.019,1],[EAST,x+.995,y,.019,1],[NORTH,x,y-.014,1,.019],[SOUTH,x,y+.995,1,.019]]) {
+     if(exposed&side) box(bx,1.42,bz,bw,.58,bd,5,[.10,.14,.15]);
+    }
+    for(const [side,bx,bz,bw,bd] of [[WEST,x-.016,y,.022,1],[EAST,x+.994,y,.022,1],[NORTH,x,y-.016,1,.022],[SOUTH,x,y+.994,1,.022]]) {
+     if(exposed&side) box(bx,2.72,bz,bw,.09,bd,5,steel);
+    }
     if((x+y)%3===0) {
      if(!solid(x,y-1)) box(x+.20,.06,y-.012,.60,2.20,.025,5,[.11,.15,.17]);
      if(!solid(x,y+1)) box(x+.20,.06,y+.992,.60,2.20,.025,5,[.11,.15,.17]);
@@ -2451,7 +2584,7 @@ function makeYardRenderer() {
     continue;
    }
    if(tile==='M') {
-    box(x,0,y,1,wallHeight,1,2,theme.metal);
+    box(x,0,y,1,wallHeight,1,2,theme.metal,TOP|tileSides(x,y,wallHeight));
     box(x,wallHeight-.16,y,1.006,.16,1.006,5,black);
     if(style==='prison') {
      box(x+.04,1.48,y-.012,.92,.52,.024,6,[.24,.33,.36]);
@@ -2468,7 +2601,7 @@ function makeYardRenderer() {
    if(style==='yard') {
     const container=!out&&(x>=28||y>=23||(x>=14&&y>=10));
     const color=container?metalColors[(Math.floor(x/4)*3+Math.floor(y/3))%metalColors.length]:[.39+rand()*.065,.43+rand()*.047,.45+rand()*.04];
-    box(x,0,y,1,wallHeight,1,container?2:1,color);
+    box(x,0,y,1,wallHeight,1,container?2:1,color,TOP|tileSides(x,y,wallHeight));
     if(out) continue;
     if(edgeNorth||edgeSouth||edgeEast||edgeWest) box(x,wallHeight-.15,y,1.006,.153,1.006,5,black);
     const bandH=container?.28:.17,bandY=container?.27:.58,bandMat=container?4:5;
@@ -2490,7 +2623,7 @@ function makeYardRenderer() {
     }
    } else {
     const color=out?theme.outer:theme.wall;
-    box(x,0,y,1,wallHeight,1,1,color);
+    box(x,0,y,1,wallHeight,1,1,color,TOP|tileSides(x,y,wallHeight));
     if(out) continue;
     if(edgeNorth||edgeSouth||edgeEast||edgeWest) box(x,wallHeight-.15,y,1.006,.153,1.006,5,black);
     const bandY=wallHeight*.47,bandMat=style==='prison'?4:5,bandColor=style==='prison'?hazard:steel;
@@ -2547,7 +2680,9 @@ function makeYardRenderer() {
    box(x-.18,y-.026,z-.068,.36,.035,.136,6,clr);
    box(x-.14,y+.025,z+.06,.28,.038,.055,6,clr);
   }
+  vertexCount=verts.length/10;
   gl.bindBuffer(gl.ARRAY_BUFFER,mesh);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+  verts.length=0;
  }
  rebuild();
  const spriteBuffer=gl.createBuffer(), textures=new WeakMap();
@@ -2712,6 +2847,32 @@ function makeYardRenderer() {
   }
   gl.depthMask(true);gl.disable(gl.BLEND);
  }
+ function prepareLights(view) {
+  for(let i=0;i<lights.length;i++) {
+   const [x,z]=lights[i];
+   lightDistances[i]=(x-view.x)**2+(z-view.y)**2;
+  }
+  lightOrder.sort((a,b)=>lightDistances[a]-lightDistances[b]||a-b);
+  const flicker=MAP.theme.flicker||0,now=frames/60;
+  lightFrame.fill(0);playerLight.fill(0);
+  for(let slot=0;slot<Math.min(lightOrder.length,12);slot++) {
+   const index=lightOrder[slot],lamp=lights[index],px=slot*4;
+   lightFrame.set(lamp,px);
+   if(flicker>0) {
+    const pulse=Math.sin(now*(7.1+index*1.31)+index*2.17)*Math.sin(now*(19.3+index*.73)+index*.91);
+    lightFrame[px+3]*=clamp(1+flicker*pulse*1.7,.28,1.45);
+   }
+   const d2=lightDistances[index];
+   if(view!==player||d2>30) continue;
+   const [x,z,height]=lamp,d=Math.sqrt(d2),dy=height-1.22;
+   if(d>.15&&ray(view.x,view.y,(x-view.x)/d,(z-view.y)/d,(height-1.35)/d).dist<d-.12) continue;
+   const power=lightFrame[px+3];
+   const strength=Math.abs(power)*.45/(1.1+d2*.58+dy*dy*.32);
+   playerLight[0]+=strength*(power>0?1.40:.32);
+   playerLight[1]+=strength*(power>0?.63:.92);
+   playerLight[2]+=strength*(power>0?.26:1.18);
+  }
+ }
  function sceneUniforms(program,view,dx,dy,look) {
   const u=program.uniforms;
   gl.useProgram(program.p);
@@ -2719,24 +2880,13 @@ function makeYardRenderer() {
   gl.uniform2f(u.uScale,focal*2/W.width,focal*2/W.height);
   gl.uniform1f(u.uPitch,look*2);gl.uniform1f(u.uTime,frames/60);
   gl.uniform1f(u.uFlash,muzzle>0?.66:0);
-  const flicker=MAP.theme.flicker||0;
-  if(flicker>0) {
-   const now=frames/60;
-   for(let i=0;i<12;i++) {
-    lightFrame[i*4]=lightData[i*4];lightFrame[i*4+1]=lightData[i*4+1];
-    lightFrame[i*4+2]=lightData[i*4+2];
-    const n=Math.sin(now*(7.1+i*1.31)+i*2.17)*Math.sin(now*(19.3+i*.73)+i*.91);
-    lightFrame[i*4+3]=lightData[i*4+3]*clamp(1+flicker*n*1.7,.28,1.45);
-   }
-   gl.uniform4fv(u['uLights[0]'],lightFrame);
-  } else gl.uniform4fv(u['uLights[0]'],lightData);
+  gl.uniform4fv(u['uLights[0]'],lightFrame);
   gl.uniform3fv(u.uFog,MAP.theme.fog);gl.uniform3fv(u.uAmbient,MAP.theme.ambient);
  }
  let viewPass=null;
- try {viewPass=makeViewPass(gl,program);} catch(error) {console.warn('Player viewmodel unavailable:',error.message);}
+ try {viewPass=makeViewPass(gl,program,playerLight);} catch(error) {console.warn('Player viewmodel unavailable:',error.message);}
  function draw(view,dx,dy,look,drawables) {
-  const nearby=lights.slice().sort((a,b)=>((a[0]-view.x)**2+(a[1]-view.y)**2)-((b[0]-view.x)**2+(b[1]-view.y)**2));
-  for(let i=0;i<12;i++)lightData.set(nearby[i]??[-20,-20,0,0],i*4);
+  prepareLights(view);
   if(canvas.width!==W.width||canvas.height!==W.height) {canvas.width=W.width;canvas.height=W.height;}
   gl.viewport(0,0,W.width,W.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
@@ -2744,7 +2894,7 @@ function makeYardRenderer() {
   photoTextures.forEach(({tex,uniform},i)=>{gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,tex);gl.uniform1i(uniform,i);});
   gl.activeTexture(gl.TEXTURE0);
   const indices=[bind(scene,'aPosition',3,40,0),bind(scene,'aNormal',3,40,12),bind(scene,'aColor',3,40,24),bind(scene,'aMaterial',1,40,36)];
-  gl.drawArrays(gl.TRIANGLES,0,verts.length/10);
+  gl.drawArrays(gl.TRIANGLES,0,vertexCount);
   indices.forEach(index=>gl.disableVertexAttribArray(index));
   sceneUniforms(spritesProgram,view,dx,dy,look);gl.bindBuffer(gl.ARRAY_BUFFER,spriteBuffer);
   const spr=[bind(spritesProgram,'aPosition',3,20,0),bind(spritesProgram,'aUv',2,20,12)];
