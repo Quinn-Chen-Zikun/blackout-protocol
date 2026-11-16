@@ -127,6 +127,10 @@ body{background:#0b1c23}
 #bossHud span{display:inline-block;margin-bottom:5px;font:800 11px ui-monospace,monospace;letter-spacing:.18em;color:#ffd4a3;text-shadow:0 2px 6px #000}
 .bossTrack{height:9px;border:1px solid #ff9b7455;background:#2a1717cc;box-shadow:0 3px 12px #0008}
 .bossTrack i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5d43,#ffb35e);transition:width .12s linear}
+.runStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 20px}
+.runStats div{border:1px solid #78959a44;background:#101f23;padding:7px 8px;font-size:10px;color:#a9c0bd;line-height:1.3}
+.runStats b{display:block;margin-top:2px;font:800 17px ui-monospace,monospace;color:#f2f5ea}
+@media(max-width:520px){.runStats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){#bossHud{top:8px;width:48vw}#bossHud span{font-size:9px}}
 </style>
 </head>
@@ -160,7 +164,7 @@ body{background:#0b1c23}
 </div>
 <div class="controls" id="touch" hidden><div id="stick" aria-label="移动摇杆"><i></i></div><button id="touchPause">暂停</button><button id="touchMap">地图</button><button id="touchSwap">切枪</button><button id="touchNade">投雷</button><button id="touchAim">瞄准</button><button id="touchMelee">近战</button><button id="touchSupply">补给</button><button id="touchReload">换弹</button><button id="touchFire">开火</button></div>
 <section class="screen centerScreen" id="modal" hidden aria-labelledby="modalTitle">
-  <div class="dialog"><div class="label" id="modalLabel"></div><h2 id="modalTitle"></h2><p id="modalText"></p><div class="actions"><button class="primary" id="modalAction"></button><button class="subtle" id="home">返回主菜单</button></div></div>
+  <div class="dialog"><div class="label" id="modalLabel"></div><h2 id="modalTitle"></h2><p id="modalText"></p><div class="runStats" id="runStats" hidden></div><div class="actions"><button class="primary" id="modalAction"></button><button class="subtle" id="home">返回主菜单</button></div></div>
 </section>
 <section class="screen" id="tactical" role="dialog" aria-modal="true" aria-labelledby="tacticalTitle" hidden>
  <div class="tacticalPanel">
@@ -940,6 +944,7 @@ let ambience=null, ambientBuffer=null;
 let alarm=0, lightning=0, nextLightning=600, enemyStepCooldown=0, damageTime=0, damageDir=0;
 let grenadeCount=2, grenadeCooldown=0, grenadeLive=[], explosions=[], blast=0, aiming=false;
 let meleeCooldown=0, meleeFlash=0;
+let runShots=0, runHits=0, runHeadshots=0, runGrenadeKills=0, runMeleeKills=0, runEliteKills=0, runBossKills=0, runDamage=0;
 const specialGate={spitter:0,screamer:0};
 let muted=read('blackout-muted','0')==='1';
 let depth, rays, focal, sky, floor;
@@ -1165,6 +1170,7 @@ function reset() {
  noticeText='';headshot=false;route=[];lastSpawn=-1;spawnHistory=[];
  specialGate.spitter=specialGate.screamer=enemyStepCooldown=0;damageTime=0;damageDir=0;
  grenadeCount=2;grenadeCooldown=0;grenadeLive.length=0;explosions.length=0;blast=0;meleeCooldown=0;meleeFlash=0;setAiming(false);
+ runShots=runHits=runHeadshots=runGrenadeKills=runMeleeKills=runEliteKills=runBossKills=runDamage=0;
 }
 reset();
 function setMode(next) {
@@ -1284,9 +1290,17 @@ function lockAim() {
 function start() {
  reset();activateAudio();startAmbience();setMode('play');nextWave();lockAim();
 }
-function modal(next,label,title,body,action) {
+function showRunSummary() {
+ const el=$('runStats'),acc=runShots?Math.round(runHits/runShots*100):0;
+ el.hidden=false;
+ el.innerHTML=`<div>击杀<b>${kills}</b></div><div>爆头<b>${runHeadshots}</b></div><div>命中率<b>${acc}%</b></div>`
+  +`<div>精英击倒<b>${runEliteKills}</b></div><div>暴君击倒<b>${runBossKills}</b></div><div>近战 / 手雷<b>${runMeleeKills} / ${runGrenadeKills}</b></div>`
+  +`<div>承受伤害<b>${Math.round(runDamage)}</b></div><div>本次军费<b>₡${runCredits}</b></div><div>总计军费<b>₡${credits}</b></div>`;
+}
+function modal(next,label,title,body,action,summary=false) {
  $('modalLabel').textContent=label;$('modalTitle').textContent=title;
  $('modalText').textContent=body;$('modalAction').textContent=action;
+ if(summary) showRunSummary(); else $('runStats').hidden=true;
  setMode(next);$('modalAction').focus();
 }
 function pause() {
@@ -1374,7 +1388,7 @@ function waveCleared() {
  if (best<wave) {best=wave;save(bestKey(selectedMap),best);}
  const bonus=80+wave*45;earn(bonus);
  if (wave===MAX_WAVE) {
-  modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'再打一局');
+  modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'再打一局',true);
   return;
  }
  waveTime=10;used.fill(0);setNotice('波次肃清 · 军费 +₡'+bonus+' · 趁现在补给',2.6);
@@ -1453,7 +1467,9 @@ function fire() {
   hits.set(hit.target,acc);
  }
  shotSound(item.kind);
+ runShots++;
  if(!hits.size) return;
+ runHits++;
  let anyCritical=false,anyArmored=false,killed=0,killedElite=false,killedBoss=false;
  for(const [target,hit] of hits) {
   target.hp-=hit.damage;target.flash=hit.armored?.045:.12;
@@ -1462,12 +1478,15 @@ function fire() {
    enemies.splice(enemies.indexOf(target),1);kills++;killed++;
    const gain=killValue(target.type,hit.critical)*(target.elite?3:1);
    earn(gain);killedElite=killedElite||target.elite;killedBoss=killedBoss||target.boss;
+   if(target.boss) runBossKills++;
+   else if(target.elite) runEliteKills++;
    if(target.boss) setNotice('暴君击倒 · 军费 +₡'+gain,2.2);
    else if(target.elite) setNotice('精英感染者击倒 · 军费 +₡'+gain,1.6);
    tone(hit.critical?530:270,.11,'triangle',.08,110);
   }
  }
  hitTime=.17;headshot=anyCritical;
+ if(anyCritical) runHeadshots++;
  if(anyArmored) tone(368,.11,'triangle',.15,106);
  hitFeedback(anyCritical,killed>0,anyArmored,killedElite,killedBoss);
 }
@@ -1486,9 +1505,10 @@ function melee() {
   if(fits(nx,z.y,.2)) z.x=nx;
   if(fits(z.x,ny,.2)) z.y=ny;
   if(z.hp<=0) {
-   enemies.splice(enemies.indexOf(z),1);kills++;killed++;
+   enemies.splice(enemies.indexOf(z),1);kills++;killed++;runMeleeKills++;
    const gain=killValue(z.type,false)*(z.elite?3:1);
    earn(gain);killedElite=killedElite||z.elite;killedBoss=killedBoss||z.boss;
+   if(z.boss) runBossKills++;else if(z.elite) runEliteKills++;
   }
  }
  tone(135,.13,'square',.075,62);
@@ -1527,7 +1547,8 @@ function explodeGrenade(g) {
   if(d>radius||!visible(g.x,g.y,z.x,z.y)) continue;
   z.hp-=230*(1-d/(radius+.9));z.flash=.2;
   if(z.hp<=0) {
-   enemies.splice(enemies.indexOf(z),1);kills++;killed.push(z);
+   enemies.splice(enemies.indexOf(z),1);kills++;killed.push(z);runGrenadeKills++;
+   if(z.boss) runBossKills++;else if(z.elite) runEliteKills++;
    earn(killValue(z.type,false)*(z.elite?3:1));
   }
  }
@@ -1717,10 +1738,11 @@ function turnZombie(z,x,y,dt) {
 function damagePlayer(amount,message='',source=null) {
  wounded=.85;damageTime=.95;
  if(source) damageDir=Math.atan2(source.y-player.y,source.x-player.x);
+ runDamage+=Math.min(player.hp,amount);
  player.hp=Math.max(0,player.hp-amount);
  tone(100,.21,'sawtooth',.105,29);
  if(player.hp===0) {
-  modal('over','信号中断 / KIA','防线失守','抵达第 '+wave+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'重新部署');
+  modal('over','信号中断 / KIA','防线失守','抵达第 '+wave+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'重新部署',true);
   return;
  }
  if(message) setNotice(message,1.05);
