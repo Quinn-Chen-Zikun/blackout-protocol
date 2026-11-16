@@ -1,6 +1,6 @@
-# 断电协议 · 雨夜货运港
+# 破晓守望 · 雨夜货运港
 
-## [▶ 点击开始玩](https://quinn-chen-zikun.github.io/blackout-protocol/)
+## [▶ 点击开始玩](https://quinn-chen-zikun.github.io/dawnwatch/)
 
 打开网页后，点击「进入隔离区」。无需登录、下载或安装。
 
