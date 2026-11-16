@@ -983,7 +983,7 @@ let frames=0, last=performance.now(), routeClock=0, route=[], lastSpawn=-1, spaw
 let ambience=null, ambientBuffer=null, audioMaster=null;
 let alarm=0, lightning=0, nextLightning=600, enemyStepCooldown=0, damageTime=0, damageDir=0;
 let grenadeCount=2, grenadeCooldown=0, grenadeLive=[], explosions=[], blast=0, aiming=false;
-let meleeCooldown=0, meleeFlash=0;
+let meleeCooldown=0, meleeFlash=0, heartbeatClock=0;
 let runShots=0, runHits=0, runHeadshots=0, runGrenadeKills=0, runMeleeKills=0, runEliteKills=0, runBossKills=0, runDamage=0;
 const specialGate={spitter:0,screamer:0};
 let muted=read('blackout-muted','0')==='1';
@@ -1198,7 +1198,8 @@ function setNotice(message,time=1.9) {noticeText=message;noticeTime=time;}
 function hitFeedback(critical,killed,armored=false,elite=false,boss=false) {
  if(!critical&&!killed&&!armored) return;
  const feed=$('feed'),ring=$('killRing');
- feed.textContent=killed?(boss?'暴君击倒':elite?'精英击倒':critical?'爆头 · 击倒':'击倒'):armored?'盾牌挡弹':'爆头';
+ feed.textContent=killed?(boss?'首领击倒':elite?'精英击倒':critical?'爆头 · 击倒':'击倒'):armored?'盾牌挡弹':'爆头';
+ if(killed&&boss) tone(66,.85,'sawtooth',.18,28);
  feed.className=critical||elite?'head':armored?'armor':'';
  if(killed) feed.classList.add('kill');
  void feed.offsetWidth;feed.classList.add('show');
@@ -1221,7 +1222,7 @@ function reset() {
  reloadTime=cooldown=recoil=muzzle=wounded=hitTime=step=noticeTime=pitch=routeClock=0;
  noticeText='';headshot=false;route=[];lastSpawn=-1;spawnHistory=[];
  specialGate.spitter=specialGate.screamer=enemyStepCooldown=0;damageTime=0;damageDir=0;
- grenadeCount=grenadeStartCount();grenadeCooldown=0;grenadeLive.length=0;explosions.length=0;blast=0;meleeCooldown=0;meleeFlash=0;setAiming(false);
+ grenadeCount=grenadeStartCount();grenadeCooldown=0;grenadeLive.length=0;explosions.length=0;blast=0;meleeCooldown=0;meleeFlash=0;heartbeatClock=0;setAiming(false);
  runShots=runHits=runHeadshots=runGrenadeKills=runMeleeKills=runEliteKills=runBossKills=runDamage=0;
 }
 reset();
@@ -1399,7 +1400,7 @@ function nextWave() {
  specialists.forEach((type,index)=>{spawnQueue[Math.floor((index+1)*count/(specialists.length+1))]=type;});
  spawnClock=.8;waveTime=0;
  const bossWave=endless?(wave>=8&&wave%4===0):wave===MAX_WAVE;
- if(bossWave) {spawnQueue.push('boss');setNotice('第 '+wave+' 波 · '+((BOSS_PROFILES[selectedMap]||BOSS_PROFILES.yard).name)+'出现'+(endless?' · 无尽生存':''),3.2);}
+ if(bossWave) {spawnQueue.push('boss');setNotice('第 '+wave+' 波 · '+((BOSS_PROFILES[selectedMap]||BOSS_PROFILES.yard).name)+'出现'+(endless?' · 无尽生存':''),3.2);tone(62,.9,'sawtooth',.15,28);}
  else setNotice('第 '+wave+' 波 · '+(firstContact[wave]??'感染者接近')+(wave>=4?' · 精英混入':''),2.4);
  alarm=MAP.theme.alarmWaves?2.4:0;
  tone(190,.22,'triangle',.13,76);
@@ -1464,6 +1465,7 @@ function waveCleared() {
  acidShots.length=0;
  if (best<wave) {best=wave;save(bestKey(selectedMap),best);}
  const bonus=80+wave*45;earn(bonus);
+ tone(392,.16,'triangle',.07,520);tone(523,.2,'triangle',.06,680);
  if (gameMode!=='endless' && wave===MAX_WAVE) {
   modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'再打一局',true);
   return;
@@ -1547,6 +1549,7 @@ function fire() {
  runShots++;
  if(!hits.size) return;
  runHits++;
+ tone(760,.035,'square',.011,680);
  let anyCritical=false,anyArmored=false,killed=0,killedElite=false,killedBoss=false;
  for(const [target,hit] of hits) {
   target.hp-=hit.damage;target.flash=hit.armored?.045:.12;
@@ -1900,6 +1903,8 @@ function update(dt) {
  }
  cooldown=Math.max(0,cooldown-dt);muzzle=Math.max(0,muzzle-dt);
  meleeCooldown=Math.max(0,meleeCooldown-dt);meleeFlash=Math.max(0,meleeFlash-dt);
+ heartbeatClock=Math.max(0,heartbeatClock-dt);
+ if(player.hp>0&&player.hp<30&&heartbeatClock===0&&mode==='play') {tone(52,.16,'sine',.045,34);heartbeatClock=.82;}
  wounded=Math.max(0,wounded-dt*2.15);hitTime=Math.max(0,hitTime-dt);
  alarm=Math.max(0,alarm-dt);damageTime=Math.max(0,damageTime-dt);
  specialGate.spitter=Math.max(0,specialGate.spitter-dt);specialGate.screamer=Math.max(0,specialGate.screamer-dt);
