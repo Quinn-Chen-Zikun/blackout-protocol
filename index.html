@@ -1125,16 +1125,29 @@ function zombieImage(type,phase,flash=false) {
  return {canvas,pixels:g.getImageData(0,0,canvas.width,canvas.height).data};
 }
 const sprites=Object.fromEntries(Object.keys(types).map(type=>[type,Array.from({length:7},(_,frame)=>zombieImage(type,frame%6,frame===6))]));
-const supplySprite=document.createElement('canvas');
-supplySprite.width=72;supplySprite.height=56;
-{
- const g=supplySprite.getContext('2d');
+function makeSupplySprite(body,top,accent,stripe) {
+ const canvas=document.createElement('canvas');canvas.width=72;canvas.height=56;
+ const g=canvas.getContext('2d');
  g.fillStyle='#161f16';g.fillRect(4,15,64,37);
- g.fillStyle='#435542';g.fillRect(5,17,62,31);
- polygon(g,[4,15,12,7,59,7,68,15],'#758265');
+ g.fillStyle=body;g.fillRect(5,17,62,31);
+ polygon(g,[4,15,12,7,59,7,68,15],top);
  g.fillStyle='#232d20';g.fillRect(7,33,59,3);g.fillRect(18,17,4,32);g.fillRect(50,17,4,32);
- g.fillStyle='#d8f36d';g.fillRect(30,29,12,3);g.fillRect(34,25,4,11);
- g.fillStyle='#adbf82';g.fillRect(11,29,3,10);g.fillRect(58,29,3,10);
+ g.fillStyle=accent;g.fillRect(30,29,12,3);g.fillRect(34,25,4,11);
+ g.fillStyle=stripe;g.fillRect(11,29,3,10);g.fillRect(58,29,3,10);
+ return canvas;
+}
+const supplySprites={
+ yard:makeSupplySprite('#435542','#758265','#d8f36d','#adbf82'),
+ subway:makeSupplySprite('#42545a','#6d8b91','#89e8ed','#9fc3c8'),
+ tunnel:makeSupplySprite('#55472c','#877346','#e9a85f','#c4a15e'),
+ hospital:makeSupplySprite('#5d6b64','#92a59b','#ff8575','#b7c7bd'),
+ prison:makeSupplySprite('#3f4b3f','#6c7f68','#ffcf7a','#a9b7a0')
+};
+const usedSupplySprites={};
+for(const [key,img] of Object.entries(supplySprites)) {
+ const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
+ const g=canvas.getContext('2d');g.filter='saturate(.3) brightness(.55)';g.drawImage(img,0,0);
+ usedSupplySprites[key]=canvas;
 }
 const acidSprite=document.createElement('canvas');
 acidSprite.width=acidSprite.height=48;
@@ -1177,12 +1190,6 @@ function warningDrawables(source) {
   out.push({x:z.x,y:z.y,base:types[z.type].height+.07,height:.42*pulse,img,kind:2});
  }
  return out;
-}
-const usedSupplySprite=document.createElement('canvas');
-usedSupplySprite.width=supplySprite.width;usedSupplySprite.height=supplySprite.height;
-{
- const g=usedSupplySprite.getContext('2d');
- g.filter='saturate(.3) brightness(.55)';g.drawImage(supplySprite,0,0);
 }
 function zombieFrame(z,advance=0) {
  return sprites[z.type][z.flash>0?6:Math.floor(z.anim+advance)%6];
@@ -3224,7 +3231,9 @@ function yardActors(demo) {
  });
  for(let i=0;i<supplies.length;i++) {
   const [x,y]=supplies[i];
-  out.push({x,y,height:.59,img:!demo&&used[i]===supplyWave()?usedSupplySprite:supplySprite,kind:1});
+  const mapSprites=supplySprites[selectedMap]||supplySprites.yard;
+  const usedSprites=usedSupplySprites[selectedMap]||usedSupplySprites.yard;
+  out.push({x,y,height:.59,img:!demo&&used[i]===supplyWave()?usedSprites:mapSprites,kind:1});
  }
  if(!demo) out.push(...warningDrawables(enemies),...acidDrawables());
  return out;
@@ -3494,7 +3503,7 @@ function paintLegacy() {
   return {x:z.x,y:z.y,height:types[z.type].height,img:canvas};
  });
  for(let i=0;i<supplies.length;i++) {
-  const [x,y]=supplies[i];drawables.push({x,y,height:.56,img:supplySprite,dim:!demo&&used[i]===supplyWave()});
+  const [x,y]=supplies[i];drawables.push({x,y,height:.56,img:supplySprites[selectedMap]||supplySprites.yard,dim:!demo&&used[i]===supplyWave()});
  }
  if(!demo) drawables.push(...warningDrawables(enemies),...acidDrawables());
  for(const item of drawables) {
