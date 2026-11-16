@@ -26,6 +26,11 @@
 
 地图为 43 × 31 格，包含南侧闸门、中央装卸区、集装箱区、维修站、卸货仓和北侧泵站。五处补给箱散布在地图上，波次间有 10 秒准备时间。准备期间领取的补给计入下一波。小地图显示当前位置、附近感染者和补给点。感染者出生点按实际可行走路线排序，优先选择视线外且路径合理的近处点，并避免连续重复同一处；近距离出生设有下限。
 
-新版用 WebGL 绘制港区立体几何、雨雾、冷暖灯光和湿地反光。浏览器无法使用 WebGL 时，会自动使用 Canvas 渲染。最佳波次和音效设置保存在浏览器中。
+新版用 WebGL 绘制三维丧尸、湿地反光和港区光影。丧尸拥有不同的体型、步态、扑击动作和头部命中判定；货运港使用混凝土、锈钢和木材的照片材质。浏览器无法使用 WebGL 时，会自动使用 Canvas 渲染。最佳波次和音效设置保存在浏览器中。
 
 命中沿用枪焰和准星标记；爆头显示橙色「爆头」，击倒显示短暂文字和淡出光环，均不遮挡准星。
+
+## 美术参考与材质
+
+- 场景的湿冷光影与近距离丧尸压迫感参考 [《死亡扳机》](https://play.google.com/store/apps/details?id=com.madfingergames.deadtrigger)。丧尸三维模型与动画为本项目制作。
+- 照片材质采用 Poly Haven 的 CC0 资产：[受损混凝土地面](https://polyhaven.com/a/damaged_concrete_floor)、[混凝土墙](https://polyhaven.com/a/concrete_slab_wall)、[锈蚀钢板](https://polyhaven.com/a/rusty_painted_metal)、[旧木板](https://polyhaven.com/a/wood_planks)。
