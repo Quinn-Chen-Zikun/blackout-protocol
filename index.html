@@ -199,6 +199,7 @@ body{background:#0b1c23}
   <article><small>第 2 波起</small><h3>疾跑者</h3><p>移动最快，容易追上落单玩家。优先处理。</p></article>
   <article><small>第 3 波起</small><h3>盾卫</h3><p>正面盾牌会挡弹。打露出的头部，或绕到侧后方。</p></article>
   <article><small>第 4 波起</small><h3>巨化感染者</h3><p>体型大、血量高，近战伤害重。绕开它的攻击距离。</p></article>
+  <article><small>第 4 波起</small><h3>自爆者</h3><p>腹部发红光，贴近后会引爆。优先在远处击倒，爆炸也会伤到附近感染者和玩家。</p></article>
   <article><small>第 5 波起</small><h3>喷吐者</h3><p>蓄力起手时锁定酸液射向，头顶亮起绿色标记。趁蓄力横移可躲，墙和货箱也能挡住酸液。</p></article>
   <article><small>第 6 波起</small><h3>尖啸者</h3><p>只加速能互相看见的附近感染者。蓄力时头顶亮起暖红色标记，优先击倒。</p></article>
  </div>
@@ -947,11 +948,12 @@ function gunStats(item){
 function currentGun(){const list=ownedWeapons();return gunStats(list[Math.min(gun,list.length-1)]||WEAPONS[0]);}
 function currentRounds(){return ammo[currentGun().id];}
 function upgradeCost(id,key){const w=WEAPON_BY_ID[id];return Math.round(UPGRADE_DEFS[key].base*(w?w.tier:1)*Math.pow(upgradesOf(id)[key]+1,1.35));}
-function killValue(type,critical){return ({walker:8,runner:10,shield:14,spitter:14,screamer:16,brute:24,boss:150}[type]||8)+(critical?4:0);}
+function killValue(type,critical){return ({walker:8,runner:10,bomber:16,shield:14,spitter:14,screamer:16,brute:24,boss:150}[type]||8)+(critical?4:0);}
 function earn(amount){credits+=amount;runCredits+=amount;armory.credits=credits;saveArmory();}
 const types = {
  walker:{speed:1.17,hp:76,damage:11,height:1.75,shirt:'#5b5947',skin:'#a0a073'},
  runner:{speed:2.4,hp:58,damage:8,height:1.62,shirt:'#6f3f34',skin:'#bb906b'},
+ bomber:{speed:1.55,hp:64,damage:9,height:1.68,shirt:'#5a3a2c',skin:'#b18a6a'},
  brute:{speed:.88,hp:218,damage:21,height:2.04,shirt:'#454658',skin:'#a8a286'},
  boss:{speed:.72,hp:1500,damage:34,height:2.7,shirt:'#4a2b29',skin:'#8f7d63'},
  shield:{speed:1.04,hp:104,damage:12,height:1.84,shirt:'#343c4a',skin:'#a6a48d'},
@@ -969,13 +971,13 @@ const waveSpecials=[
  [],
  ['runner','runner'],
  ['runner','shield','runner'],
- ['runner','brute','shield','runner','brute'],
- ['runner','spitter','shield','brute','runner','spitter'],
- ['runner','screamer','spitter','runner','brute','shield'],
- ['shield','spitter','screamer','runner','brute','shield','spitter','runner'],
- ['runner','shield','brute','spitter','screamer','runner','shield','spitter','brute','screamer']
+ ['runner','brute','bomber','shield','runner','brute'],
+ ['runner','spitter','bomber','shield','brute','runner','spitter'],
+ ['runner','screamer','bomber','spitter','runner','brute','shield'],
+ ['shield','spitter','screamer','bomber','runner','brute','shield','spitter','runner'],
+ ['runner','shield','brute','spitter','bomber','screamer','runner','shield','spitter','brute','screamer','bomber']
 ];
-const firstContact={2:'疾跑者出没',3:'盾卫出没',4:'巨化感染者出没',5:'喷吐者出没',6:'尖啸者出没'};
+const firstContact={2:'疾跑者出没',3:'盾卫出没',4:'巨化感染者 / 自爆者出没',5:'喷吐者出没',6:'尖啸者出没'};
 let mode = 'menu', player, enemies, acidShots, ammo, used, wave, waveTime, spawnQueue, spawnClock, kills, gun;
 let reloadTime, cooldown, recoil, muzzle, wounded, hitTime, headshot, step, noticeTime, noticeText;
 let firing=false, aimPointer=null, joyId=null, joyX=0, joyY=0, pressed=false, pitch=0;
@@ -1121,6 +1123,11 @@ function zombieImage(type,phase,flash=false) {
   g.fillStyle='#a9bf67';g.fillRect(34,34,14,8);g.fillRect(44,47,5,12);
  } else if(type==='screamer') {
   g.fillStyle='#281719';g.beginPath();g.ellipse(41,34,6,7,0,0,TAU);g.fill();
+ } else if(type==='bomber') {
+  const glow=g.createRadialGradient(40,58,2,40,58,17);
+  glow.addColorStop(0,'#ffe08a');glow.addColorStop(.45,'#e05a32');glow.addColorStop(1,'#54160d00');
+  g.fillStyle=glow;g.beginPath();g.ellipse(40,58,17,18,0,0,TAU);g.fill();
+  g.fillStyle='#ffcf7a';g.fillRect(37,52,6,4);
  }
  return {canvas,pixels:g.getImageData(0,0,canvas.width,canvas.height).data};
 }
@@ -1551,6 +1558,7 @@ function fire() {
  runHits++;
  tone(760,.035,'square',.011,680);
  let anyCritical=false,anyArmored=false,killed=0,killedElite=false,killedBoss=false;
+ const bomberBursts=[];
  for(const [target,hit] of hits) {
   target.hp-=hit.damage;target.flash=hit.armored?.045:.12;
   anyCritical=anyCritical||hit.critical;anyArmored=anyArmored||hit.armored;
@@ -1562,12 +1570,14 @@ function fire() {
    else if(target.elite) runEliteKills++;
    if(target.boss) setNotice((target.bossName||'暴君')+'击倒 · 军费 +₡'+gain,2.2);
    else if(target.elite) setNotice('精英感染者击倒 · 军费 +₡'+gain,1.6);
+   if(target.type==='bomber') bomberBursts.push({x:target.x,y:target.y});
    tone(hit.critical?530:270,.11,'triangle',.08,110);
   }
  }
  hitTime=.17;headshot=anyCritical;
  if(anyCritical) runHeadshots++;
  if(anyArmored) tone(368,.11,'triangle',.15,106);
+ for(const burst of bomberBursts) explodeGrenade(burst);
  hitFeedback(anyCritical,killed>0,anyArmored,killedElite,killedBoss);
 }
 function melee() {
@@ -1575,6 +1585,7 @@ function melee() {
  meleeCooldown=.72;meleeFlash=.2;recoil=Math.min(.18,recoil+.04);
  const dx=Math.cos(player.angle),dy=Math.sin(player.angle);
  let hit=0,killed=0,killedElite=false,killedBoss=false;
+ const bomberBursts=[];
  for(const z of [...enemies]) {
   const vx=z.x-player.x,vy=z.y-player.y,dist=Math.hypot(vx,vy);
   if(dist>1.75||!visible(player.x,player.y,z.x,z.y)) continue;
@@ -1589,8 +1600,10 @@ function melee() {
    const gain=killValue(z.type,false)*(z.elite?3:1);
    earn(gain);killedElite=killedElite||z.elite;killedBoss=killedBoss||z.boss;
    if(z.boss) runBossKills++;else if(z.elite) runEliteKills++;
+   if(z.type==='bomber') bomberBursts.push({x:z.x,y:z.y});
   }
  }
+ for(const burst of bomberBursts) explodeGrenade(burst);
  tone(135,.13,'square',.075,62);
  if(hit) {
   hitTime=.17;headshot=false;
@@ -1617,6 +1630,13 @@ function explosionSound() {
  gain.gain.setValueAtTime(.55,now);gain.gain.exponentialRampToValueAtTime(.006,now+.6);
  source.connect(filter).connect(gain).connect(audioMaster);source.start();
  tone(62,.7,'sawtooth',.28,22);
+}
+function detonateBomber(z) {
+ const index=enemies.indexOf(z);if(index<0) return;
+ enemies.splice(index,1);kills++;
+ earn(killValue('bomber',false)*(z.elite?3:1));
+ if(z.elite) runEliteKills++;
+ explodeGrenade({x:z.x,y:z.y});
 }
 function explodeGrenade(g) {
  explosions.push({x:g.x,y:g.y,t:.55,max:.55});
@@ -1947,6 +1967,11 @@ function update(dt) {
   const kind=types[z.type], dist=Math.hypot(player.x-z.x,player.y-z.y);
   z.attack-=dt;z.flash=Math.max(0,z.flash-dt);z.attackPose=Math.max(0,(z.attackPose??0)-dt);
   z.rage=Math.max(0,(z.rage??0)-dt);
+  if(z.type==='bomber'&&dist<1.55&&visible(z.x,z.y,player.x,player.y)) {
+   detonateBomber(z);
+   if(mode!=='play') return;
+   continue;
+  }
   if(specialAttack(z,dist,dt)) continue;
   if(dist<(z.boss?1.55:.83) && visible(z.x,z.y,player.x,player.y)) {
    turnZombie(z,player.x,player.y,dt);
@@ -1997,7 +2022,7 @@ function update(dt) {
 
 function zombiePose(z,view,advance=0) {
  const kind=types[z.type], heavy=z.type==='brute'||z.type==='boss', quick=z.type==='runner';
- const shield=z.type==='shield',spitter=z.type==='spitter',screamer=z.type==='screamer';
+ const shield=z.type==='shield',spitter=z.type==='spitter',screamer=z.type==='screamer',bomber=z.type==='bomber';
  const scale=kind.height/1.75, width=heavy?1.26:shield?1.12:quick||spitter?.89:1;
  const yaw=z.yaw??Math.atan2(view.y-z.y,view.x-z.x);
  const fz=Math.sin(yaw),fx=Math.cos(yaw),rx=-fz,rz=fx;
@@ -2071,6 +2096,10 @@ function zombiePose(z,view,advance=0) {
  }
  if(spitter) {
   for(const x of [-.07,.07]) orb(x,1.338+bob,lean+.063,.056,.064,.038,[.37,.48,.188],2);
+ }
+ if(bomber) {
+  orb(0,1.02+bob,lean+.118,.118,.15,.07,[.82,.22,.10],6,'body');
+  orb(0,1.02+bob,lean+.185,.045,.06,.02,[1,.55,.18],6);
  }
  const cy=1.525+bob-.024*attack+(screamer&&z.specialWindup>0?.027:0),cz=lean+.019+reach*.33,cx=tilt+(heavy?-.012:.005);
  bone([0,1.290+bob,.068],[cx,cy-.087,cz],.055*width,.069,skin,1,body);
@@ -3095,7 +3124,7 @@ function makeYardRenderer() {
     const off=count*17;
     instances.set(center,off);instances.set(axes[0],off+3);instances.set(axes[1],off+6);
     instances.set(axes[2],off+9);instances.set(color,off+12);
-    instances[off+15]=material+shape*.125;instances[off+16]=Math.max(Math.max(0,z.flash)*1.2,z.rage>0?.10:0,z.specialWindup>0?.065:0,z.elite?.22:0);count++;
+    instances[off+15]=material+shape*.125;instances[off+16]=Math.max(Math.max(0,z.flash)*1.2,z.rage>0?.10:0,z.specialWindup>0?.065:0,z.elite?.22:0,z.type==='bomber'?.12:0);count++;
    }
   }
   sceneUniforms(modelProgram,view,dx,dy,look);
