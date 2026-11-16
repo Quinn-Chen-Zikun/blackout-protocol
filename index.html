@@ -82,17 +82,48 @@ body{background:#0b1c23}
 @media(max-width:390px){.guideGrid article{padding:8px}.guideGrid p{font-size:11px}}
 @media(pointer:coarse){#radar{width:82px;height:82px}}
 @media(max-height:520px){.hero h1{font-size:clamp(36px,7.8vw,66px)}.mapHud .label{margin-top:1px}}
+.headerRight{display:flex;align-items:center;gap:14px}
+.wallet{color:var(--acid);font-size:11px;border:1px solid var(--line);padding:5px 9px;background:#0b1a1dcc;white-space:nowrap}
+.armory{width:min(900px,calc(100vw - 30px));max-height:calc(100dvh - 26px);overflow:auto}
+.armory header{flex-wrap:wrap;gap:9px 12px}
+.armory h2{font-size:clamp(23px,4.4vw,34px)}
+.weaponTabs{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 14px}
+.weaponTab{display:flex;align-items:center;gap:8px;min-height:40px;padding:5px 11px;border:1px solid #78959a55;background:#12262b;color:#dce6e2;font-weight:750}
+.weaponTab small{font:800 9px ui-monospace,monospace;color:#91b5b8;letter-spacing:.08em}
+.weaponTab.locked{opacity:.62}.weaponTab.active{border-color:var(--acid);background:var(--acid);color:#11170b}.weaponTab.active small{color:#3f4a22}
+.weaponDetail{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:14px}
+.weaponCard{border:1px solid #89adc44a;background:#13272b;padding:13px 15px}
+.weaponCard h3{margin:0 0 4px;font-size:clamp(18px,3vw,25px)}
+.weaponCard .tagline{color:#a9c4c4;font-size:12px;line-height:1.55;margin:0 0 11px}
+.weaponCard .price{font:800 15px ui-monospace,monospace;color:var(--acid)}
+.statGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:9px 0 4px}
+.statGrid div{border:1px solid #7192963d;background:#0e1e22;padding:6px 8px;font-size:11px;color:#a9c0bd}
+.statGrid b{display:block;color:#f2f5ea;font:800 16px ui-monospace,monospace;margin-top:2px}
+.upgradeList{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+.upgradeRow{display:grid;grid-template-columns:74px 1fr auto;align-items:center;gap:8px;border:1px solid #7192963d;background:#0e1e22;padding:6px 8px}
+.upgradeRow>span{font-size:11px;color:#b9cdca}.pips{display:flex;gap:3px}.pips i{width:13px;height:6px;background:#31474a;display:block}.pips i.on{background:var(--acid)}
+.upgradeRow button{min-height:28px;padding:0 8px;font-size:11px;border:1px solid #7fa4a766;background:#1d353a;color:#e7efe8;font-weight:750}
+.upgradeRow button:disabled{opacity:.38;cursor:not-allowed}
+.skinList{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.skinSwatch{min-height:44px;padding:5px 8px;border:1px solid #71929655;background:#0e1e22;color:#dce6e2;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:750}
+.skinSwatch i{width:16px;height:16px;display:block;border:1px solid #ffffff33}
+.skinSwatch.active{border-color:var(--acid);box-shadow:0 0 0 1px var(--acid) inset}
+.skinSwatch small{color:var(--acid);font:800 9px ui-monospace,monospace}
+.armoryHint{margin:13px 0 0;color:#93aaad;font-size:11px;line-height:1.6}
+.buyWide{width:100%;margin-top:8px}
+@media(max-width:760px){.weaponDetail{grid-template-columns:1fr}.statGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.weaponTabs{gap:5px}.weaponTab{padding:4px 8px;min-height:35px}.upgradeRow{grid-template-columns:62px 1fr auto}}
 </style>
 </head>
 <body>
 <canvas id="world" aria-label="第一人称战场"></canvas><div id="shade"></div><div id="effects"></div>
 <section class="screen" id="menu">
-  <header class="header"><div class="brand"><i aria-hidden="true">ϟ</i> DAWNWATCH</div><div class="status">封锁中</div></header>
+  <header class="header"><div class="brand"><i aria-hidden="true">ϟ</i> DAWNWATCH</div><div class="headerRight"><span class="wallet mono" id="menuCredits">₡ 0</span><div class="status">封锁中</div></div></header>
   <div class="hero">
     <div class="label">单人生存 / ZOMBIE SURVIVAL</div>
     <h1>破晓守望</h1><div class="en">DAWNWATCH</div>
     <p id="menuBlurb">雨夜货运港已失守。穿过集装箱区、维修站和装卸场，守住八波感染者。</p>
-    <div class="actions"><button class="primary" id="start">进入隔离区 <span aria-hidden="true">↗</span></button><button class="subtle" id="mute">声音 开</button><button class="subtle" id="openGuide">感染者图鉴</button></div>
+    <div class="actions"><button class="primary" id="start">进入隔离区 <span aria-hidden="true">↗</span></button><button class="subtle" id="openArmory">军械库</button><button class="subtle" id="mute">声音 开</button><button class="subtle" id="openGuide">感染者图鉴</button></div>
     <div class="mapSelect" id="mapSelect" role="group" aria-label="选择战区">
       <button type="button" class="mapChoice active" data-map="yard" aria-pressed="true"><small>07</small><b>货运港</b></button>
       <button type="button" class="mapChoice" data-map="subway" aria-pressed="false"><small>11</small><b>地铁站</b></button>
@@ -100,7 +131,7 @@ body{background:#0b1c23}
       <button type="button" class="mapChoice" data-map="hospital" aria-pressed="false"><small>22</small><b>医院</b></button>
       <button type="button" class="mapChoice" data-map="prison" aria-pressed="false"><small>18</small><b>监狱</b></button>
     </div>
-    <div class="instructions" id="desktopHelp"><span><b class="key">WASD</b>移动</span><span><b class="key">鼠标</b>瞄准 / 射击</span><span><b class="key">R</b>换弹</span><span><b class="key">1 / 2</b>切枪</span><span><b class="key">E</b>补给</span></div>
+    <div class="instructions" id="desktopHelp"><span><b class="key">WASD</b>移动</span><span><b class="key">鼠标</b>瞄准 / 射击</span><span><b class="key">R</b>换弹</span><span><b class="key">1–5 / Q</b>切枪</span><span><b class="key">E</b>补给</span></div>
     <div class="instructions" id="touchHelp" hidden>左摇杆移动 · 滑动战场瞄准 · 右侧按钮射击</div>
   </div>
   <div class="mapTag"><small class="mono" id="sectorTag">SECTOR 07 / 43 × 31</small><b id="sectorName">雨夜货运港</b></div>
@@ -125,6 +156,12 @@ body{background:#0b1c23}
   <article><small>第 5 波起</small><h3>喷吐者</h3><p>蓄力起手时锁定酸液射向，头顶亮起绿色标记。趁蓄力横移可躲，墙和货箱也能挡住酸液。</p></article>
   <article><small>第 6 波起</small><h3>尖啸者</h3><p>只加速能互相看见的附近感染者。蓄力时头顶亮起暖红色标记，优先击倒。</p></article>
  </div>
+</dialog>
+<dialog class="guide armory" id="armory" aria-labelledby="armoryTitle">
+ <header><h2 id="armoryTitle">军械库 / ARMORY</h2><span class="label" id="armoryCredits">₡ 0</span><button class="subtle" id="closeArmory">关闭</button></header>
+ <div class="weaponTabs" id="weaponTabs" role="tablist" aria-label="武器"></div>
+ <div class="weaponDetail" id="weaponDetail"></div>
+ <p class="armoryHint">击杀、爆头和通过波次获得军费。购买的武器、配件和涂装会永久保存。数字键 1–5 或 Q 在局内切换已拥有的武器。</p>
 </dialog>
 <script>
 'use strict';
@@ -157,6 +194,154 @@ function yardRows() {
  for(const [x,y] of yardCrates) grid[y][x]='C';
  return grid.map(row=>row.join(''));
 }
+const PROPS={
+ yard:[
+  {t:'pallet',x:8.5,z:22.4,dir:0},{t:'pallet',x:35.5,z:18.4,dir:1},
+  {t:'barrel',x:15.5,z:24.4},{t:'barrel',x:27.5,z:6.6},{t:'barrel',x:37.6,z:22.4},
+  {t:'puddle',x:19.4,z:10.4,w:4.2,d:1.1,color:[.075,.115,.125]},
+  {t:'puddle',x:25.2,z:24.6,w:3.2,d:1.0,color:[.075,.115,.125]},
+  {t:'puddle',x:10.4,z:16.9,w:2.8,d:.9,color:[.075,.115,.125]},
+  {t:'crate',x:18.4,z:20.6,s:1.1},{t:'crate',x:29.6,z:12.4,s:1.0},
+  {t:'cone',x:22.4,z:19.8},{t:'cone',x:23.6,z:19.8},
+  {t:'vent',x:31.5,z:10.2,dir:1,y:2.3}
+ ],
+ subway:[
+  {t:'bench',x:8.5,z:6.62,dir:0},{t:'bench',x:14.5,z:6.62,dir:0},
+  {t:'bench',x:26.5,z:6.62,dir:0},{t:'bench',x:32.5,z:6.62,dir:0},
+  {t:'bench',x:8.5,z:24.38,dir:0},{t:'bench',x:14.5,z:24.38,dir:0},
+  {t:'bench',x:26.5,z:24.38,dir:0},{t:'bench',x:32.5,z:24.38,dir:0},
+  {t:'bench',x:21.5,z:6.62,dir:0},
+  {t:'bin',x:10.9,z:6.7},{t:'bin',x:30.9,z:6.7},
+  {t:'bin',x:10.9,z:24.3},{t:'bin',x:30.9,z:24.3},
+  {t:'vending',x:3.6,z:6.72,dir:0,color:[.28,.42,.46]},
+  {t:'vending',x:39.4,z:24.28,dir:0,color:[.46,.30,.26]},
+  {t:'vending',x:21.5,z:2.5,dir:0,color:[.30,.36,.44]},
+  {t:'pipe',x:12,z:5.86,len:11,dir:0,y:3.18,color:[.32,.38,.37]},
+  {t:'pipe',x:30,z:5.86,len:11,dir:0,y:3.18,color:[.32,.38,.37]},
+  {t:'pipe',x:12,z:25.14,len:11,dir:0,y:3.18,color:[.32,.38,.37]},
+  {t:'pipe',x:30,z:25.14,len:11,dir:0,y:3.18,color:[.32,.38,.37]},
+  {t:'cable',x:21.5,z:6.08,len:35,dir:0,y:3.72},
+  {t:'cable',x:21.5,z:24.92,len:35,dir:0,y:3.72},
+  {t:'puddle',x:9.3,z:20.15,w:3.4,d:.7,color:[.07,.115,.12]},
+  {t:'puddle',x:20.0,z:11.35,w:4.2,d:.65,color:[.07,.115,.12]},
+  {t:'puddle',x:30.8,z:20.2,w:2.8,d:.7,color:[.07,.115,.12]},
+  {t:'barrel',x:5.6,z:11.2},{t:'barrel',x:37.4,z:20.8},
+  {t:'pallet',x:14.4,z:11.1,dir:0},{t:'pallet',x:26.4,z:20.7,dir:0},
+  {t:'door',x:4.5,z:5.0,dir:0},{t:'door',x:38.5,z:5.0,dir:0},
+  {t:'door',x:4.5,z:25.0,dir:0},{t:'door',x:38.5,z:25.0,dir:0}
+ ],
+ tunnel:[
+  {t:'pipe',x:21.5,z:14.16,len:40,dir:0,y:2.35,color:[.29,.31,.27]},
+  {t:'pipe',x:21.5,z:16.84,len:40,dir:0,y:2.52,color:[.25,.26,.23]},
+  {t:'cable',x:21.5,z:14.28,len:40,dir:0,y:3.05},
+  {t:'cable',x:21.5,z:16.72,len:40,dir:0,y:3.22},
+  {t:'puddle',x:6.2,z:16.2,w:3.0,d:.75,color:[.055,.085,.065]},
+  {t:'puddle',x:15.0,z:15.1,w:2.6,d:.7,color:[.055,.085,.065]},
+  {t:'puddle',x:24.5,z:16.3,w:3.2,d:.75,color:[.055,.085,.065]},
+  {t:'puddle',x:33.0,z:15.2,w:2.8,d:.7,color:[.055,.085,.065]},
+  {t:'valve',x:4.0,z:14.2},{t:'valve',x:12.0,z:16.8},
+  {t:'valve',x:24.0,z:14.2},{t:'valve',x:34.0,z:16.8},
+  {t:'barrel',x:9.4,z:14.45},{t:'barrel',x:27.4,z:16.6},
+  {t:'crate',x:6.4,z:7.1,s:1.0},{t:'crate',x:18.4,z:6.9,s:1.0},
+  {t:'crate',x:7.4,z:24.0,s:1.0},{t:'crate',x:34.4,z:25.0,s:1.0},
+  {t:'locker',x:17.6,z:6.55,dir:0},{t:'locker',x:22.4,z:6.55,dir:0},
+  {t:'workbench',x:20.5,z:2.7,dir:0},
+  {t:'workbench',x:5.5,z:27.2,dir:0},{t:'workbench',x:33.5,z:23.2,dir:0},
+  {t:'vent',x:2.2,z:12.4,dir:1,y:2.1},{t:'vent',x:40.8,z:19.6,dir:1,y:2.1}
+ ],
+ hospital:[
+  {t:'door',x:10.0,z:7.5,dir:0},{t:'door',x:34.0,z:7.5,dir:0},
+  {t:'door',x:10.0,z:13.5,dir:0},{t:'door',x:33.0,z:13.5,dir:0},
+  {t:'door',x:10.0,z:19.5,dir:0},{t:'door',x:33.0,z:19.5,dir:0},
+  {t:'iv',x:4.0,z:3.1},{t:'iv',x:9.0,z:3.1},{t:'iv',x:14.0,z:3.1},
+  {t:'iv',x:27.0,z:3.1},{t:'iv',x:32.0,z:3.1},{t:'iv',x:37.0,z:3.1},
+  {t:'iv',x:4.0,z:11.1},{t:'iv',x:9.0,z:11.1},{t:'iv',x:14.0,z:11.1},
+  {t:'iv',x:27.0,z:11.1},{t:'iv',x:32.0,z:11.1},{t:'iv',x:37.0,z:11.1},
+  {t:'iv',x:4.0,z:21.1},{t:'iv',x:9.0,z:21.1},{t:'iv',x:14.0,z:21.1},
+  {t:'iv',x:27.0,z:21.1},{t:'iv',x:32.0,z:21.1},{t:'iv',x:37.0,z:21.1},
+  {t:'curtain',x:5.5,z:3.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:10.5,z:3.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:15.5,z:3.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:28.5,z:3.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:33.5,z:3.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:38.5,z:3.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:5.5,z:21.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:10.5,z:21.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:15.5,z:21.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:28.5,z:21.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:33.5,z:21.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'curtain',x:38.5,z:21.2,len:2.6,dir:1,color:[.42,.56,.60]},
+  {t:'gurney',x:19.5,z:10.4,dir:1},{t:'gurney',x:23.5,z:20.4,dir:1},
+  {t:'gurney',x:21.5,z:7.5,dir:0},
+  {t:'wheelchair',x:18.5,z:12.4,dir:1},{t:'wheelchair',x:24.5,z:18.5,dir:1},
+  {t:'tank',x:4.6,z:4.8},{t:'tank',x:9.6,z:4.8},{t:'tank',x:14.6,z:4.8},
+  {t:'tank',x:27.6,z:4.8},{t:'tank',x:32.6,z:4.8},{t:'tank',x:37.6,z:4.8},
+  {t:'monitor',x:20.0,z:14.4,dir:1},{t:'monitor',x:23.0,z:14.4,dir:1},
+  {t:'blood',x:19.8,z:16.2,w:1.5,d:.8},{t:'blood',x:14.0,z:8.4,w:1.1,d:.5},
+  {t:'blood',x:30.2,z:16.1,w:1.3,d:.6},{t:'blood',x:21.4,z:9.1,w:1.4,d:.6},
+  {t:'puddle',x:21.2,z:12.4,w:2.2,d:.55,color:[.065,.105,.11]},
+  {t:'puddle',x:7.0,z:16.0,w:2.6,d:.6,color:[.065,.105,.11]}
+ ],
+ prison:[
+  {t:'door',x:3.5,z:9.5,dir:0,open:1},{t:'door',x:10.5,z:9.5,dir:0,open:1},
+  {t:'door',x:16.5,z:9.5,dir:0,open:1},{t:'door',x:22.5,z:9.5,dir:0,open:1},
+  {t:'door',x:28.5,z:9.5,dir:0,open:1},{t:'door',x:34.5,z:9.5,dir:0,open:1},
+  {t:'door',x:39.5,z:9.5,dir:0,open:1},
+  {t:'door',x:3.5,z:23.5,dir:0,open:1},{t:'door',x:10.5,z:23.5,dir:0,open:1},
+  {t:'door',x:16.5,z:23.5,dir:0,open:1},{t:'door',x:22.5,z:23.5,dir:0,open:1},
+  {t:'door',x:28.5,z:23.5,dir:0,open:1},{t:'door',x:34.5,z:23.5,dir:0,open:1},
+  {t:'door',x:39.5,z:23.5,dir:0,open:1},
+  {t:'toilet',x:5.5,z:2.5,dir:1},{t:'toilet',x:11.5,z:2.5,dir:1},
+  {t:'toilet',x:17.5,z:2.5,dir:1},{t:'toilet',x:23.5,z:2.5,dir:1},
+  {t:'toilet',x:29.5,z:2.5,dir:1},{t:'toilet',x:35.5,z:2.5,dir:1},
+  {t:'toilet',x:5.5,z:29.5,dir:1},{t:'toilet',x:11.5,z:29.5,dir:1},
+  {t:'toilet',x:17.5,z:29.5,dir:1},{t:'toilet',x:23.5,z:29.5,dir:1},
+  {t:'toilet',x:29.5,z:29.5,dir:1},{t:'toilet',x:35.5,z:29.5,dir:1},
+  {t:'locker',x:2.5,z:8.4,dir:1},{t:'locker',x:8.5,z:8.4,dir:1},
+  {t:'locker',x:14.5,z:8.4,dir:1},{t:'locker',x:20.5,z:8.4,dir:1},
+  {t:'locker',x:26.5,z:8.4,dir:1},{t:'locker',x:32.5,z:8.4,dir:1},
+  {t:'mast',x:10.5,z:16.0},{t:'mast',x:32.5,z:16.0},
+  {t:'hoop',x:14.5,z:19.6,dir:0},{t:'hoop',x:28.5,z:12.4,dir:0},
+  {t:'washing',x:2.0,z:13.8,dir:0},{t:'washing',x:3.0,z:13.8,dir:0},{t:'washing',x:4.0,z:13.8,dir:0},
+  {t:'workbench',x:40.4,z:14.5,dir:1},{t:'workbench',x:40.4,z:18.0,dir:1},
+  {t:'barrel',x:12.5,z:14.5},{t:'barrel',x:29.5,z:17.5},{t:'barrel',x:16.5,z:19.0},
+  {t:'pallet',x:24.5,z:13.0,dir:0},{t:'pallet',x:9.5,z:17.5,dir:0},
+  {t:'barrier',x:20.5,z:12.2,dir:0},{t:'barrier',x:23.5,z:19.8,dir:0},
+  {t:'puddle',x:18.5,z:15.2,w:3.0,d:.8,color:[.055,.085,.105]},
+  {t:'puddle',x:26.5,z:18.5,w:2.2,d:.7,color:[.055,.085,.105]}
+ ]
+};
+const WALL_SIGNS={
+ yard:[],
+ subway:[
+  {x:21.5,y:2.7,z:5.83,text:'地铁站',sub:'DAWN LINE  /  L2',w:3.2,h:.8,accent:'#89e8ed'},
+  {x:8.5,y:2.35,z:10.18,text:'一号站台',sub:'PLATFORM 1',w:2.4,h:.62,accent:'#89e8ed'},
+  {x:34.5,y:2.35,z:10.18,text:'二号站台',sub:'PLATFORM 2',w:2.4,h:.62,accent:'#89e8ed'},
+  {x:4.5,y:2.25,z:10.18,text:'← 出口',sub:'EXIT',w:1.6,h:.5,accent:'#8df06a'},
+  {x:38.5,y:2.25,z:21.82,text:'换乘通道',sub:'TRANSFER',w:2.0,h:.55,accent:'#89e8ed'}
+ ],
+ tunnel:[
+  {x:8.5,y:2.2,z:13.82,text:'B2 检修通道',sub:'MAINTENANCE',w:2.6,h:.65,accent:'#e9a85f'},
+  {x:24.5,y:2.2,z:13.82,text:'排水暗渠',sub:'DRAINAGE →',w:2.4,h:.6,accent:'#89e8ed'},
+  {x:6.5,y:2.1,z:18.18,text:'禁止入内',sub:'RESTRICTED',w:2.0,h:.55,accent:'#ff7959'},
+  {x:36.5,y:2.1,z:18.18,text:'应急出口',sub:'EMERGENCY EXIT',w:2.2,h:.55,accent:'#8df06a'}
+ ],
+ hospital:[
+  {x:21.5,y:2.75,z:13.8,text:'住院部',sub:'INPATIENT WARD  /  L3',w:3.0,h:.75,accent:'#89e8ed'},
+  {x:18.2,y:2.2,z:8.52,text:'西侧病区',sub:'WARD WEST',w:2.2,h:.6,accent:'#89e8ed'},
+  {x:24.8,y:2.2,z:8.52,text:'东侧病区',sub:'WARD EAST',w:2.2,h:.6,accent:'#89e8ed'},
+  {x:18.2,y:2.2,z:18.2,text:'诊疗区',sub:'CLINIC',w:2.0,h:.55,accent:'#8df06a'},
+  {x:21.5,y:2.9,z:1.2,text:'↑ 药房',sub:'PHARMACY',w:1.8,h:.5,accent:'#8df06a'}
+ ],
+ prison:[
+  {x:21.5,y:2.8,z:11.82,text:'中央放风场',sub:'PRISON YARD',w:3.0,h:.75,accent:'#e9a85f'},
+  {x:16.5,y:2.2,z:11.82,text:'A 区',sub:'BLOCK A',w:1.6,h:.5,accent:'#89e8ed'},
+  {x:26.5,y:2.2,z:11.82,text:'B 区',sub:'BLOCK B',w:1.6,h:.5,accent:'#89e8ed'},
+  {x:8.5,y:2.2,z:20.2,text:'洗衣房',sub:'LAUNDRY',w:1.8,h:.5,accent:'#e9a85f'},
+  {x:34.5,y:2.2,z:20.2,text:'工场',sub:'WORKSHOP',w:1.8,h:.5,accent:'#e9a85f'}
+ ]
+};
+
 const MAPS={
  yard:{
   name:'雨夜货运港', code:'SECTOR 07', short:'港口', tagline:'雨夜 · 集装箱码头',
@@ -193,11 +378,13 @@ const MAPS={
    [11.5,16.0,2.85,2.3],[7.1,11.3,2.5,-2.2],[34.2,15.8,2.8,2.55],[34.7,22.0,2.95,-2.3],
    [6.4,23.5,2.7,1.9],[33.5,8.7,2.65,-2.6],[23.5,27.8,2.05,2.55],[12.8,5.7,2.7,-2.2]],
   decor:[],
+  props:PROPS.yard,wallSigns:WALL_SIGNS.yard,
   theme:{style:'yard',ground:[.255,.274,.274],fog:[.104,.184,.190],ambient:[.34,.44,.47],
    sky:['#07141d','#142731','#354f57','#16252a'],floor:['#635946','#3c3d33','#171b17'],
    weather:'rain',clouds:true,moon:true,wallHeight:3.35,outerHeight:4.6,crateHeight:1.55,
    trainHeight:4.4,woodHeight:1.2,metalHeight:2.55,wall:[.39,.43,.45],outer:[.32,.36,.37],
-   crate:[.53,.38,.25],wood:[.53,.40,.27],metal:[.37,.48,.50],train:[.31,.48,.47]}
+   crate:[.53,.38,.25],wood:[.53,.40,.27],metal:[.37,.48,.50],train:[.31,.48,.47],
+   flicker:.08,dust:.06,lightCone:.5,grade:'#07161c',ambientSound:'rain',lightning:true,alarmWaves:false}
  },
  subway:{
   name:'地铁站',code:'SECTOR 11',short:'地铁',tagline:'停摆列车 · 候车月台',
@@ -264,11 +451,14 @@ const MAPS={
    [18.5,21.4,3.05,-2.3],[24.5,21.4,3.05,2.2],[30.5,21.4,3.05,2.2],[36.5,21.4,3.05,2.2]],
   decor:[[1.5,11.34,40,.14,[.66,.55,.24]],[1.5,20.52,40,.14,[.66,.55,.24]],
    [21.2,6.2,.18,17,[.33,.40,.40]]],
+  props:PROPS.subway,wallSigns:WALL_SIGNS.subway,
   theme:{style:'subway',ground:[.225,.245,.245],fog:[.072,.100,.106],ambient:[.31,.37,.38],
    sky:['#090d0f','#131a1d','#222c2e','#0f1517'],floor:['#3b4748','#26302f','#111817'],
-   weather:'none',clouds:false,moon:false,wallHeight:3.35,outerHeight:4.6,crateHeight:1.5,
+   weather:'none',clouds:false,moon:false,wallHeight:4.15,outerHeight:4.6,crateHeight:1.5,
    trainHeight:3.0,woodHeight:1.15,metalHeight:2.6,wall:[.42,.48,.48],outer:[.27,.33,.34],
-   crate:[.57,.57,.52],wood:[.43,.36,.27],metal:[.34,.40,.42],train:[.30,.43,.47]}
+   crate:[.57,.57,.52],wood:[.43,.36,.27],metal:[.34,.40,.42],train:[.30,.43,.47],
+   ceiling:{height:4.15,color:[.27,.32,.32],panel:[.58,.68,.64],beam:[.17,.20,.20]},
+   flicker:.24,dust:.30,lightCone:.4,grade:'#06161a',ambientSound:'subway',lightning:false,alarmWaves:true}
  },
  tunnel:{
   name:'地下隧道',code:'SECTOR 03',short:'隧道',tagline:'检修管廊 · 应急照明',
@@ -336,11 +526,14 @@ const MAPS={
    [35.0,6.0,2.6,1.9],[6.0,26.0,2.6,-1.7],[19.0,24.0,2.6,1.9],[36.0,26.0,2.6,-1.7]],
   decor:[[1.5,17.35,40,.16,[.20,.32,.31]],[1.5,13.68,40,.11,[.40,.33,.16]],
    [3.5,6.4,5,.08,[.22,.30,.29]],[16.5,4.4,6,.08,[.22,.30,.29]]],
+  props:PROPS.tunnel,wallSigns:WALL_SIGNS.tunnel,
   theme:{style:'tunnel',ground:[.195,.205,.190],fog:[.055,.072,.058],ambient:[.235,.255,.220],
    sky:['#080a08','#121510','#23251b','#0c0e0b'],floor:['#3b3a2d','#25251c','#10110c'],
-   weather:'drip',clouds:false,moon:false,wallHeight:3.2,outerHeight:4.6,crateHeight:1.35,
+   weather:'drip',clouds:false,moon:false,wallHeight:3.65,outerHeight:4.6,crateHeight:1.35,
    trainHeight:4.2,woodHeight:1.1,metalHeight:2.5,wall:[.32,.31,.26],outer:[.24,.24,.20],
-   crate:[.40,.35,.26],wood:[.42,.33,.22],metal:[.30,.32,.29],train:[.32,.34,.30]}
+   crate:[.40,.35,.26],wood:[.42,.33,.22],metal:[.30,.32,.29],train:[.32,.34,.30],
+   ceiling:{height:3.65,color:[.19,.20,.17],panel:[.46,.40,.24],beam:[.15,.16,.14]},
+   flicker:.32,dust:.48,lightCone:.3,grade:'#071008',ambientSound:'tunnel',lightning:false,alarmWaves:true}
  },
  hospital:{
   name:'医院',code:'SECTOR 22',short:'医院',tagline:'白炽病房 · 封锁病区',
@@ -410,11 +603,14 @@ const MAPS={
    [30.0,11.0,3.0,-2.3],[6.0,22.0,3.0,1.8],[30.0,22.0,3.0,1.8],[21.5,15.0,3.2,2.0]],
   decor:[[18.9,9.5,.13,18,[.38,.14,.12]],[24.9,9.5,.13,18,[.38,.14,.12]],
    [1.5,14.4,40,.10,[.34,.38,.36]]],
+  props:PROPS.hospital,wallSigns:WALL_SIGNS.hospital,
   theme:{style:'hospital',ground:[.300,.325,.315],fog:[.095,.125,.126],ambient:[.40,.45,.44],
    sky:['#0b1011','#161d1e','#293231','#111819'],floor:['#5b625b','#3a413c','#181d1a'],
-   weather:'none',clouds:false,moon:false,wallHeight:3.3,outerHeight:4.6,crateHeight:1.35,
+   weather:'none',clouds:false,moon:false,wallHeight:3.95,outerHeight:4.6,crateHeight:1.35,
    trainHeight:4.2,woodHeight:1.1,metalHeight:2.5,wall:[.58,.62,.58],outer:[.38,.42,.40],
-   crate:[.44,.50,.47],wood:[.55,.50,.41],metal:[.42,.47,.48],train:[.42,.47,.48]}
+   crate:[.44,.50,.47],wood:[.55,.50,.41],metal:[.42,.47,.48],train:[.42,.47,.48],
+   ceiling:{height:3.95,color:[.32,.37,.36],panel:[.72,.80,.75],beam:[.24,.28,.27]},
+   flicker:.18,dust:.34,lightCone:.42,grade:'#0a1718',ambientSound:'hospital',lightning:false,alarmWaves:true}
  },
  prison:{
   name:'监狱',code:'SECTOR 18',short:'监狱',tagline:'放风场 · 高压探照灯',
@@ -482,11 +678,13 @@ const MAPS={
    [21.0,21.0,3.0,-1.9],[39.0,21.0,3.0,-1.9],[21.5,14.0,3.2,-2.0],[21.5,18.0,3.2,-2.0]],
   decor:[[7.5,12.5,27,.12,[.54,.45,.22]],[7.5,19.5,27,.12,[.54,.45,.22]],
    [14.5,15.5,.10,2,[.42,.47,.49]],[27.5,15.5,.10,2,[.42,.47,.49]]],
+  props:PROPS.prison,wallSigns:WALL_SIGNS.prison,
   theme:{style:'prison',ground:[.235,.250,.255],fog:[.068,.085,.100],ambient:[.29,.33,.37],
    sky:['#070a0d','#11171c','#232d35','#0d1318'],floor:['#41474b','#292f33','#13181c'],
    weather:'none',clouds:false,moon:false,wallHeight:3.45,outerHeight:5.0,crateHeight:1.5,
    trainHeight:4.2,woodHeight:1.1,metalHeight:2.7,wall:[.37,.41,.44],outer:[.23,.27,.30],
-   crate:[.43,.45,.43],wood:[.37,.33,.27],metal:[.30,.35,.39],train:[.32,.36,.39]}
+   crate:[.43,.45,.43],wood:[.37,.33,.27],metal:[.30,.35,.39],train:[.32,.36,.39],
+   flicker:.12,dust:.18,lightCone:.45,grade:'#080f16',ambientSound:'prison',lightning:false,alarmWaves:true}
  }
 };
 let MAP=MAPS.yard,selectedMap='yard',columns=COLS,rows=ROWS,layout,map,supplies,spawnPoints,worldStart,preview,previewEnemies=[];
@@ -526,10 +724,86 @@ function coverHeight(x,y) {
  return 0;
 }
 const TAU = 2 * Math.PI, MAX_WAVE = 8;
-const guns = [
- {name:'K-07 突击步枪',capacity:30, initial:150,stock:180,damage:34,headMultiplier:2.5,delay:.13,reload:1.45,kick:.031},
- {name:'M-9 手枪',capacity:12, initial:60,stock:72,damage:42,headMultiplier:2,delay:.28,reload:.95,kick:.047}
+const WEAPONS=[
+ {id:'rifle',name:'K-07 突击步枪',short:'K-07',kind:'rifle',price:0,tier:1,
+  desc:'全能自动步枪。射速、精度和弹匣容量均衡，适合守住任何一条走廊。',
+  capacity:30,startReserve:150,maxReserve:240,damage:34,headMultiplier:2.5,delay:.13,reload:1.45,kick:.031,pellets:1,spread:.003},
+ {id:'pistol',name:'M-9 手枪',short:'M-9',kind:'pistol',price:0,tier:.7,
+  desc:'可靠的备用武器。单发伤害高，弹药紧张时用来点爆头。',
+  capacity:12,startReserve:60,maxReserve:120,damage:42,headMultiplier:2,delay:.28,reload:.95,kick:.047,pellets:1,spread:.005},
+ {id:'smg',name:'V-9 冲锋枪',short:'V-9',kind:'smg',price:650,tier:1,
+  desc:'射速极快的近战压制武器。弹匣大，但单发伤害和远距离精度较低。',
+  capacity:36,startReserve:180,maxReserve:300,damage:21,headMultiplier:2,delay:.075,reload:1.12,kick:.022,pellets:1,spread:.013},
+ {id:'shotgun',name:'S-12 战术霰弹枪',short:'S-12',kind:'shotgun',price:900,tier:1.25,
+  desc:'一次喷出 7 枚弹丸。近距离能瞬杀普通感染者，远距离威力迅速衰减。',
+  capacity:6,startReserve:24,maxReserve:48,damage:19,headMultiplier:1.6,delay:.72,reload:2.15,kick:.12,pellets:7,spread:.085},
+ {id:'dmr',name:'R-7 精确步枪',short:'R-7',kind:'dmr',price:1200,tier:1.35,
+  desc:'高伤害半自动精确步枪。爆头收益最高，适合在月台和长走廊点名。',
+  capacity:8,startReserve:40,maxReserve:80,damage:78,headMultiplier:3,delay:.42,reload:1.75,kick:.07,pellets:1,spread:.002}
 ];
+const WEAPON_BY_ID=Object.fromEntries(WEAPONS.map(w=>[w.id,w]));
+const UPGRADE_DEFS={
+ damage:{name:'伤害',max:5,base:140,effect:'每级 +8%'},
+ capacity:{name:'弹匣',max:4,base:120,effect:'每级 +20%'},
+ reload:{name:'装填',max:4,base:110,effect:'每级 -8% 时间'},
+ control:{name:'稳定',max:4,base:100,effect:'每级 -12% 后坐/扩散'}
+};
+const SKINS={
+ default:{name:'制式',price:0,body:'#28363a',metal:'#586b70',accent:'#b99d5b'},
+ urban:{name:'都市迷彩',price:260,body:'#3d4b46',metal:'#727b75',accent:'#9fb3a5'},
+ ember:{name:'余烬',price:420,body:'#4a2f27',metal:'#9a6a4f',accent:'#ff9f62'},
+ arctic:{name:'极地',price:520,body:'#33454f',metal:'#8fa6ad',accent:'#bfe8f2'},
+ neon:{name:'霓虹',price:680,body:'#1d2a2e',metal:'#4b6a70',accent:'#d6f56f'}
+};
+const SAVE_KEY='blackout-armory-v1';
+function makeWeaponState(){return {upgrades:{damage:0,capacity:0,reload:0,control:0},skins:['default'],skin:'default'};}
+function defaultArmory(){
+ const weapons={};for(const def of WEAPONS) weapons[def.id]=makeWeaponState();
+ return {credits:0,owned:['rifle','pistol'],weapons};
+}
+function loadArmory(){
+ let data=null;
+ try {data=JSON.parse(read(SAVE_KEY,'')||'null');} catch {}
+ if(!data||typeof data!=='object') return defaultArmory();
+ const base=defaultArmory();
+ const owned=Array.isArray(data.owned)?data.owned.filter(id=>WEAPON_BY_ID[id]):base.owned.slice();
+ if(!owned.includes('rifle')) owned.unshift('rifle');
+ if(!owned.includes('pistol')) owned.push('pistol');
+ const weapons={};
+ for(const def of WEAPONS){
+  const src=data.weapons&&data.weapons[def.id]||{};
+  const st=makeWeaponState();
+  for(const key of Object.keys(UPGRADE_DEFS))
+   st.upgrades[key]=Math.min(UPGRADE_DEFS[key].max,Math.max(0,Number(src.upgrades&&src.upgrades[key])||0));
+  st.skins=Array.isArray(src.skins)?src.skins.filter(key=>SKINS[key]):['default'];
+  if(!st.skins.includes('default')) st.skins.unshift('default');
+  st.skin=SKINS[src.skin]?src.skin:'default';
+  if(!st.skins.includes(st.skin)) st.skin='default';
+  weapons[def.id]=st;
+ }
+ return {credits:Math.max(0,Number(data.credits)||0),owned,weapons};
+}
+const armory=loadArmory();
+let credits=armory.credits,runCredits=0,shopWeapon='rifle';
+function saveArmory(){try {localStorage.setItem(SAVE_KEY,JSON.stringify(armory));} catch {}}
+function ownedWeapons(){return WEAPONS.filter(w=>armory.owned.includes(w.id));}
+function ensureWeaponState(id){if(!armory.weapons[id]) armory.weapons[id]=makeWeaponState();}
+function upgradesOf(id){ensureWeaponState(id);return armory.weapons[id].upgrades;}
+function skinOf(id){ensureWeaponState(id);return SKINS[armory.weapons[id].skin]||SKINS.default;}
+function gunStats(item){
+ const up=upgradesOf(item.id);
+ return {...item,
+  capacity:Math.round(item.capacity*(1+.20*up.capacity)),
+  damage:item.damage*(1+.08*up.damage),
+  reload:item.reload*Math.max(.55,1-.08*up.reload),
+  kick:item.kick*Math.max(.4,1-.12*up.control),
+  spread:item.spread*Math.max(.4,1-.12*up.control)};
+}
+function currentGun(){const list=ownedWeapons();return gunStats(list[Math.min(gun,list.length-1)]||WEAPONS[0]);}
+function currentRounds(){return ammo[currentGun().id];}
+function upgradeCost(id,key){const w=WEAPON_BY_ID[id];return Math.round(UPGRADE_DEFS[key].base*(w?w.tier:1)*Math.pow(upgradesOf(id)[key]+1,1.35));}
+function killValue(type,critical){return ({walker:8,runner:10,shield:14,spitter:14,screamer:16,brute:24}[type]||8)+(critical?4:0);}
+function earn(amount){credits+=amount;runCredits+=amount;armory.credits=credits;saveArmory();}
 const types = {
  walker:{speed:1.17,hp:76,damage:11,height:1.75,shirt:'#5b5947',skin:'#a0a073'},
  runner:{speed:2.4,hp:58,damage:8,height:1.62,shirt:'#6f3f34',skin:'#bb906b'},
@@ -553,6 +827,8 @@ let mode = 'menu', player, enemies, acidShots, ammo, used, wave, waveTime, spawn
 let reloadTime, cooldown, recoil, muzzle, wounded, hitTime, headshot, step, noticeTime, noticeText;
 let firing=false, aimPointer=null, joyId=null, joyX=0, joyY=0, pressed=false, pitch=0;
 let frames=0, last=performance.now(), routeClock=0, route=[], lastSpawn=-1, spawnHistory=[], audio=null, noise=null;
+let ambience=null, ambientBuffer=null;
+let alarm=0, lightning=0, nextLightning=600;
 const specialGate={spitter:0,screamer:0};
 let muted=read('blackout-muted','0')==='1';
 let depth, rays, focal, sky, floor;
@@ -763,10 +1039,17 @@ function hitFeedback(critical,killed,armored=false) {
   void ring.offsetWidth;ring.classList.add('show');
  }
 }
+function initAmmo() {
+ ammo={};
+ for(const def of ownedWeapons()) {
+  const stats=gunStats(def);
+  ammo[def.id]={mag:stats.capacity,reserve:stats.startReserve};
+ }
+}
 function reset() {
  player={...worldStart,hp:100};
- enemies=[];acidShots=[];ammo=guns.map(item=>({mag:item.capacity,reserve:item.initial}));
- used=supplies.map(()=>0);wave=0;waveTime=0;spawnQueue=[];spawnClock=0;kills=0;gun=0;
+ enemies=[];acidShots=[];initAmmo();
+ used=supplies.map(()=>0);wave=0;waveTime=0;spawnQueue=[];spawnClock=0;kills=0;gun=0;runCredits=0;
  reloadTime=cooldown=recoil=muzzle=wounded=hitTime=step=noticeTime=pitch=routeClock=0;
  noticeText='';headshot=false;route=[];lastSpawn=-1;spawnHistory=[];
  specialGate.spitter=specialGate.screamer=0;
@@ -774,6 +1057,7 @@ function reset() {
 reset();
 function setMode(next) {
  mode=next;document.body.classList.toggle('playing',mode==='play');
+ if(mode==='menu'||mode==='over') stopAmbience();
  $('menu').hidden=mode!=='menu';$('hud').hidden=mode!=='play';
  $('touch').hidden=mode!=='play'||!mobile;
  $('modal').hidden=mode==='menu'||mode==='play';
@@ -792,11 +1076,83 @@ function syncMenu() {
  $('sectorName').textContent=def.name;
  $('footSector').textContent=def.code+' / '+def.name;
  $('best').textContent=best?'最佳纪录 / 通过 '+best+' 波':'最佳纪录 / —';
+ $('menuCredits').textContent='₡ '+credits;
  for(const button of document.querySelectorAll('.mapChoice')) {
   const on=button.dataset.map===selectedMap;
   button.classList.toggle('active',on);
   button.setAttribute('aria-pressed',String(on));
  }
+}
+function buyWeapon(id) {
+ const def=WEAPON_BY_ID[id];
+ if(!def||armory.owned.includes(id)||credits<def.price) return;
+ credits-=def.price;armory.owned.push(id);armory.credits=credits;ensureWeaponState(id);saveArmory();
+ shopWeapon=id;tone(420,.16,'triangle',.09,690);renderArmory();syncMenu();
+}
+function buyUpgrade(id,key) {
+ const def=UPGRADE_DEFS[key];if(!def||!armory.owned.includes(id)) return;
+ const level=upgradesOf(id)[key];if(level>=def.max) return;
+ const cost=upgradeCost(id,key);if(credits<cost) return;
+ credits-=cost;armory.credits=credits;upgradesOf(id)[key]=level+1;saveArmory();
+ tone(500,.13,'triangle',.08,760);renderArmory();syncMenu();
+}
+function buyOrEquipSkin(id,key) {
+ if(!armory.owned.includes(id)||!SKINS[key]) return;
+ const state=armory.weapons[id];
+ if(!state.skins.includes(key)) {
+  const cost=SKINS[key].price;if(credits<cost) return;
+  credits-=cost;armory.credits=credits;state.skins.push(key);
+ }
+ state.skin=key;saveArmory();tone(540,.12,'triangle',.07,820);renderArmory();syncMenu();
+}
+function renderArmory() {
+ if(!WEAPON_BY_ID[shopWeapon]) shopWeapon='rifle';
+ $('armoryCredits').textContent='₡ '+credits;
+ const tabs=$('weaponTabs');tabs.innerHTML='';
+ for(const def of WEAPONS) {
+  const owned=armory.owned.includes(def.id);
+  const button=document.createElement('button');
+  button.className='weaponTab'+(def.id===shopWeapon?' active':'')+(owned?'':' locked');
+  button.type='button';button.setAttribute('role','tab');
+  button.innerHTML=`<b>${def.short}</b><small>${owned?'已拥有':'₡ '+def.price}</small>`;
+  button.onclick=()=>{shopWeapon=def.id;renderArmory();};
+  tabs.appendChild(button);
+ }
+ const def=WEAPON_BY_ID[shopWeapon]||WEAPONS[0],owned=armory.owned.includes(def.id);
+ const stats=gunStats(def),up=upgradesOf(def.id),skin=skinOf(def.id);
+ const detail=$('weaponDetail');
+ const upgradeRows=Object.entries(UPGRADE_DEFS).map(([key,u])=>{
+  const level=up[key],max=level>=u.max,cost=upgradeCost(def.id,key);
+  return `<div class="upgradeRow"><span>${u.name} · ${u.effect}</span><span class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<level?'on':''}"></i>`).join('')}</span><button type="button" data-up="${key}" ${!owned||max||credits<cost?'disabled':''}>${max?'满级':'₡ '+cost}</button></div>`;
+ }).join('');
+ const skins=Object.entries(SKINS).map(([key,s])=>{
+  const has=armory.weapons[def.id].skins.includes(key),equipped=armory.weapons[def.id].skin===key;
+  return `<button type="button" class="skinSwatch${equipped?' active':''}" data-skin="${key}" ${!owned||(!has&&credits<s.price)?'disabled':''}><i style="background:${s.body};box-shadow:inset 0 0 0 4px ${s.accent}"></i>${s.name}${!has?`<small>₡ ${s.price}</small>`:equipped?'<small>使用中</small>':''}</button>`;
+ }).join('');
+ detail.innerHTML=`
+  <div class="weaponCard">
+   <h3>${def.name}</h3>
+   <p class="tagline">${def.desc}</p>
+   <div class="statGrid">
+    <div>${stats.pellets>1?'每弹丸伤害':'单发伤害'}<b>${stats.damage.toFixed(0)}</b></div>
+    <div>单发总伤害<b>${(stats.damage*stats.pellets).toFixed(0)}</b></div>
+    <div>弹匣容量<b>${stats.capacity}</b></div>
+    <div>理论射速<b>${Math.round(60/stats.delay)}/分</b></div>
+    <div>装填时间<b>${stats.reload.toFixed(2)}s</b></div>
+    <div>弹丸数<b>${stats.pellets}</b></div>
+    <div>基础扩散<b>${(stats.spread*180/Math.PI).toFixed(1)}°</b></div>
+   </div>
+   ${owned?`<p class="tagline" style="margin-top:10px">当前涂装：${skin.name}。配件等级会直接改变武器数值，并在枪身上显示瞄具、握把和扩容弹匣。</p>`:`<button type="button" class="primary buyWide" data-buy="${def.id}" ${credits<def.price?'disabled':''}>购买 ${def.name} · ₡ ${def.price}</button>`}
+  </div>
+  <div class="weaponCard">
+   <h3>配件升级</h3>
+   <div class="upgradeList">${owned?upgradeRows:'<p class="tagline">购买武器后解锁伤害、弹匣、装填与稳定四类配件。</p>'}</div>
+   <h3 style="margin-top:15px">涂装</h3>
+   <div class="skinList">${owned?skins:'<p class="tagline">购买武器后可用军费解锁制式、都市迷彩、余烬、极地和霓虹涂装。</p>'}</div>
+  </div>`;
+ detail.querySelectorAll('[data-buy]').forEach(button=>button.onclick=()=>buyWeapon(button.dataset.buy));
+ detail.querySelectorAll('[data-up]').forEach(button=>button.onclick=()=>buyUpgrade(def.id,button.dataset.up));
+ detail.querySelectorAll('[data-skin]').forEach(button=>button.onclick=()=>buyOrEquipSkin(def.id,button.dataset.skin));
 }
 function selectMap(id) {
  if(!MAPS[id]||id===selectedMap) return;
@@ -808,7 +1164,7 @@ function lockAim() {
  try {W.requestPointerLock()?.catch(()=>{});} catch {}
 }
 function start() {
- reset();activateAudio();setMode('play');nextWave();lockAim();
+ reset();activateAudio();startAmbience();setMode('play');nextWave();lockAim();
 }
 function modal(next,label,title,body,action) {
  $('modalLabel').textContent=label;$('modalTitle').textContent=title;
@@ -824,6 +1180,7 @@ function nextWave() {
  spawnQueue=Array(count).fill('walker');
  specialists.forEach((type,index)=>{spawnQueue[Math.floor((index+1)*count/(specialists.length+1))]=type;});
  spawnClock=.8;waveTime=0;setNotice('第 '+wave+' 波 · '+(firstContact[wave]??'感染者接近'),2.4);
+ alarm=MAP.theme.alarmWaves?2.4:0;
  tone(190,.22,'triangle',.13,76);
 }
 function routeLength(x,y) {
@@ -882,11 +1239,12 @@ function updateRoute() {
 function waveCleared() {
  acidShots.length=0;
  if (best<wave) {best=wave;save(bestKey(selectedMap),best);}
+ const bonus=80+wave*45;earn(bonus);
  if (wave===MAX_WAVE) {
-  modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。','再打一局');
+  modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'再打一局');
   return;
  }
- waveTime=10;used.fill(0);setNotice('战区暂时安全 · 趁现在补给',2.4);
+ waveTime=10;used.fill(0);setNotice('波次肃清 · 军费 +₡'+bonus+' · 趁现在补给',2.6);
 }
 function supplyWave() {return wave+(waveTime>0?1:0);}
 function closestSupply() {
@@ -897,29 +1255,28 @@ function resupply() {
  const index=closestSupply();
  if(index<0 || used[index]===supplyWave()) return;
  used[index]=supplyWave();
- for(let i=0;i<guns.length;i++) ammo[i].reserve=Math.min(guns[i].stock,ammo[i].reserve+(i===0?60:24));
+ for(const def of ownedWeapons()) {
+  const stats=gunStats(def),rounds=ammo[def.id];
+  if(!rounds) continue;
+  rounds.reserve=Math.min(stats.maxReserve,rounds.reserve+Math.max(24,Math.round(stats.startReserve*.4)));
+ }
  player.hp=Math.min(100,player.hp+24);
  setNotice('补给已领取 · 弹药与生命',1.5);tone(480,.18,'triangle',.09,730);
 }
 function reload() {
- const item=guns[gun], rounds=ammo[gun];
- if(mode!=='play'||reloadTime>0||rounds.mag===item.capacity||rounds.reserve===0) return;
+ const item=currentGun(), rounds=currentRounds();
+ if(mode!=='play'||reloadTime>0||rounds.mag>=item.capacity||rounds.reserve===0) return;
  reloadTime=item.reload;tone(135,.12,'triangle',.08,47);
 }
 function switchGun(index) {
- if(mode!=='play'||gun===index) return;
+ const list=ownedWeapons();
+ if(mode!=='play'||index<0||index>=list.length||gun===index) return;
  gun=index;reloadTime=0;cooldown=Math.max(cooldown,.16);recoil=0;muzzle=0;
  tone(150,.09,'triangle',.06,65);
 }
-function fire() {
- if(mode!=='play'||cooldown>0||reloadTime>0) return;
- const item=guns[gun], rounds=ammo[gun];
- if(rounds.mag===0) {reload();if(!reloadTime) {tone(80,.055,'square',.035,50);cooldown=.23;}return;}
- rounds.mag--;cooldown=item.delay;recoil=Math.min(.18,recoil+item.kick);muzzle=.057;
- const dx=Math.cos(player.angle),dy=Math.sin(player.angle);
- const slope=pitch*W.height/focal;
+function traceShot(dx,dy,slope) {
  const wall=ray(player.x,player.y,dx,dy,yard3D?slope:null).dist;
- let target=null, targetDepth=wall, critical=false, armored=false;
+ let target=null,targetDepth=wall,critical=false,armored=false;
  for(const z of enemies) {
   if(yard3D?.hasModels()) {
    const hit=hitModel(z,targetDepth,dx,dy,slope);
@@ -938,15 +1295,45 @@ function fire() {
   const facing=z.yaw??Math.atan2(-y,-x);
   armored=z.type==='shield'&&sy>=43&&sy<=93&&Math.abs(sx-40)<22&&(-x*Math.cos(facing)-y*Math.sin(facing))>Math.hypot(x,y)*.52;
  }
- shotSound(gun===0);
- if(target) {
-  target.hp-=item.damage*(armored?.29:critical?item.headMultiplier:1);target.flash=armored?.045:.12;
-  if(armored) tone(368,.11,'triangle',.15,106);
-  hitTime=.17;headshot=critical;
-  const killed=target.hp<=0;
-  if(killed) {enemies.splice(enemies.indexOf(target),1);kills++;tone(critical?530:270,.11,'triangle',.08,110);}
-  hitFeedback(critical,killed,armored);
+ return {target,depth:targetDepth,critical,armored};
+}
+function fire() {
+ if(mode!=='play'||cooldown>0||reloadTime>0) return;
+ const item=currentGun(), rounds=currentRounds();
+ if(!rounds) return;
+ if(rounds.mag===0) {reload();if(!reloadTime) {tone(80,.055,'square',.035,50);cooldown=.23;}return;}
+ rounds.mag--;cooldown=item.delay;recoil=Math.min(.18,recoil+item.kick);muzzle=.057;
+ const hits=new Map(),pellets=item.pellets||1;
+ for(let pellet=0;pellet<pellets;pellet++) {
+  const spreadX=(Math.random()*2-1)*(item.spread||0);
+  const spreadY=(Math.random()*2-1)*(item.spread||0)*.55;
+  const angle=player.angle+spreadX;
+  const dx=Math.cos(angle),dy=Math.sin(angle);
+  const slope=pitch*W.height/focal+spreadY;
+  const hit=traceShot(dx,dy,slope);
+  if(!hit.target) continue;
+  const acc=hits.get(hit.target)||{damage:0,critical:false,armored:false};
+  acc.damage+=item.damage*(hit.armored?.29:hit.critical?item.headMultiplier:1);
+  acc.critical=acc.critical||hit.critical;
+  acc.armored=acc.armored||hit.armored;
+  hits.set(hit.target,acc);
  }
+ shotSound(item.kind);
+ if(!hits.size) return;
+ let anyCritical=false,anyArmored=false,killed=0;
+ for(const [target,hit] of hits) {
+  target.hp-=hit.damage;target.flash=hit.armored?.045:.12;
+  anyCritical=anyCritical||hit.critical;anyArmored=anyArmored||hit.armored;
+  if(target.hp<=0) {
+   enemies.splice(enemies.indexOf(target),1);kills++;killed++;
+   const gain=killValue(target.type,hit.critical);
+   earn(gain);
+   tone(hit.critical?530:270,.11,'triangle',.08,110);
+  }
+ }
+ hitTime=.17;headshot=anyCritical;
+ if(anyArmored) tone(368,.11,'triangle',.15,106);
+ hitFeedback(anyCritical,killed>0,anyArmored);
 }
 function activateAudio() {
  if(muted) return;
@@ -960,6 +1347,102 @@ function activateAudio() {
   audio.resume().catch(()=>{});
  } catch {}
 }
+function ambientNoise() {
+ if(ambientBuffer) return ambientBuffer;
+ ambientBuffer=audio.createBuffer(1,Math.ceil(audio.sampleRate*2),audio.sampleRate);
+ const data=ambientBuffer.getChannelData(0);
+ let last=0;
+ for(let i=0;i<data.length;i++) {
+  const white=Math.random()*2-1;
+  last=last*.94+white*.06;
+  data[i]=last*.8+white*.2;
+ }
+ return ambientBuffer;
+}
+function stopAmbience() {
+ if(!ambience) return;
+ try {
+  if(ambience.timer) clearTimeout(ambience.timer);
+  for(const node of ambience.sources) {try {node.stop();} catch {}}
+  const now=audio.currentTime;
+  ambience.gain.gain.cancelScheduledValues(now);
+  ambience.gain.gain.setValueAtTime(ambience.gain.gain.value,now);
+  ambience.gain.gain.linearRampToValueAtTime(0,now+.35);
+  const gain=ambience.gain;
+  setTimeout(()=>{try {gain.disconnect();} catch {}},500);
+ } catch {}
+ ambience=null;
+}
+function ambientLoop(kind,filterType,freq,level,destination) {
+ const source=audio.createBufferSource();source.buffer=ambientNoise();source.loop=true;
+ const filter=audio.createBiquadFilter();filter.type=filterType;filter.frequency.value=freq;
+ const gain=audio.createGain();gain.gain.value=level;
+ source.connect(filter).connect(gain).connect(destination);source.start();
+ return [source,filter,gain];
+}
+function startAmbience() {
+ stopAmbience();
+ if(!audio||muted) return;
+ const kind=MAP.theme.ambientSound||'yard';
+ const master=audio.createGain();master.gain.value=0;master.connect(audio.destination);
+ const sources=[];let timer=null;
+ if(kind==='rain') {
+  sources.push(...ambientLoop('rain','lowpass',1450,.040,master));
+  sources.push(...ambientLoop('rain','lowpass',260,.024,master));
+ } else if(kind==='subway') {
+  sources.push(...ambientLoop('subway','bandpass',420,.012,master));
+  const osc=audio.createOscillator(),g=audio.createGain();
+  osc.type='sine';osc.frequency.value=118;g.gain.value=.010;
+  osc.connect(g).connect(master);osc.start();sources.push(osc,g);
+  const osc2=audio.createOscillator(),g2=audio.createGain();
+  osc2.type='sine';osc2.frequency.value=236;g2.gain.value=.004;
+  osc2.connect(g2).connect(master);osc2.start();sources.push(osc2,g2);
+ } else if(kind==='tunnel') {
+  sources.push(...ambientLoop('tunnel','lowpass',240,.035,master));
+  const drip=()=>{
+   if(!ambience) return;
+   const now=audio.currentTime,osc=audio.createOscillator(),g=audio.createGain();
+   osc.type='sine';osc.frequency.setValueAtTime(760+Math.random()*360,now);
+   osc.frequency.exponentialRampToValueAtTime(220,now+.18);
+   g.gain.setValueAtTime(.035,now);g.gain.exponentialRampToValueAtTime(.001,now+.22);
+   osc.connect(g).connect(master);osc.start();osc.stop(now+.24);
+   ambience.timer=setTimeout(drip,1200+Math.random()*3200);
+  };
+  timer=setTimeout(drip,900+Math.random()*1500);
+ } else if(kind==='hospital') {
+  sources.push(...ambientLoop('hospital','bandpass',520,.008,master));
+  const osc=audio.createOscillator(),g=audio.createGain();
+  osc.type='sine';osc.frequency.value=122;g.gain.value=.007;
+  osc.connect(g).connect(master);osc.start();sources.push(osc,g);
+  const beep=()=>{
+   if(!ambience) return;
+   const now=audio.currentTime,o=audio.createOscillator(),gg=audio.createGain();
+   o.type='sine';o.frequency.value=880;gg.gain.setValueAtTime(.012,now);
+   gg.gain.exponentialRampToValueAtTime(.001,now+.16);
+   o.connect(gg).connect(master);o.start();o.stop(now+.18);
+   ambience.timer=setTimeout(beep,5200+Math.random()*7800);
+  };
+  timer=setTimeout(beep,3200+Math.random()*4000);
+ } else if(kind==='prison') {
+  sources.push(...ambientLoop('prison','bandpass',610,.026,master));
+  sources.push(...ambientLoop('prison','lowpass',180,.018,master));
+  const clang=()=>{
+   if(!ambience) return;
+   const now=audio.currentTime,o=audio.createOscillator(),g=audio.createGain();
+   o.type='triangle';o.frequency.setValueAtTime(180,now);
+   o.frequency.exponentialRampToValueAtTime(72,now+.5);
+   g.gain.setValueAtTime(.020,now);g.gain.exponentialRampToValueAtTime(.001,now+.55);
+   o.connect(g).connect(master);o.start();o.stop(now+.6);
+   ambience.timer=setTimeout(clang,6000+Math.random()*9000);
+  };
+  timer=setTimeout(clang,3800+Math.random()*5000);
+ } else {
+  sources.push(...ambientLoop('yard','lowpass',1300,.030,master));
+ }
+ ambience={gain:master,sources,timer};
+ const now=audio.currentTime;
+ master.gain.linearRampToValueAtTime(1,now+1.1);
+}
 function tone(freq,length,type,volume,end) {
  if(!audio||muted) return;
  const oscillator=audio.createOscillator(),gain=audio.createGain(),now=audio.currentTime;
@@ -968,13 +1451,15 @@ function tone(freq,length,type,volume,end) {
  gain.gain.setValueAtTime(volume,now);gain.gain.exponentialRampToValueAtTime(.001,now+length);
  oscillator.connect(gain).connect(audio.destination);oscillator.start();oscillator.stop(now+length);
 }
-function shotSound(rifle) {
+function shotSound(kind) {
  if(!audio||muted||!noise) return;
  const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain(),now=audio.currentTime;
- source.buffer=noise;filter.type='lowpass';filter.frequency.value=rifle?2600:3900;
- gain.gain.setValueAtTime(.32,now);gain.gain.exponentialRampToValueAtTime(.006,now+.16);
+ const shotgun=kind==='shotgun',smg=kind==='smg',dmr=kind==='dmr';
+ source.buffer=noise;filter.type='lowpass';filter.frequency.value=shotgun?1700:smg?3400:dmr?2200:kind==='rifle'?2600:3900;
+ gain.gain.setValueAtTime(shotgun?.44:smg?.24:dmr?.38:.32,now);
+ gain.gain.exponentialRampToValueAtTime(.006,now+(shotgun?.22:.16));
  source.connect(filter).connect(gain).connect(audio.destination);source.start();
- tone(rifle?115:170,.13,'triangle',.24,36);
+ tone(shotgun?68:dmr?92:smg?165:kind==='rifle'?115:170,shotgun?.2:smg?.09:.13,'triangle',shotgun?.32:.24,36);
 }
 function turnZombie(z,x,y,dt) {
  const target=Math.atan2(y-z.y,x-z.x);
@@ -987,7 +1472,7 @@ function damagePlayer(amount,message='') {
  player.hp=Math.max(0,player.hp-amount);
  tone(100,.21,'sawtooth',.105,29);
  if(player.hp===0) {
-  modal('over','信号中断 / KIA','防线失守','抵达第 '+wave+' 波 · 击倒 '+kills+' 名感染者。','重新部署');
+  modal('over','信号中断 / KIA','防线失守','抵达第 '+wave+' 波 · 击倒 '+kills+' 名感染者。本次军费 ₡'+runCredits+' · 总计 ₡'+credits,'重新部署');
   return;
  }
  if(message) setNotice(message,1.05);
@@ -1065,12 +1550,13 @@ function update(dt) {
  }
  cooldown=Math.max(0,cooldown-dt);muzzle=Math.max(0,muzzle-dt);
  wounded=Math.max(0,wounded-dt*2.15);hitTime=Math.max(0,hitTime-dt);
+ alarm=Math.max(0,alarm-dt);
  specialGate.spitter=Math.max(0,specialGate.spitter-dt);specialGate.screamer=Math.max(0,specialGate.screamer-dt);
  recoil*=Math.exp(-dt*13);noticeTime=Math.max(0,noticeTime-dt);
  if(reloadTime>0) {
   reloadTime=Math.max(0,reloadTime-dt);
   if(reloadTime===0) {
-   const rounds=ammo[gun], amount=Math.min(guns[gun].capacity-rounds.mag,rounds.reserve);
+   const item=currentGun(),rounds=currentRounds(),amount=Math.min(item.capacity-rounds.mag,rounds.reserve);
    rounds.mag+=amount;rounds.reserve-=amount;tone(175,.08,'triangle',.065,92);
   }
  }
@@ -1352,6 +1838,11 @@ function makeYardRenderer() {
      c=mix(c*.18,c,pattern)*(1.-.68*wear);
    } else if(mat>5.5 && mat<6.5) {
      gl_FragColor=vec4(fog(c,p),1.);return;
+   } else if(mat<7.5) {
+     float folds=noise(vec2(uv.x*2.4,uv.y*7.0))*noise(vec2(uv.y*3.1,uv.x*1.3));
+     float hem=smoothstep(.93,1.0,fract(uv.y*4.2));
+     c*=.72+folds*.38-hem*.18;
+     c+=.10*(folds-.5);
    } else {
      c*=.86+grain*.14+macro*.25;
    }
@@ -1415,7 +1906,7 @@ function makeYardRenderer() {
   if(yardPhotography[name]) photo.src=yardPhotography[name];
  }
  const verts=[], lights=[];
- const lightData=new Float32Array(48);
+ const lightData=new Float32Array(48), lightFrame=new Float32Array(48);
  const steel=[.37,.48,.50], black=[.23,.27,.28], hazard=[.78,.56,.27];
  const signObjects=[];
  function face(a,b,c,d,n,color,mat) {
@@ -1430,6 +1921,154 @@ function makeYardRenderer() {
  }
  function paintLine(x,z,w,d,color) {
   face([x,.010,z],[x+w,.010,z],[x+w,.010,z+d],[x,.010,z+d],[0,1,0],color,5);
+ }
+ function paintWet(x,z,w,d,color) {
+  face([x,.006,z],[x+w,.006,z],[x+w,.006,z+d],[x,.006,z+d],[0,1,0],color,0);
+ }
+ function part(x,z,len,wid,y,h,dir,mat,color) {
+  const w=dir?wid:len, d=dir?len:wid;
+  box(x-w/2,y,z-d/2,w,h,d,mat,color);
+ }
+ function drawProp(item) {
+  const t=item.t,dir=item.dir||0,x=item.x,z=item.z;
+  if(t==='bench') {
+   part(x,z,1.55,.5,.42,.10,dir,3,[.45,.35,.24]);
+   part(x,z,1.55,.5,.52,.07,dir,5,[.24,.27,.26]);
+   part(x-(dir?0:.24),z-(dir?.24:0),1.55,.07,.52,.40,dir,5,[.31,.35,.34]);
+   for(const a of [-.62,.62]) for(const b of [-.16,.16])
+    box(x+(dir?b:a)-.035,0,z+(dir?a:b)-.035,.07,.42,.07,5,[.18,.22,.21]);
+  } else if(t==='bin') {
+   box(x-.19,0,z-.19,.38,.78,.38,2,[.25,.29,.29]);
+   box(x-.21,.78,z-.21,.42,.06,.42,5,black);
+   box(x-.15,.72,z-.15,.30,.04,.30,6,[.18,.24,.22]);
+  } else if(t==='vending') {
+   part(x,z,.92,.56,0,1.92,dir,2,item.color||[.34,.38,.42]);
+   part(x,z,.99,.60,1.9,.07,dir,5,black);
+   if(dir===0) {box(x-.30,.98,z+.28,.60,.64,.025,6,[.62,.84,.80]);box(x-.11,.30,z+.285,.22,.18,.02,5,black);}
+   else {box(x+.28,.98,z-.30,.025,.64,.60,6,[.62,.84,.80]);box(x+.285,.30,z-.11,.02,.18,.22,5,black);}
+  } else if(t==='pipe') {
+   const len=item.len||4,y=item.y||2.2,r=item.r||.09;
+   part(x,z,len,r*2,y,r*2,dir,2,item.color||MAP.theme.metal);
+   for(let a=-len/2+1.2;a<len/2;a+=3.2) {
+    const px=x+(dir?0:a),pz=z+(dir?a:0);
+    box(px-.09,y-.06,pz-.09,.18,.24,.18,5,black);
+   }
+  } else if(t==='cable') {
+   part(x,z,item.len||4,.035,item.y||3.1,.035,dir,5,[.09,.11,.11]);
+  } else if(t==='beam') {
+   part(x,z,item.len||4,.16,item.y||3.4,.16,dir,5,item.color||[.20,.22,.21]);
+  } else if(t==='bed') {
+   part(x,z,1.9,.86,.33,.13,dir,2,[.30,.34,.34]);
+   part(x,z,1.82,.77,.46,.14,dir,3,[.69,.71,.67]);
+   part(x-(dir?0:.62),z-(dir?.62:0),.54,.52,.60,.12,dir,3,[.82,.83,.78]);
+   for(const a of [-.86,.86]) for(const b of [-.38,.38])
+    box(x+(dir?b:a)-.03,0,z+(dir?a:b)-.03,.06,.34,.06,5,[.20,.24,.23]);
+   part(x,z,1.86,.03,.58,.26,dir,2,[.38,.44,.44]);
+  } else if(t==='iv') {
+   box(x-.02,0,z-.02,.04,1.86,.04,2,steel);
+   box(x-.17,.01,z-.17,.34,.05,.34,5,black);
+   box(x-.13,1.53,z-.025,.26,.32,.05,5,[.58,.66,.65]);
+   box(x-.10,1.57,z+.03,.20,.22,.03,6,[.44,.72,.62]);
+  } else if(t==='gurney') {
+   part(x,z,1.78,.74,.4,.12,dir,2,[.33,.38,.38]);
+   part(x,z,1.7,.67,.50,.13,dir,3,[.66,.70,.68]);
+   part(x-(dir?0:.58),z-(dir?.58:0),.45,.46,.63,.10,dir,3,[.80,.82,.78]);
+   for(const a of [-.66,.66]) for(const b of [-.36,.36])
+    box(x+(dir?b:a)-.05,0,z+(dir?a:b)-.05,.10,.10,.10,5,[.13,.16,.16]);
+   part(x+(dir?0:0),z+(dir?0:0),1.9,.04,.86,.03,dir,2,steel);
+  } else if(t==='curtain') {
+   part(x,z,item.len||2.4,.035,.20,2.48,dir,7,item.color||[.42,.56,.60]);
+   part(x,z,item.len||2.4,.05,2.70,.05,dir,5,steel);
+  } else if(t==='bunk') {
+   for(const a of [-.92,.92]) for(const b of [-.38,.38])
+    box(x+(dir?b:a)-.035,0,z+(dir?a:b)-.035,.07,1.62,.07,5,[.22,.26,.26]);
+   part(x,z,1.84,.80,.42,.12,dir,3,[.58,.60,.55]);
+   part(x,z,1.84,.80,1.18,.12,dir,3,[.58,.60,.55]);
+   part(x,z,1.84,.04,1.32,.30,dir,2,steel);
+  } else if(t==='locker') {
+   part(x,z,.64,.46,0,1.86,dir,2,[.30,.35,.36]);
+   part(x,z,.58,.03,1.32,.30,dir,5,[.17,.20,.20]);
+   part(x,z,.05,.05,1.0,.16,dir,6,[.50,.56,.52]);
+  } else if(t==='washing') {
+   part(x,z,.78,.78,0,1.05,dir,2,[.62,.66,.64]);
+   if(dir===0) {box(x-.21,.30,z+.39,.42,.42,.025,5,[.22,.27,.28]);box(x-.15,.36,z+.40,.30,.30,.02,6,[.38,.48,.50]);}
+   else {box(x+.39,.30,z-.21,.025,.42,.42,5,[.22,.27,.28]);box(x+.40,.36,z-.15,.02,.30,.30,6,[.38,.48,.50]);}
+  } else if(t==='workbench') {
+   part(x,z,1.7,.62,.80,.11,dir,3,[.38,.31,.22]);
+   for(const a of [-.7,.7]) for(const b of [-.22,.22])
+    box(x+(dir?b:a)-.04,0,z+(dir?a:b)-.04,.08,.80,.08,5,black);
+   part(x,z,1.7,.06,1.05,.72,dir,2,[.27,.31,.31]);
+   for(const a of [-.45,-.1,.28]) part(x+(dir?0:a),z+(dir?a:0),.30,.05,.92,.28,dir,5,[.44,.40,.30]);
+  } else if(t==='barrier') {
+   part(x,z,1.25,.42,0,.30,dir,1,[.40,.42,.40]);
+   part(x,z,1.05,.34,.30,.56,dir,1,[.44,.46,.43]);
+   part(x,z,1.06,.35,.56,.12,dir,4,hazard);
+  } else if(t==='mast') {
+   box(x-.07,0,z-.07,.14,4.9,.14,5,[.18,.22,.22]);
+   box(x-.32,0,z-.32,.64,.08,.64,5,black);
+   box(x-.23,4.78,z-.23,.46,.25,.46,5,black);
+   box(x-.16,4.90,z-.16,.32,.04,.32,6,[1,.72,.38]);
+  } else if(t==='door') {
+   for(const a of [-.58,.58]) box(x+(dir?0:a)-.05,0,z+(dir?a:0)-.05,.10,2.25,.10,5,[.25,.29,.29]);
+   box(x-(dir?.60:.62),2.25,z-(dir?.62:.60),dir?.20:1.24,.12,dir?1.24:.20,5,[.25,.29,.29]);
+   if(dir===0) {
+    const hx=x+.58,oz=z+.47;
+    box(hx-.035,0,oz-.45,.07,2.10,.90,2,[.26,.31,.32]);
+    for(const a of [-.32,-.16,0,.16,.32]) box(hx-.015,.06,oz+a-.015,.03,1.95,.03,5,steel);
+   } else {
+    const oz=z+.58,ox=x+.47;
+    box(ox-.45,0,oz-.035,.90,2.10,.07,2,[.26,.31,.32]);
+    for(const a of [-.32,-.16,0,.16,.32]) box(ox+a-.015,.06,oz-.015,.03,1.95,.03,5,steel);
+   }
+  } else if(t==='hoop') {
+   box(x-.06,0,z-.06,.12,3.15,.12,5,[.20,.24,.25]);
+   box(x-.49,3.08,z-.04,.98,.62,.07,3,[.62,.58,.48]);
+   box(x-.30,2.86,z-.22,.60,.05,.44,4,hazard);
+   box(x-.24,2.80,z-.03,.48,.05,.05,5,[.55,.30,.20]);
+   box(x-.24,2.72,z-.03,.05,.10,.05,5,[.55,.30,.20]);
+   box(x+.19,2.72,z-.03,.05,.10,.05,5,[.55,.30,.20]);
+  } else if(t==='pallet') {
+   part(x,z,1.0,.94,.05,.09,dir,3,[.44,.35,.24]);
+   for(const a of [-.38,-.12,.14,.38]) part(x+(dir?0:a),z+(dir?a:0),.14,.94,.14,.06,dir,3,[.34,.27,.18]);
+  } else if(t==='barrel') {
+   box(x-.27,0,z-.27,.54,.92,.54,2,[.36,.30,.22]);
+   for(const y of [.18,.62]) box(x-.29,y,z-.29,.58,.09,.58,4,hazard);
+   box(x-.22,.92,z-.22,.44,.05,.44,5,black);
+  } else if(t==='tank') {
+   box(x-.14,0,z-.14,.28,.92,.28,2,[.55,.62,.63]);
+   box(x-.17,.92,z-.17,.34,.06,.34,5,black);
+   box(x-.04,1.0,z-.04,.08,.14,.08,5,steel);
+  } else if(t==='toilet') {
+   part(x,z,.56,.42,0,.42,dir,1,[.62,.65,.62]);
+   part(x,z,.42,.52,.42,.08,dir,1,[.50,.54,.52]);
+   part(x-(dir?0:.36),z-(dir?.36:0),.42,.22,.42,.38,dir,1,[.58,.62,.60]);
+  } else if(t==='monitor') {
+   box(x-.24,1.55,z-.04,.48,.30,.05,5,black);
+   box(x-.20,1.60,z+.02,.40,.20,.02,6,[.40,.68,.64]);
+   box(x-.02,1.10,z-.02,.04,.48,.04,5,steel);
+  } else if(t==='blood') {
+   paintWet(x,z,item.w||1.2,item.d||.6,[.16,.025,.025]);
+  } else if(t==='puddle') {
+   paintWet(x,z,item.w||2.4,item.d||.8,item.color||[.06,.10,.11]);
+  } else if(t==='crate') {
+   const s=item.s||1;
+   box(x-s*.5,.02,z-s*.5,s,s*.62,s,3,[.48,.37,.25]);
+   box(x-s*.42,s*.62,z-s*.42,s*.8,s*.45,s*.8,3,[.53,.41,.28]);
+   box(x-s*.5,.12,z-s*.5,s,.08,s,4,hazard);
+  } else if(t==='cone') {
+   box(x-.18,0,z-.18,.36,.05,.36,5,black);
+   box(x-.13,.05,z-.13,.26,.32,.26,4,[.78,.40,.16]);
+   box(x-.09,.37,z-.09,.18,.22,.18,4,[.82,.48,.20]);
+  } else if(t==='vent') {
+   part(x,z,.70,.10,item.y||2.0,.46,dir,5,[.16,.19,.19]);
+   for(const a of [-.14,0,.14]) part(x+(dir?0:a),z+(dir?a:0),.58,.02,item.y+0.08||2.08,.05,dir,6,[.28,.32,.30]);
+  } else if(t==='valve') {
+   box(x-.05,item.y||2.2,z-.05,.10,.10,.10,5,steel);
+   for(const a of [-.18,.18]) {
+    box(x+a-.03,item.y+.32,z-.02,.06,.06,.04,5,[.46,.38,.24]);
+    box(x-.03,item.y+.32,z+a-.02,.04,.06,.06,5,[.46,.38,.24]);
+   }
+  }
  }
  function makeSign(cap,sub,accent) {
   const img=document.createElement('canvas');img.width=384;img.height=96;
@@ -1447,6 +2086,18 @@ function makeYardRenderer() {
   box(x0+.11,post-.02,z+.26,.61,.052,.055,6,clr);
   box(x1-.72,post-.02,z+.26,.61,.052,.055,6,clr);
   signObjects.push({x:(x0+x1)*.5,y:post-.05,z:z+.276,width:2.88,height:.72,data:makeSign(title,sub,warm?'#e9a85f':'#89e8ed')});
+ }
+ function buildCeiling(def) {
+  const h=def.height;
+  face([1,h,1],[columns-1,h,1],[columns-1,h,rows-1],[1,h,rows-1],[0,-1,0],def.color,1);
+  const beamColor=def.beam||[.19,.21,.20];
+  for(let x=3;x<columns-2;x+=4) box(x,h-.17,1.5,.17,.17,rows-3,5,beamColor);
+  for(let z=3;z<rows-2;z+=4) box(1.5,h-.17,z,columns-3,.17,.17,5,beamColor);
+  for(const [x,z] of lights) {
+   box(x-.38,h-.07,z-.14,.76,.07,.28,6,def.panel);
+   box(x-.02,h-.46,z-.02,.04,.39,.04,5,[.13,.15,.15]);
+   box(x-.09,h-.52,z-.09,.18,.06,.18,5,[.16,.18,.18]);
+  }
  }
  const metalColors=[[.31,.48,.47],[.42,.45,.51],[.53,.30,.248],[.52,.43,.305],[.32,.36,.42]];
  const mesh=gl.createBuffer();
@@ -1470,11 +2121,29 @@ function makeYardRenderer() {
       box(x+.012,.025,y+offset,.976,wallHeight-.005,.06,5,black);
      }
      box(x,.14,y,1,.15,1,4,hazard);
+    } else if(style==='subway') {
+     box(x+.06,.02,y+.06,.88,.52,.88,1,[.44,.47,.45]);
+     box(x+.12,.54,y+.12,.76,.34,.76,1,[.38,.42,.40]);
+     box(x+.18,.88,y+.18,.64,.30,.64,3,[.25,.34,.24]);
+     box(x+.26,.52,y+.02,.48,.06,.06,5,steel);
+    } else if(style==='tunnel') {
+     box(x+.04,.02,y+.04,.62,.38,.58,1,[.33,.32,.28]);
+     box(x+.30,.02,y+.20,.58,.26,.52,1,[.28,.28,.24]);
+     box(x+.14,.24,y+.10,.42,.34,.38,1,[.37,.35,.29]);
+     box(x+.58,.02,y+.60,.34,.42,.30,1,[.30,.30,.26]);
+    } else if(style==='hospital') {
+     box(x+.02,.02,y+.02,.96,1.10,.96,1,[.46,.51,.48]);
+     box(x-.02,1.08,y-.02,1.04,.09,1.04,5,[.26,.30,.29]);
+     box(x+.10,.34,y+.98,.80,.52,.025,6,[.55,.75,.70]);
+     box(x+.40,.78,y+.985,.20,.06,.03,6,[.88,.96,.90]);
+     box(x+.46,.66,y+.985,.08,.12,.03,6,[.88,.96,.90]);
+    } else if(style==='prison') {
+     box(x+.02,.02,y+.10,.96,.22,.80,1,[.40,.42,.40]);
+     box(x+.14,.24,y+.18,.72,.52,.64,1,[.44,.46,.43]);
+     box(x+.14,.76,y+.18,.72,.16,.64,4,hazard);
     } else {
      box(x,.02,y,1,wallHeight-.02,1,3,theme.crate);
      box(x,.13,y,1,.13,1,4,hazard);
-     box(x,wallHeight-.13,y,1.004,.13,1.004,5,black);
-     if(style==='subway') for(const offset of [.10,.84]) box(x+offset,.04,y+.01,.06,wallHeight-.08,.98,5,[.30,.34,.34]);
     }
     continue;
    }
@@ -1483,19 +2152,49 @@ function makeYardRenderer() {
     for(const [bx,bz,bw,bd] of [[x-.014,y,.019,1],[x+.995,y,.019,1],[x,y-.014,1,.019],[x,y+.995,1,.019]])
      box(bx,1.42,bz,bw,.58,bd,5,[.10,.14,.15]);
     for(const [bx,bz,bw,bd] of [[x-.016,y,.022,1],[x+.994,y,.022,1],[x,y-.016,1,.022],[x,y+.994,1,.022]])
-     box(bx,3.46,bz,bw,.09,bd,5,steel);
+     box(bx,2.72,bz,bw,.09,bd,5,steel);
+    if((x+y)%3===0) {
+     if(!solid(x,y-1)) box(x+.20,.06,y-.012,.60,2.20,.025,5,[.11,.15,.17]);
+     if(!solid(x,y+1)) box(x+.20,.06,y+.992,.60,2.20,.025,5,[.11,.15,.17]);
+    }
+    if((x*7+y)%5===0) box(x+.20,wallHeight,y+.22,.58,.20,.56,2,[.24,.29,.30]);
     continue;
    }
    if(tile==='W') {
-    box(x,0,y,1,wallHeight,1,3,theme.wood);
-    box(x,wallHeight-.10,y,1.004,.10,1.004,5,black);
+    if(style==='hospital') {
+     box(x+.04,.02,y+.10,.92,.30,.80,2,[.34,.38,.38]);
+     box(x+.06,.32,y+.12,.88,.18,.76,3,[.72,.74,.70]);
+     box(x+.06,.50,y+.12,.32,.13,.32,3,[.84,.85,.80]);
+     for(const a of [.10,.84]) for(const b of [.16,.76]) box(x+a-.02,0,y+b-.02,.04,.32,.04,5,[.18,.22,.21]);
+     box(x+.04,.50,y+.86,.92,.05,.05,5,steel);
+    } else if(style==='prison') {
+     for(const a of [.10,.84]) for(const b of [.16,.76]) box(x+a-.025,0,y+b-.025,.05,1.28,.05,5,[.20,.24,.24]);
+     box(x+.08,.38,y+.12,.84,.12,.76,3,[.55,.57,.52]);
+     box(x+.08,1.00,y+.12,.84,.12,.76,3,[.55,.57,.52]);
+     box(x+.08,.62,y+.12,.84,.05,.76,2,steel);
+    } else if(style==='subway') {
+     box(x+.10,.42,y+.12,.80,.10,.76,3,[.44,.35,.24]);
+     box(x+.86,.52,y+.20,.06,.40,.60,5,[.30,.34,.33]);
+     for(const b of [.20,.74]) box(x+.12,0,y+b-.03,.04,.42,.06,5,black);
+    } else {
+     box(x,0,y,1,wallHeight,1,3,theme.wood);
+     box(x,wallHeight-.10,y,1.004,.10,1.004,5,black);
+    }
     continue;
    }
    if(tile==='M') {
     box(x,0,y,1,wallHeight,1,2,theme.metal);
     box(x,wallHeight-.16,y,1.006,.16,1.006,5,black);
-    if(edgeNorth) box(x,wallHeight*.46,y-.016,1,.12,.019,5,hazard);
-    if(edgeSouth) box(x,wallHeight*.46,y+.995,1,.12,.020,5,hazard);
+    if(style==='prison') {
+     box(x+.04,1.48,y-.012,.92,.52,.024,6,[.24,.33,.36]);
+     box(x+.04,1.48,y+.988,.92,.52,.024,6,[.24,.33,.36]);
+     box(x-.012,1.48,y+.04,.024,.52,.92,6,[.24,.33,.36]);
+     box(x+.988,1.48,y+.04,.024,.52,.92,6,[.24,.33,.36]);
+     box(x+.10,2.18,y+.10,.80,.10,.80,5,black);
+    } else {
+     if(edgeNorth) box(x,wallHeight*.46,y-.016,1,.12,.019,5,hazard);
+     if(edgeSouth) box(x,wallHeight*.46,y+.995,1,.12,.020,5,hazard);
+    }
     continue;
    }
    if(style==='yard') {
@@ -1531,8 +2230,18 @@ function makeYardRenderer() {
     if(edgeSouth) box(x,bandY,y+.995,1,.12,.020,bandMat,bandColor);
     if(edgeWest) box(x-.016,bandY,y,.019,.12,1,bandMat,bandColor);
     if(edgeEast) box(x+.995,bandY,y,.020,.12,1,bandMat,bandColor);
+    if(style==='prison'&&(y===9||y===23)) {
+     const onSouth=y===9&&edgeSouth,onNorth=y===23&&edgeNorth;
+     if(onSouth||onNorth) {
+      const zz=onSouth?y+.991:y-.011;
+      box(x+.16,1.78,zz,.68,.68,.020,5,[.08,.11,.13]);
+      for(const bx of [.24,.41,.58,.75]) box(x+bx,1.80,zz+.002,.035,.64,.025,5,[.33,.39,.42]);
+     }
+    }
    }
   }
+  if(theme.ceiling) buildCeiling(theme.ceiling);
+  for(const item of MAP.props) drawProp(item);
   if(style==='yard') {
    for(const x of [17.31,24.63]) {
     box(x,3.17,13.20,.09,.09,3.7,2,[.29,.31,.29]);
@@ -1553,6 +2262,7 @@ function makeYardRenderer() {
    paintLine(x-.68,y-.68,.055,1.36,[.5,.67,.45]);paintLine(x+.63,y-.68,.055,1.36,[.5,.67,.45]);
   }
   for(const [x0,x1,z,title,sub,warm,level] of MAP.signs) gantry(x0,x1,z,title,sub,warm,level);
+  for(const s of MAP.wallSigns) signObjects.push({x:s.x,y:s.y,z:s.z,width:s.w,height:s.h,data:makeSign(s.text,s.sub,s.accent)});
   for(const [x,z,y,w] of lights) {
    const clr=w>0?[1,.66,.35]:[.38,.94,1];
    let arm=null;
@@ -1740,7 +2450,18 @@ function makeYardRenderer() {
   gl.uniform2f(u.uCamera,view.x,view.y);gl.uniform2f(u.uForward,dx,dy);
   gl.uniform2f(u.uScale,focal*2/W.width,focal*2/W.height);
   gl.uniform1f(u.uPitch,look*2);gl.uniform1f(u.uTime,frames/60);
-  gl.uniform1f(u.uFlash,muzzle>0?.66:0);gl.uniform4fv(u['uLights[0]'],lightData);
+  gl.uniform1f(u.uFlash,muzzle>0?.66:0);
+  const flicker=MAP.theme.flicker||0;
+  if(flicker>0) {
+   const now=frames/60;
+   for(let i=0;i<12;i++) {
+    lightFrame[i*4]=lightData[i*4];lightFrame[i*4+1]=lightData[i*4+1];
+    lightFrame[i*4+2]=lightData[i*4+2];
+    const n=Math.sin(now*(7.1+i*1.31)+i*2.17)*Math.sin(now*(19.3+i*.73)+i*.91);
+    lightFrame[i*4+3]=lightData[i*4+3]*clamp(1+flicker*n*1.7,.28,1.45);
+   }
+   gl.uniform4fv(u['uLights[0]'],lightFrame);
+  } else gl.uniform4fv(u['uLights[0]'],lightData);
   gl.uniform3fv(u.uFog,MAP.theme.fog);gl.uniform3fv(u.uAmbient,MAP.theme.ambient);
  }
  function draw(view,dx,dy,look,drawables) {
@@ -1781,6 +2502,10 @@ try {yard3D=makeYardRenderer();} catch(error) {console.warn('WebGL renderer unav
 
 const rainRandom=rng(2117);
 const rainDrops=Array.from({length:73},()=>[rainRandom(),rainRandom(),rainRandom(),rainRandom()]);
+const dustRandom=rng(3301);
+const dustMotes=Array.from({length:46},()=>[dustRandom(),dustRandom(),dustRandom()]);
+const splashRandom=rng(4407);
+const splashRings=Array.from({length:22},()=>[splashRandom(),splashRandom(),splashRandom()]);
 const cloudRandom=rng(621);
 const cloudBanks=Array.from({length:14},()=>[cloudRandom(),cloudRandom(),cloudRandom()]);
 function yardActors(demo) {
@@ -1827,6 +2552,24 @@ function paintYard() {
  const dx=Math.cos(view.angle),dy=Math.sin(view.angle),w=W.width,h=W.height;
  paintSky(view,look);
  ctx.drawImage(yard3D.draw(view,dx,dy,look,yardActors(demo)),0,0);
+ const theme=MAP.theme;
+ if((theme.lightCone||0)>0) {
+  ctx.globalCompositeOperation='lighter';
+  for(const [x,z,y,color] of yard3D.lights) {
+   const wx=x-view.x,wz=z-view.y,forward=wx*dx+wz*dy;
+   if(forward<1||forward>22||!visible(view.x,view.y,x,z)) continue;
+   const sx=w/2+(wz*dx-wx*dy)*focal/forward;
+   const sy=h*(.5+look)+(1.35-y)*focal/forward;
+   const floorY=h*(.5+look)+1.35*focal/forward;
+   if(sx<-140||sx>w+140) continue;
+   const spread=clamp(150/forward,18,110)*theme.lightCone;
+   const grad=ctx.createLinearGradient(sx,sy,sx,floorY);
+   grad.addColorStop(0,color>0?`rgba(255,186,110,${.105*theme.lightCone})`:`rgba(150,238,255,${.09*theme.lightCone})`);
+   grad.addColorStop(1,'rgba(0,0,0,0)');
+   ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx-spread,floorY);ctx.lineTo(sx+spread,floorY);ctx.closePath();ctx.fill();
+  }
+  ctx.globalCompositeOperation='source-over';
+ }
  ctx.globalCompositeOperation='screen';
  for(const [x,z,y,color] of yard3D.lights) {
   const wx=x-view.x,wz=z-view.y,forward=wx*dx+wz*dy;
@@ -1857,6 +2600,55 @@ function paintYard() {
     ctx.lineTo(x-2-s*3,y+4+s*14+offset*3);ctx.stroke();
    }
   }
+ }
+ const dust=theme.dust||0;
+ if(dust>0) {
+  ctx.globalCompositeOperation='lighter';
+  const t=frames*.011;
+  for(const [u,v,p] of dustMotes) {
+   const x=((u*w+Math.sin(t*2.1+p*8.7)*28+view.angle*w*.025)%w+w)%w;
+   const y=(v*h+t*16+p*47)%h;
+   ctx.fillStyle=`rgba(205,228,220,${.035+dust*.06})`;
+   ctx.fillRect(x,y,1.3,1.3);
+  }
+ }
+ if(weather==='rain') {
+  for(const [u,v,p] of splashRings) {
+   const phase=(frames*.010+p*3.1)%1;
+   const x=((u*w+view.angle*w*.035)%w+w)%w;
+   const y=h*(.48+v*.47);
+   const r=1.5+phase*8;
+   ctx.strokeStyle=`rgba(190,225,232,${(1-phase)*.09})`;
+   ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
+  }
+ } else if(weather==='drip') {
+  for(const [u,v,p] of splashRings.slice(0,10)) {
+   const phase=(frames*.006+p*4.3)%1;
+   const x=((u*w+view.angle*w*.02)%w+w)%w;
+   const y=h*(.52+v*.4);
+   const r=1+phase*10;
+   ctx.strokeStyle=`rgba(150,205,190,${(1-phase)*.11})`;
+   ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
+  }
+ }
+ if(dust>0||weather==='rain'||weather==='drip') ctx.globalCompositeOperation='source-over';
+ if(theme.lightning) {
+  if(frames>nextLightning) {
+   lightning=1;nextLightning=frames+900+Math.random()*1300;
+   tone(58,.45,'sawtooth',.045,28);
+  }
+  if(lightning>0) {
+   ctx.fillStyle=`rgba(205,230,240,${.10*lightning})`;ctx.fillRect(0,0,w,h);
+   lightning=Math.max(0,lightning-.045);
+  }
+ }
+ if(alarm>0) {
+  const pulse=alarm*(.045+.035*Math.sin(frames*.55));
+  ctx.fillStyle=`rgba(180,32,22,${clamp(pulse,0,.11)})`;ctx.fillRect(0,0,w,h);
+ }
+ if(theme.grade) {
+  ctx.save();ctx.globalCompositeOperation='soft-light';ctx.globalAlpha=.17;
+  ctx.fillStyle=theme.grade;ctx.fillRect(0,0,w,h);ctx.restore();
  }
  const vignette=ctx.createRadialGradient(w*.50,h*.48,Math.min(w,h)*.36,w*.50,h*.48,Math.max(w,h)*.65);
  vignette.addColorStop(0,'#0b161600');vignette.addColorStop(1,'#04121a65');
@@ -1932,53 +2724,107 @@ function paintLegacy() {
  }
  if(mode==='play'||mode==='pause') paintGun();
 }
+function tint(hex,factor) {
+ const n=parseInt(hex.slice(1),16);
+ const r=clamp(Math.round(((n>>16)&255)*factor),0,255);
+ const g=clamp(Math.round(((n>>8)&255)*factor),0,255);
+ const b=clamp(Math.round((n&255)*factor),0,255);
+ return `rgb(${r},${g},${b})`;
+}
 function paintGun() {
  const height=W.height,width=W.width,scale=Math.min(width,height*1.52)/540;
+ const item=currentGun(),skin=skinOf(item.id),up=upgradesOf(item.id),kind=item.kind;
  ctx.save();
- ctx.translate(width*.61+Math.sin(step*.5)*3,height+Math.abs(Math.cos(step))*4+recoil*height*.61+Math.sin(Math.PI*reloadTime/guns[gun].reload)*height*.32);
+ ctx.translate(width*.61+Math.sin(step*.5)*3,height+Math.abs(Math.cos(step))*4+recoil*height*.61+Math.sin(Math.PI*reloadTime/item.reload)*height*.32);
  ctx.scale(scale,scale);
  const body=ctx.createLinearGradient(-30,-120,38,-30);
- body.addColorStop(0,'#3a494d');body.addColorStop(.36,gun===0?'#28363a':'#435357');body.addColorStop(1,'#151d20');
+ body.addColorStop(0,tint(skin.body,1.35));body.addColorStop(.36,skin.body);body.addColorStop(1,tint(skin.body,.48));
  const metal=ctx.createLinearGradient(-31,-127,35,-48);
- metal.addColorStop(0,'#89999a');metal.addColorStop(.35,'#586b70');metal.addColorStop(.75,'#3c5055');metal.addColorStop(1,'#6b7f81');
- polygon(ctx,[-43,10,-59,-39,-38,-75,0,-66,53,-11,71,16],'#242a23');
- polygon(ctx,[76,20,39,-22,30,-61,61,-76,101,-39,174,15],'#30382e');
- polygon(ctx,[-53,-41,-44,-52,-18,-35,1,-12,-9,-8,-40,-26],'#3f514b');
- polygon(ctx,[-34,-59,-25,-75,2,-84,23,-61,15,-39,-15,-32],'#6e6350');
- polygon(ctx,[13,-45,24,-103,42,-113,77,-77,69,-46,46,-38],'#625642');
- if(gun===0) {
-  polygon(ctx,[-47,-94,-66,-130,-62,-142,-48,-143,-24,-112,-3,-97],'#252d28');
-  polygon(ctx,[-61,-143,-49,-146,-21,-115,-30,-112],'#7b8473');
+ metal.addColorStop(0,tint(skin.metal,1.22));metal.addColorStop(.35,skin.metal);
+ metal.addColorStop(.75,tint(skin.metal,.72));metal.addColorStop(1,tint(skin.metal,1.08));
+ const dark=tint(skin.body,.32),accent=skin.accent;
+ polygon(ctx,[-43,10,-59,-39,-38,-75,0,-66,53,-11,71,16],dark);
+ polygon(ctx,[76,20,39,-22,30,-61,61,-76,101,-39,174,15],tint(skin.body,.83));
+ if(kind==='pistol') {
+  polygon(ctx,[-41,-88,-45,-113,-28,-122,18,-97,41,-75,40,-56,22,-48,-8,-69],body);
+  polygon(ctx,[-44,-112,-27,-121,19,-95,42,-75,29,-70,0,-91],metal);
+  polygon(ctx,[5,-70,28,-61,20,-28,-1,-24,-12,-42],dark);
+  polygon(ctx,[-35,-118,-31,-125,-25,-125,-23,-116],tint(skin.body,.55));
+  polygon(ctx,[17,-94,19,-101,26,-96,26,-89],accent);
+ } else if(kind==='smg') {
+  polygon(ctx,[-52,-72,-60,-106,-44,-128,10,-102,40,-72,37,-50,12,-40,-14,-60],body);
+  polygon(ctx,[-59,-100,-48,-121,-30,-121,-12,-102,22,-86,42,-72,28,-68,2,-88],metal);
+  polygon(ctx,[5,-68,28,-58,21,-8,-1,-3,-11,-27],dark);
+  polygon(ctx,[-38,-44,-25,-53,-9,-46,-17,-31],tint(skin.body,.62));
+  polygon(ctx,[-59,-108,-51,-117,-45,-115,-42,-105],accent);
+  ctx.strokeStyle=tint(skin.metal,.8);ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(18,-76);ctx.lineTo(66,-58);ctx.stroke();
+ } else if(kind==='shotgun') {
+  polygon(ctx,[-48,12,-64,-34,-42,-74,0,-64,54,-8,72,18],dark);
+  polygon(ctx,[-56,-76,-66,-118,-44,-132,8,-104,44,-70,40,-48,10,-38,-18,-64],body);
+  polygon(ctx,[-62,-104,-54,-124,-30,-121,-4,-104,26,-84,50,-66,36,-62,4,-82],metal);
+  polygon(ctx,[-74,-128,-84,-158,-71,-161,-58,-132],metal);
+  polygon(ctx,[-58,-104,-48,-96,-6,-72,-12,-60,-38,-74],tint(skin.body,.7));
+  polygon(ctx,[-52,-116,-42,-132,-30,-134,-26,-122],dark);
+  for(const x of [-34,-18,-2]) polygon(ctx,[x,-92,x+9,-95,x+6,-76,x-4,-73],accent);
+  polygon(ctx,[-68,-152,-62,-132,-52,-136,-57,-154],tint(skin.metal,.9));
+ } else {
+  const dmr=kind==='dmr';
+  polygon(ctx,[-47,-94,-66,-130,-62,-142,-48,-143,-24,-112,-3,-97],dark);
+  polygon(ctx,[-61,-143,-49,-146,-21,-115,-30,-112],tint(skin.metal,1.1));
   polygon(ctx,[-65,-102,-51,-126,-34,-123,-2,-106,29,-89,65,-45,57,-17,26,-18,-21,-56],body);
   polygon(ctx,[-61,-104,-51,-123,-34,-120,-4,-104,26,-85,54,-52,40,-53,12,-75,-25,-94],metal);
-  polygon(ctx,[-25,-55,6,-41,1,-13,-16,3,-37,-9,-17,-31],'#242b25');
-  polygon(ctx,[-47,-110,-40,-116,-39,-126,-33,-125,-30,-110],'#202722');
-  polygon(ctx,[-23,-100,-16,-115,5,-106,18,-91,4,-86],'#292e28');
-  polygon(ctx,[-17,-109,-13,-116,5,-109,11,-101,-2,-100],'#869177');
-  ctx.strokeStyle='#131a15';ctx.lineWidth=2;
+  polygon(ctx,[-25,-55,6,-41,1,-13,-16,3,-37,-9,-17,-31],dark);
+  polygon(ctx,[-47,-110,-40,-116,-39,-126,-33,-125,-30,-110],tint(skin.body,.5));
+  polygon(ctx,[-23,-100,-16,-115,5,-106,18,-91,4,-86],tint(skin.body,.7));
+  polygon(ctx,[-17,-109,-13,-116,5,-109,11,-101,-2,-100],accent);
+  ctx.strokeStyle=tint(skin.metal,.7);ctx.lineWidth=2;
   for(let i=0;i<10;i++) {
    const x=-43+i*4,y=-114+i*2.25;
    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+11);ctx.stroke();
   }
-  polygon(ctx,[6,-73,24,-64,38,-46,30,-39,13,-48],'#1d241d');
-  polygon(ctx,[8,-71,17,-65,23,-58,16,-61],'#8aa898');
-  polygon(ctx,[-22,-81,-6,-72,12,-55,2,-55,-15,-69],'#476269');
-  polygon(ctx,[-14,-91,-8,-98,-1,-94,-3,-88],'#b99d5b');
- } else {
-  polygon(ctx,[-41,-88,-45,-113,-28,-122,18,-97,41,-75,40,-56,22,-48,-8,-69],body);
-  polygon(ctx,[-44,-112,-27,-121,19,-95,42,-75,29,-70,0,-91],metal);
-  polygon(ctx,[5,-70,28,-61,20,-28,-1,-24,-12,-42],'#232b26');
-  polygon(ctx,[-35,-118,-31,-125,-25,-125,-23,-116],'#202620');
-  polygon(ctx,[17,-94,19,-101,26,-96,26,-89],'#30382f');
+  polygon(ctx,[6,-73,24,-64,38,-46,30,-39,13,-48],dark);
+  polygon(ctx,[8,-71,17,-65,23,-58,16,-61],accent);
+  polygon(ctx,[-22,-81,-6,-72,12,-55,2,-55,-15,-69],tint(skin.body,.55));
+  polygon(ctx,[-14,-91,-8,-98,-1,-94,-3,-88],accent);
+  if(dmr) {
+   polygon(ctx,[-78,-132,-112,-168,-102,-174,-64,-140],metal);
+   polygon(ctx,[-58,-128,-34,-145,-18,-141,-20,-124,-42,-116],dark);
+   polygon(ctx,[-34,-139,-16,-137,-14,-130,-32,-130],accent);
+   polygon(ctx,[-96,-164,-84,-158,-82,-147,-94,-152],tint(skin.metal,.8));
+  }
  }
+ if(up.capacity>=2&&kind!=='pistol') {
+  polygon(ctx,[2,-52,34,-40,28,6,0,0,-8,-30],tint(skin.body,.58));
+  polygon(ctx,[8,-42,26,-36,22,-2,8,2],tint(skin.metal,.55));
+ }
+ if(up.control>=1) {
+  polygon(ctx,[-42,-88,-30,-82,-30,-58,-40,-62],tint(skin.body,.65));
+  polygon(ctx,[-36,-78,-32,-75,-33,-62,-37,-65],accent);
+ }
+ if(up.control>=2&&kind!=='pistol') {
+  polygon(ctx,[-42,-126,-16,-139,12,-130,8,-118,-20,-114],dark);
+  polygon(ctx,[-38,-127,-16,-135,6,-128,4,-122,-20,-118],tint(skin.metal,.65));
+  polygon(ctx,[-34,-126,-18,-132,-2,-126,-4,-122,-20,-121],accent);
+ }
+ if(up.damage>=2) {
+  polygon(ctx,[-74,-144,-62,-150,-58,-136,-70,-132],tint(skin.metal,.9));
+ }
+ if(up.reload>=2) polygon(ctx,[-20,-100,6,-88,10,-80,-16,-92],accent);
+ ctx.globalAlpha=.20;ctx.strokeStyle=accent;ctx.lineWidth=3;
+ for(let i=0;i<3;i++) {
+  ctx.beginPath();ctx.moveTo(-34+i*20,-96);ctx.lineTo(-20+i*20,-58);ctx.stroke();
+ }
+ ctx.globalAlpha=1;
  if(muzzle>0) {
   ctx.globalCompositeOperation='lighter';
-  const x=gun===0?-65:-46,y=gun===0?-148:-116;
-  const glow=ctx.createRadialGradient(x,y,0,x,y,48);
+  const muzzleX=kind==='pistol'?-46:kind==='shotgun'?-92:kind==='smg'?-64:kind==='dmr'?-108:-65;
+  const muzzleY=kind==='pistol'?-116:kind==='shotgun'?-158:kind==='smg'?-126:kind==='dmr'?-172:-148;
+  const glow=ctx.createRadialGradient(muzzleX,muzzleY,0,muzzleX,muzzleY,kind==='shotgun'?62:48);
   glow.addColorStop(0,'#fff1bccc');glow.addColorStop(.38,'#ff964459');glow.addColorStop(1,'#ff962000');
-  ctx.fillStyle=glow;ctx.fillRect(x-48,y-48,96,96);
-  polygon(ctx,[x-36,y-6,x-17,y-9,x-20,y-25,x-7,y-16,x+9,y-27,x+4,y-11,x+15,y-7,x+5,y+1,x+6,y+11,x-9,y+7,x-25,y+14,x-20,y+2],'#ffb861');
-  polygon(ctx,[x-28,y-4,x-13,y-7,x-16,y-16,x-1,y-10,x+7,y-13,x+3,y-1,x-7,y+3,x-19,y+6],'#fff3c2');
+  ctx.fillStyle=glow;ctx.fillRect(muzzleX-64,muzzleY-64,128,128);
+  polygon(ctx,[muzzleX-36,muzzleY-6,muzzleX-17,muzzleY-9,muzzleX-20,muzzleY-25,muzzleX-7,muzzleY-16,muzzleX+9,muzzleY-27,muzzleX+4,muzzleY-11,muzzleX+15,muzzleY-7,muzzleX+5,muzzleY+1,muzzleX+6,muzzleY+11,muzzleX-9,muzzleY+7,muzzleX-25,muzzleY+14,muzzleX-20,muzzleY+2],'#ffb861');
+  polygon(ctx,[muzzleX-28,muzzleY-4,muzzleX-13,muzzleY-7,muzzleX-16,muzzleY-16,muzzleX-1,muzzleY-10,muzzleX+7,muzzleY-13,muzzleX+3,muzzleY-1,muzzleX-7,muzzleY+3,muzzleX-19,muzzleY+6],'#fff3c2');
  }
  ctx.restore();
 }
@@ -1999,7 +2845,7 @@ function paintRadar() {
  polygon(radar,[5,0,-3,3,-2,0,-3,-3],'#f3f6e5');radar.restore();
 }
 function paintHud() {
- const rounds=ammo[gun];
+ const item=currentGun(),rounds=currentRounds();
  $('wave').textContent=String(wave).padStart(2,'0');
  $('health').textContent=player.hp;
  $('life').style.width=player.hp+'%';
@@ -2008,11 +2854,11 @@ function paintHud() {
  $('notice').textContent=noticeTime>0?noticeText:reloadTime>0?'装填中…':'';
  const supply=closestSupply();
  $('interact').textContent=supply<0?'':used[supply]===supplyWave()?'本波已领取':(mobile?'':'[E] ')+'补充弹药和生命';
- $('weapon').textContent=guns[gun].name;
+ $('weapon').textContent=item.name;
  $('zone').textContent=zone(player.x,player.y);
  $('mag').textContent=String(rounds.mag).padStart(2,'0');
  $('reserve').textContent='/ '+rounds.reserve;
- $('kills').textContent='击倒 '+kills;
+ $('kills').textContent='击倒 '+kills+' · ₡'+runCredits;
  $('cross').classList.toggle('hit',hitTime>0);
  $('cross').classList.toggle('head',hitTime>0&&headshot);
  $('effects').style.opacity=wounded;
@@ -2026,7 +2872,8 @@ function toggleMute() {
  muted=!muted;save('blackout-muted',muted?'1':'0');
  $('mute').textContent='声音 '+(muted?'关':'开');
  $('mute').setAttribute('aria-pressed',String(!muted));
- if(!muted) activateAudio();
+ if(!muted) {activateAudio();if(mode==='play') startAmbience();}
+ else stopAmbience();
 }
 $('start').onclick=start;
 for(const button of document.querySelectorAll('.mapChoice')) button.onclick=()=>{
@@ -2034,6 +2881,8 @@ for(const button of document.querySelectorAll('.mapChoice')) button.onclick=()=>
 };
 $('openGuide').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
+$('openArmory').onclick=()=>{shopWeapon=ownedWeapons()[0]?.id||'rifle';renderArmory();$('armory').showModal();};
+$('closeArmory').onclick=()=>$('armory').close();
 $('mute').onclick=toggleMute;
 $('mute').textContent='声音 '+(muted?'关':'开');
 $('mute').setAttribute('aria-pressed',String(!muted));
@@ -2055,8 +2904,8 @@ addEventListener('keydown',event=>{
  if(event.repeat) return;
  if(code==='KeyR') reload();
  if(code==='KeyE') resupply();
- if(code==='Digit1') switchGun(0);
- if(code==='Digit2') switchGun(1);
+ for(let i=0;i<5;i++) if(code==='Digit'+(i+1)) switchGun(i);
+ if(code==='KeyQ') switchGun((gun+1)%Math.max(1,ownedWeapons().length));
  if(code==='KeyP') pause();
 });
 addEventListener('keyup',event=>keys.delete(event.code));
@@ -2103,7 +2952,7 @@ for(const name of ['pointerup','pointercancel','lostpointercapture']) stick.addE
 });
 $('touchFire').onpointerdown=event=>{event.currentTarget.setPointerCapture(event.pointerId);firing=true;fire();};
 for(const name of ['pointerup','pointercancel','lostpointercapture']) $('touchFire').addEventListener(name,()=>{firing=false;});
-$('touchSwap').onclick=()=>switchGun(1-gun);
+$('touchSwap').onclick=()=>switchGun((gun+1)%Math.max(1,ownedWeapons().length));
 $('touchReload').onclick=reload;
 $('touchSupply').onclick=resupply;
 $('touchPause').onclick=pause;

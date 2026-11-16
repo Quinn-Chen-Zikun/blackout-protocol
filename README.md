@@ -4,7 +4,7 @@
 
 打开网页后，在主菜单选择战区，再点击「进入隔离区」。无需登录、下载或安装。
 
-浏览器里的单人第一人称射击游戏。五个战区各有独立地图、灯光和路线，守住八波感染者。也可以直接用 `?map=yard|subway|tunnel|hospital|prison` 打开指定战区。
+浏览器里的单人第一人称射击游戏。五个战区各有独立地图、灯光、场景道具和路线，守住八波感染者。击杀、爆头和通过波次可获得军费，在主菜单的「军械库」购买武器、升级配件并解锁涂装。也可以直接用 `?map=yard|subway|tunnel|hospital|prison` 打开指定战区。
 
 ## 操作说明
 
@@ -16,7 +16,7 @@
 | 瞄准 / 射击 | 鼠标移动 / 左键 |
 | 键盘瞄准 / 射击 | 方向键 / 空格 |
 | 装填弹药 | R |
-| 切换步枪与手枪 | 1 / 2 |
+| 切换已拥有武器 | 数字键 1–5 / Q 循环 |
 | 领取补给 | E（靠近标有十字的箱子） |
 | 暂停 | Esc 或 P |
 
@@ -36,7 +36,23 @@
 
 新版用 WebGL 绘制三维丧尸、湿地反光和战区光影，并按战区切换雾气、环境光和灯光布置。丧尸拥有不同的体型、步态、扑击动作和头部命中判定；场景使用混凝土、锈钢和木材的照片材质。浏览器无法使用 WebGL 时，会自动使用 Canvas 渲染。每个战区分别保存最佳波次，音效设置保存在浏览器中。
 
+场景里增加了会随战区重建的细节：地铁站有吊顶灯带、长椅、自动售货机和停摆列车的车窗 / 车门；隧道有沿墙管线、阀门、电缆桥架和积水；医院有病房床、隔帘、输液架、担架、轮椅和护士站；监狱有牢房铁窗、床铺、马桶、放风场篮架、探照灯和洗衣房设备。灯光会轻微闪烁，部分战区在波次开始时触发红色警报，雨夜港口有雨滴涟漪和偶发闪电。每个战区还有独立的环境声：雨声、日光灯嗡鸣、滴水或风声。
+
 命中沿用枪焰和准星标记；爆头显示橙色「爆头」，击倒显示短暂文字和淡出光环，均不遮挡准星。
+
+## 军械库与军费
+
+击杀感染者、爆头和每波肃清都会获得军费，军费、已购武器、配件等级和涂装保存在浏览器中。
+
+| 武器 | 特点 | 价格 |
+| --- | --- | --- |
+| K-07 突击步枪 | 初始武器，射速、精度和弹匣均衡 | 已拥有 |
+| M-9 手枪 | 初始备用武器，单发伤害高 | 已拥有 |
+| V-9 冲锋枪 | 高射速、大弹匣，近距离压制 | ₡ 650 |
+| S-12 战术霰弹枪 | 单次 7 枚弹丸，近距离爆发 | ₡ 900 |
+| R-7 精确步枪 | 高伤害半自动，爆头收益最高 | ₡ 1,200 |
+
+每把武器有伤害、弹匣、装填、稳定四条配件升级线，升级会直接改变数值，并在枪身上显示瞄具、握把、扩容弹匣和枪口制退器。涂装包括制式、都市迷彩、余烬、极地和霓虹，购买后可随时切换。
 
 ## 感染者类型
 
@@ -57,3 +73,6 @@
 
 - 场景的湿冷光影与近距离丧尸压迫感参考 [《死亡扳机》](https://play.google.com/store/apps/details?id=com.madfingergames.deadtrigger)。丧尸三维模型与动画为本项目制作。
 - 照片材质采用 Poly Haven 的 CC0 资产：[受损混凝土地面](https://polyhaven.com/a/damaged_concrete_floor)、[混凝土墙](https://polyhaven.com/a/concrete_slab_wall)、[锈蚀钢板](https://polyhaven.com/a/rusty_painted_metal)、[旧木板](https://polyhaven.com/a/wood_planks)。
+- 地铁站的月台灯、应急灯、停摆列车和站厅布局参考 [LAST TRAIN 模块化地铁站套件](https://forums.unrealengine.com/t/souldesignstudio-last-train-stylized-abandoned-subway-station-modular-horror-environment/2846876) 与 [Subway Metro Station 环境资产](https://ultimategameassets.com/assets/subway-metro-station)；应急照明与疏散标识参考 [MTA 车站检查手册](https://www.mta.info/document/16631)。
+- 医院的病房床、隔帘、输液架、担架和护士站参考 [PSX Abandoned Hospital](https://assetstore.unity.com/packages/3d/environments/urban/psx-abandoned-hospital-low-poly-ps1-retro-kit-423840) 与 [Hospital Wing](https://assetstore.unity.com/packages/3d/environments/urban/hospital-wing-clean-and-abandoned-418740)。
+- 灯光体积感使用屏幕空间光锥与加色光晕，思路参考 [Three.js volumetric beam](https://github.com/TrentSterling/threejs-volumetric-beam) 的圆柱形 billboard 方案，避免逐像素体积光的高开销。
