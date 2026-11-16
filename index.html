@@ -132,6 +132,12 @@ body{background:#0b1c23}
 .runStats b{display:block;margin-top:2px;font:800 17px ui-monospace,monospace;color:#f2f5ea}
 @media(max-width:520px){.runStats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){#bossHud{top:8px;width:48vw}#bossHud span{font-size:9px}}
+.settings{width:min(560px,calc(100vw - 30px))}
+.settingRow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 12px;padding:13px 0;border-bottom:1px solid #78959a33}
+.settingRow label{font-weight:750;color:#e8f0ea;font-size:13px}
+.settingRow output{color:var(--acid);font:800 12px ui-monospace,monospace}
+.settingRow input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--acid);height:18px}
+.settingRow input[type=checkbox]{width:22px;height:22px;accent-color:var(--acid);justify-self:end}
 </style>
 </head>
 <body>
@@ -142,7 +148,7 @@ body{background:#0b1c23}
     <div class="label">单人生存 / ZOMBIE SURVIVAL</div>
     <h1>破晓守望</h1><div class="en">DAWNWATCH</div>
     <p id="menuBlurb">雨夜货运港已失守。穿过集装箱区、维修站和装卸场，守住八波感染者。</p>
-    <div class="actions"><button class="primary" id="start">进入隔离区 <span aria-hidden="true">↗</span></button><button class="subtle" id="openArmory">军械库</button><button class="subtle" id="mute">声音 开</button><button class="subtle" id="openGuide">感染者图鉴</button></div>
+    <div class="actions"><button class="primary" id="start">进入隔离区 <span aria-hidden="true">↗</span></button><button class="subtle" id="openArmory">军械库</button><button class="subtle" id="openSettings">设置</button><button class="subtle" id="mute">声音 开</button><button class="subtle" id="openGuide">感染者图鉴</button></div>
     <div class="mapSelect" id="mapSelect" role="group" aria-label="选择战区">
       <button type="button" class="mapChoice active" data-map="yard" aria-pressed="true"><small>07</small><b>货运港</b></button>
       <button type="button" class="mapChoice" data-map="subway" aria-pressed="false"><small>11</small><b>地铁站</b></button>
@@ -195,6 +201,13 @@ body{background:#0b1c23}
  <div class="weaponTabs" id="weaponTabs" role="tablist" aria-label="武器"></div>
  <div class="weaponDetail" id="weaponDetail"></div>
  <p class="armoryHint">击杀、爆头和通过波次获得军费。购买的武器、配件和涂装会永久保存。数字键 1–5 或 Q 在局内切换已拥有的武器。</p>
+</dialog>
+<dialog class="guide settings" id="settings" aria-labelledby="settingsTitle">
+ <header><h2 id="settingsTitle">设置 / OPTIONS</h2><button class="subtle" id="closeSettings">关闭</button></header>
+ <div class="settingRow"><label for="sens">鼠标灵敏度</label><output id="sensVal">1.00</output><input id="sens" type="range" min="0.5" max="2" step="0.05" value="1"></div>
+ <div class="settingRow"><label for="fov">视野</label><output id="fovVal">1.00×</output><input id="fov" type="range" min="0.85" max="1.15" step="0.01" value="1"></div>
+ <div class="settingRow"><label for="fxToggle">动态特效</label><output id="fxVal">开</output><input id="fxToggle" type="checkbox" checked></div>
+ <p class="armoryHint">设置会保存在浏览器中。降低视野或关闭动态特效可提升低配设备的帧率。</p>
 </dialog>
 <script>
 'use strict';
@@ -947,6 +960,9 @@ let meleeCooldown=0, meleeFlash=0;
 let runShots=0, runHits=0, runHeadshots=0, runGrenadeKills=0, runMeleeKills=0, runEliteKills=0, runBossKills=0, runDamage=0;
 const specialGate={spitter:0,screamer:0};
 let muted=read('blackout-muted','0')==='1';
+let sensitivity=Math.min(2,Math.max(.5,Number(read('blackout-sens','1'))||1));
+let fovScale=Math.min(1.15,Math.max(.85,Number(read('blackout-fov','1'))||1));
+let effectsOn=read('blackout-fx','1')!=='0';
 let depth, rays, focal, sky, floor;
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 function read(key,fallback) { try {return localStorage.getItem(key) || fallback;} catch {return fallback;} }
@@ -998,7 +1014,7 @@ function walkableLine(x,y,tx,ty,radius,stopShort=0) {
 function resize() {
  W.width=Math.min(1040,Math.max(320,Math.round(innerWidth*.81)));
  W.height=Math.round(W.width*innerHeight/innerWidth);
- focal=W.width*.76;
+ focal=W.width*.76*fovScale;
  depth=new Float32Array(W.width);
  rays=Array.from({length:W.width},(_,i)=>(i+.5-W.width/2)/focal);
  const theme=MAP.theme;
@@ -3209,7 +3225,7 @@ function paintYard() {
  paintSky(view,look);
  ctx.drawImage(yard3D.draw(view,dx,dy,look,yardActors(demo)),0,0);
  const theme=MAP.theme;
- if((theme.lightCone||0)>0) {
+ if(effectsOn&&(theme.lightCone||0)>0) {
   ctx.globalCompositeOperation='lighter';
   for(const [x,z,y,color] of yard3D.lights) {
    const wx=x-view.x,wz=z-view.y,forward=wx*dx+wz*dy;
@@ -3320,7 +3336,7 @@ function paintYard() {
   }
  }
  const dust=theme.dust||0;
- if(dust>0) {
+ if(effectsOn&&dust>0) {
   ctx.globalCompositeOperation='lighter';
   const t=frames*.011;
   for(const [u,v,p] of dustMotes) {
@@ -3330,7 +3346,7 @@ function paintYard() {
    ctx.fillRect(x,y,1.3,1.3);
   }
  }
- if(weather==='rain') {
+ if(effectsOn&&weather==='rain') {
   for(const [u,v,p] of splashRings) {
    const phase=(frames*.010+p*3.1)%1;
    const x=((u*w+view.angle*w*.035)%w+w)%w;
@@ -3339,7 +3355,7 @@ function paintYard() {
    ctx.strokeStyle=`rgba(190,225,232,${(1-phase)*.09})`;
    ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
   }
- } else if(weather==='drip') {
+ } else if(effectsOn&&weather==='drip') {
   for(const [u,v,p] of splashRings.slice(0,10)) {
    const phase=(frames*.006+p*4.3)%1;
    const x=((u*w+view.angle*w*.02)%w+w)%w;
@@ -3350,7 +3366,7 @@ function paintYard() {
   }
  }
  if(dust>0||weather==='rain'||weather==='drip') ctx.globalCompositeOperation='source-over';
- if(theme.lightning) {
+ if(effectsOn&&theme.lightning) {
   if(frames>nextLightning) {
    lightning=1;nextLightning=frames+900+Math.random()*1300;
    tone(58,.45,'sawtooth',.045,28);
@@ -3643,8 +3659,8 @@ function paintHud() {
  paintRadar();
 }
 function aim(dx,dy) {
- player.angle=(player.angle+dx*.0028)%TAU;
- pitch=clamp(pitch-dy*.0021,-.3,.3);
+ player.angle=(player.angle+dx*.0028*sensitivity)%TAU;
+ pitch=clamp(pitch-dy*.0021*sensitivity,-.3,.3);
 }
 function toggleMute() {
  muted=!muted;save('blackout-muted',muted?'1':'0');
@@ -3661,6 +3677,17 @@ $('openGuide').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 $('openArmory').onclick=()=>{shopWeapon=ownedWeapons()[0]?.id||'rifle';renderArmory();$('armory').showModal();};
 $('closeArmory').onclick=()=>$('armory').close();
+function applySettings() {
+ $('sens').value=sensitivity;$('sensVal').textContent=sensitivity.toFixed(2);
+ $('fov').value=fovScale;$('fovVal').textContent=fovScale.toFixed(2)+'×';
+ $('fxToggle').checked=effectsOn;$('fxVal').textContent=effectsOn?'开':'关';
+}
+$('openSettings').onclick=()=>{applySettings();$('settings').showModal();};
+$('closeSettings').onclick=()=>$('settings').close();
+$('sens').oninput=event=>{sensitivity=Number(event.target.value)||1;save('blackout-sens',sensitivity);applySettings();};
+$('fov').oninput=event=>{fovScale=Number(event.target.value)||1;save('blackout-fov',fovScale);applySettings();resize();};
+$('fxToggle').onchange=event=>{effectsOn=event.target.checked;save('blackout-fx',effectsOn?'1':'0');applySettings();};
+applySettings();
 $('mute').onclick=toggleMute;
 $('mute').textContent='声音 '+(muted?'关':'开');
 $('mute').setAttribute('aria-pressed',String(!muted));
