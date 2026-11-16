@@ -98,12 +98,12 @@ const supplies = [[9.5,3.5],[8.5,8.5],[17.5,14.5]];
 const spawnPoints = [[1.7,1.8],[18.8,2.1],[2,13.7],[19,14],[1.7,7.5],[18.8,8.2],[10.8,2.3],[10.3,15.3]];
 const TAU = 2 * Math.PI, MAX_WAVE = 8;
 const guns = [
- {name:'K-07 突击步枪',capacity:30, initial:150,stock:180,damage:34,delay:.13,reload:1.45,kick:.031},
- {name:'M-9 手枪',capacity:12, initial:60,stock:72,damage:42,delay:.28,reload:.95,kick:.047}
+ {name:'K-07 突击步枪',capacity:30, initial:150,stock:180,damage:34,headMultiplier:2.5,delay:.13,reload:1.45,kick:.031},
+ {name:'M-9 手枪',capacity:12, initial:60,stock:72,damage:42,headMultiplier:2,delay:.28,reload:.95,kick:.047}
 ];
 const types = {
  walker:{speed:1.17,hp:76,damage:11,height:1.75,shirt:'#5b5947',skin:'#a0a073'},
- runner:{speed:2.02,hp:58,damage:8,height:1.62,shirt:'#6f3f34',skin:'#bb906b'},
+ runner:{speed:2.4,hp:58,damage:8,height:1.62,shirt:'#6f3f34',skin:'#bb906b'},
  brute:{speed:.88,hp:218,damage:21,height:2.04,shirt:'#454658',skin:'#a8a286'}
 };
 let mode = 'menu', player, enemies, ammo, used, wave, waveTime, spawnQueue, spawnClock, kills, gun;
@@ -327,7 +327,7 @@ function resupply() {
  const index=closestSupply();
  if(index<0 || used[index]===supplyWave()) return;
  used[index]=supplyWave();
- for(let i=0;i<guns.length;i++) ammo[i].reserve=Math.min(guns[i].stock,ammo[i].reserve+(i===0?90:36));
+ for(let i=0;i<guns.length;i++) ammo[i].reserve=Math.min(guns[i].stock,ammo[i].reserve+(i===0?60:24));
  player.hp=Math.min(100,player.hp+24);
  setNotice('补给已领取 · 弹药与生命',1.5);tone(480,.18,'triangle',.09,730);
 }
@@ -362,7 +362,7 @@ function fire() {
  }
  shotSound(gun===0);
  if(target) {
-  target.hp-=item.damage*(critical?2:1);target.flash=.12;
+  target.hp-=item.damage*(critical?item.headMultiplier:1);target.flash=.12;
   hitTime=.17;headshot=critical;
   if(target.hp<=0) {enemies.splice(enemies.indexOf(target),1);kills++;tone(critical?530:270,.11,'triangle',.08,110);}
  }
@@ -419,7 +419,7 @@ function update(dt) {
  const strafe=Number(keys.has('KeyD'))-Number(keys.has('KeyA'))+joyX;
  const length=Math.hypot(forward,strafe), running=keys.has('ShiftLeft')||keys.has('ShiftRight');
  if(length>.01) {
-  const speed=(running?4.8:3.2)*dt/Math.max(1,length);
+  const speed=(running?3.9:3.2)*dt/Math.max(1,length);
   const c=Math.cos(player.angle), s=Math.sin(player.angle);
   move(player,(forward*c-strafe*s)*speed,(forward*s+strafe*c)*speed,.23);
   step+=dt*(running?15:9);
