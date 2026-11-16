@@ -957,6 +957,13 @@ const types = {
  spitter:{speed:1.03,hp:82,damage:8,height:1.71,shirt:'#6b613a',skin:'#a3a879'},
  screamer:{speed:1.28,hp:88,damage:9,height:1.78,shirt:'#753f40',skin:'#b29c8e'}
 };
+const BOSS_PROFILES={
+ yard:{name:'码头监工',hp:1500,speed:.74,damage:34},
+ subway:{name:'末班车长',hp:1350,speed:.83,damage:32},
+ tunnel:{name:'泵房看守',hp:1650,speed:.68,damage:36},
+ hospital:{name:'夜班主治',hp:1450,speed:.76,damage:34},
+ prison:{name:'典狱长',hp:1600,speed:.70,damage:38}
+};
 const waveSpecials=[
  [],
  ['runner','runner'],
@@ -1383,7 +1390,7 @@ function nextWave() {
  specialists.forEach((type,index)=>{spawnQueue[Math.floor((index+1)*count/(specialists.length+1))]=type;});
  spawnClock=.8;waveTime=0;
  const bossWave=endless?(wave>=8&&wave%4===0):wave===MAX_WAVE;
- if(bossWave) {spawnQueue.push('boss');setNotice('第 '+wave+' 波 · 暴君出现'+(endless?' · 无尽生存':''),3.2);}
+ if(bossWave) {spawnQueue.push('boss');setNotice('第 '+wave+' 波 · '+((BOSS_PROFILES[selectedMap]||BOSS_PROFILES.yard).name)+'出现'+(endless?' · 无尽生存':''),3.2);}
  else setNotice('第 '+wave+' 波 · '+(firstContact[wave]??'感染者接近')+(wave>=4?' · 精英混入':''),2.4);
  alarm=MAP.theme.alarmWaves?2.4:0;
  tone(190,.22,'triangle',.13,76);
@@ -1425,10 +1432,10 @@ function spawn(type) {
  }
  if(!chosen) chosen=candidates.sort((a,b)=>b.distance-a.distance)[0] || {index:0,x:spawnPoints[0][0],y:spawnPoints[0][1]};
  lastSpawn=chosen.index;spawnHistory.unshift(chosen.index);spawnHistory.length=Math.min(4,spawnHistory.length);
- const boss=type==='boss';
+ const boss=type==='boss',profile=boss?(BOSS_PROFILES[selectedMap]||BOSS_PROFILES.yard):null;
  const elite=boss||(wave>=4&&Math.random()<Math.min(.34,.05+wave*.028));
- const hp=boss?types[type].hp:(types[type].hp+Math.max(wave-3,0)*5)*(elite?1.8:1);
- enemies.push({type,x:chosen.x,y:chosen.y,hp,maxHp:hp,attack:.55,anim:Math.random()*6,flash:0,specialCooldown:1.2+Math.random()*.8,specialWindup:0,specialAim:null,rage:0,elite,boss,damageScale:boss?1.35:elite?1.3:1,speedScale:boss?1:elite?1.1:1});
+ const hp=boss?profile.hp:(types[type].hp+Math.max(wave-3,0)*5)*(elite?1.8:1);
+ enemies.push({type,x:chosen.x,y:chosen.y,hp,maxHp:hp,attack:.55,anim:Math.random()*6,flash:0,specialCooldown:1.2+Math.random()*.8,specialWindup:0,specialAim:null,rage:0,elite,boss,bossName:boss?profile.name:null,damageScale:boss?profile.damage/34:elite?1.3:1,speedScale:boss?profile.speed/.72:elite?1.1:1});
 }
 function updateRoute() {
  const root=Math.floor(player.y)*columns+Math.floor(player.x);
@@ -1541,7 +1548,7 @@ function fire() {
    earn(gain);killedElite=killedElite||target.elite;killedBoss=killedBoss||target.boss;
    if(target.boss) runBossKills++;
    else if(target.elite) runEliteKills++;
-   if(target.boss) setNotice('暴君击倒 · 军费 +₡'+gain,2.2);
+   if(target.boss) setNotice((target.bossName||'暴君')+'击倒 · 军费 +₡'+gain,2.2);
    else if(target.elite) setNotice('精英感染者击倒 · 军费 +₡'+gain,1.6);
    tone(hit.critical?530:270,.11,'triangle',.08,110);
   }
@@ -3327,7 +3334,7 @@ function paintYard() {
    if(forward<18) {
     const fs=clamp(70/forward,7,13);
     ctx.font=`800 ${fs}px ui-monospace,monospace`;ctx.textAlign='center';
-    ctx.fillStyle=z.boss?'rgba(255,170,132,.86)':'rgba(255,214,126,.72)';ctx.fillText(z.boss?'暴君':'精英',sx,hy-11-fs);
+    ctx.fillStyle=z.boss?'rgba(255,170,132,.86)':'rgba(255,214,126,.72)';ctx.fillText(z.boss?(z.bossName||'暴君'):'精英',sx,hy-11-fs);
    }
   }
  }
@@ -3699,7 +3706,7 @@ function paintHud() {
  $('kills').textContent='击倒 '+kills+' · ₡'+runCredits;
  const boss=enemies.find(z=>z.boss);
  $('bossHud').hidden=!boss;
- if(boss) $('bossFill').style.width=Math.max(0,boss.hp/boss.maxHp*100)+'%';
+ if(boss) {$('bossName').textContent=(boss.bossName||'暴君')+' · TYRANT';$('bossFill').style.width=Math.max(0,boss.hp/boss.maxHp*100)+'%';}
  $('cross').classList.toggle('hit',hitTime>0);
  $('cross').classList.toggle('head',hitTime>0&&headshot);
  $('effects').style.opacity=wounded;
