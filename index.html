@@ -171,7 +171,7 @@ const radar = $('radar').getContext('2d'), keys = new Set();
 const mobile = matchMedia('(pointer:coarse)').matches;
 $('desktopHelp').hidden = mobile;
 $('touchHelp').hidden = !mobile;
-const COLS=43, ROWS=31;
+const COLS=43, ROWS=31, VENDING_HEIGHT=1.97;
 const yardBlocks=[
  [2,2,9,3],[12,2,18,3],[24,2,32,4],[35,2,40,3],
  [4,5,5,10],[8,7,13,8],[8,9,8,11],[14,6,17,7],
@@ -695,7 +695,12 @@ function applyMap(id,interactive=true) {
  selectedMap=def===MAPS[id]?id:'yard';MAP=def;
  columns=COLS;rows=ROWS;
  layout=def.rows.map(row=>row.split(''));
- map=def.rows.slice();
+ for(const {t,x,z} of def.props) {
+  if(t!=='vending') continue;
+  const col=Math.floor(x),row=Math.floor(z);
+  if(layout[row]?.[col]==='.') layout[row][col]='V';
+ }
+ map=layout.map(row=>row.join(''));
  supplies=def.supplies;spawnPoints=def.spawnPoints;worldStart=def.start;
  preview=def.preview;previewEnemies=def.previewEnemies||[];
  best=Number(read(bestKey(selectedMap),selectedMap==='yard'?read('blackout-best','0'):'0'))||0;
@@ -714,6 +719,7 @@ function zone(x,y) {
 function coverHeight(x,y) {
  const tile=cell(x,y),t=MAP.theme;
  if(tile==='T') return t.trainHeight??4.2;
+ if(tile==='V') return VENDING_HEIGHT;
  if(tile==='C') return t.crateHeight??1.55;
  if(tile==='W') return t.woodHeight??1.2;
  if(tile==='M') return t.metalHeight??2.55;
@@ -1942,10 +1948,16 @@ function makeYardRenderer() {
    box(x-.21,.78,z-.21,.42,.06,.42,5,black);
    box(x-.15,.72,z-.15,.30,.04,.30,6,[.18,.24,.22]);
   } else if(t==='vending') {
-   part(x,z,.92,.56,0,1.92,dir,2,item.color||[.34,.38,.42]);
-   part(x,z,.99,.60,1.9,.07,dir,5,black);
-   if(dir===0) {box(x-.30,.98,z+.28,.60,.64,.025,6,[.62,.84,.80]);box(x-.11,.30,z+.285,.22,.18,.02,5,black);}
-   else {box(x+.28,.98,z-.30,.025,.64,.60,6,[.62,.84,.80]);box(x+.285,.30,z-.11,.02,.18,.22,5,black);}
+   const cx=Math.floor(x)+.5,cz=Math.floor(z)+.5;
+   part(cx,cz,1,1,0,VENDING_HEIGHT-.07,dir,2,item.color||[.34,.38,.42]);
+   part(cx,cz,1,1,VENDING_HEIGHT-.07,.07,dir,5,black);
+   if(dir===0) {
+    box(cx-.30,.98,cz+.489,.60,.64,.017,6,[.62,.84,.80]);
+    box(cx-.11,.30,cz+.491,.22,.18,.015,5,black);
+   } else {
+    box(cx+.489,.98,cz-.30,.017,.64,.60,6,[.62,.84,.80]);
+    box(cx+.491,.30,cz-.11,.015,.18,.22,5,black);
+   }
   } else if(t==='pipe') {
    const len=item.len||4,y=item.y||2.2,r=item.r||.09;
    part(x,z,len,r*2,y,r*2,dir,2,item.color||MAP.theme.metal);
@@ -2110,7 +2122,7 @@ function makeYardRenderer() {
   face([1,0,1],[columns-1,0,1],[columns-1,0,rows-1],[1,0,rows-1],[0,1,0],theme.ground,0);
   for(let y=0;y<rows;y++) for(let x=0;x<columns;x++) {
    const tile=cell(x,y);
-   if(tile==='.') continue;
+   if(tile==='.'||tile==='V') continue;
    const wallHeight=coverHeight(x,y),out=x===0||y===0||x===columns-1||y===rows-1;
    const edgeNorth=!solid(x,y-1),edgeSouth=!solid(x,y+1),edgeEast=!solid(x+1,y),edgeWest=!solid(x-1,y);
    if(tile==='C') {
@@ -2676,7 +2688,7 @@ function paintLegacy() {
   const d=Math.max(.035,hit.dist);
   for(let i=0;i<stride && sx+i<width;i++) depth[sx+i]=d;
   const wallHeight=coverHeight(hit.gx,hit.gy);
-  const tex=hit.kind==='C'?texture.crate:(hit.gx*13+hit.gy*5)%7<3?texture.steel:texture.brick;
+  const tex=hit.kind==='V'?texture.steel:hit.kind==='C'?texture.crate:(hit.gx*13+hit.gy*5)%7<3?texture.steel:texture.brick;
   const bottom=horizon+1.35*focal/d;
   const wall=horizon+(1.35-wallHeight)*focal/d;
   const u=Math.min(63,Math.floor(hit.u*64));
