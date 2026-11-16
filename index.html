@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#131613">
-<title>破晓守望 · 雨夜货运港</title>
-<meta name="description" content="破晓守望：在雨夜货运港守住八波丧尸，面对六类感染者。">
+<title>破晓守望 · 五大战区</title>
+<meta name="description" content="破晓守望：在货运港、地铁站、地下隧道、医院与监狱五个战区守住八波感染者。">
 <style>
 :root{color-scheme:dark;--ink:#10120f;--paper:#f2f0e7;--muted:#9fa39a;--acid:#d8f36d;--orange:#ff9f62;--line:rgba(224,232,207,.16)}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}
@@ -26,6 +26,10 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--
 .primary{background:var(--acid);color:#12170b;border-color:var(--acid);display:flex;align-items:center;justify-content:space-between;gap:35px;min-width:172px}
 .primary:hover{background:#edffa9}.subtle{background:#171b15bb;color:#dadfd1}.subtle:hover{background:#353a2c}
 .instructions{display:flex;align-items:center;flex-wrap:wrap;gap:9px 16px;margin-top:22px;color:#c1c2b9;font-size:11px}.key{display:inline-block;border:1px solid #6d7560;background:#22281f;padding:3px 5px;color:#eff3e2;font-size:10px;margin-right:4px}
+.mapSelect{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.mapChoice{display:flex;align-items:center;gap:7px;min-height:38px;padding:5px 10px;border:1px solid var(--line);background:#0f1e218f;color:#c8d4cf;font-weight:750;letter-spacing:.03em}
+.mapChoice small{font:800 9px ui-monospace,monospace;color:#8faeaa;letter-spacing:.12em}.mapChoice b{font-size:12px}
+.mapChoice:hover{background:#263b3e}.mapChoice.active{border-color:var(--acid);background:var(--acid);color:#11170b}.mapChoice.active small{color:#3f4a22}
 .mapTag{position:absolute;right:5vw;bottom:13vh;border-right:2px solid var(--orange);padding-right:13px;text-align:right;color:#f2e3cd;background:#1c1813a8;padding-left:12px}.mapTag b{display:block;margin-top:4px;font-size:14px;letter-spacing:.15em}
 #hud{padding:22px clamp(12px,3vw,36px) 23px;display:flex;flex-direction:column;justify-content:space-between}
 .hudTop,.hudBottom{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -44,8 +48,8 @@ button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--
 .dialog h2{font-size:clamp(30px,6vw,56px);line-height:1;margin:12px 0 16px}.dialog p{color:#b7bfaa;line-height:1.65;margin:0 0 24px}
 .controls{position:absolute;inset:0;pointer-events:none}.controls button{pointer-events:auto;position:absolute;height:44px;width:58px;touch-action:none;border:1px solid var(--line);background:#141c16bc;color:var(--paper);font-weight:800}.controls #touchFire{right:20px;bottom:105px;height:64px;width:74px;color:var(--acid)}.controls #touchReload{right:103px;bottom:110px}.controls #touchSwap{right:20px;bottom:177px}.controls #touchSupply{right:103px;bottom:160px}.controls #touchPause{right:13px;top:9px;width:64px;height:29px}.controls #stick{pointer-events:auto;position:absolute;left:16px;bottom:102px;width:116px;height:116px;border:1px solid #b8c4a762;border-radius:50%;background:#0e140c6b;touch-action:none}.controls #stick i{position:absolute;left:36px;top:36px;width:42px;height:42px;border-radius:50%;background:#b6c99088}
 @media(pointer:coarse){#radar{margin-top:23px;width:77px;height:77px}}
-@media(max-width:650px){.mapTag{display:none}.hero p{margin:16px 0 19px}.instructions{margin-top:15px}.plate{min-width:90px;padding:7px 9px}.plate strong{font-size:24px}.healthBar{width:75px}}
-@media(max-height:520px){.header{top:9px;padding-bottom:7px}.menuFoot{bottom:9px;padding-top:7px}.hero{padding:25px 0 6px}.hero h1{font-size:clamp(35px,8vw,67px);margin:8px 0}.hero p{margin:8px 0 11px}.instructions{margin-top:8px}.primary,.subtle{min-height:38px}#hud{padding:7px 12px}.mapTag{display:none}.controls #stick{bottom:68px}.controls #touchFire{bottom:71px}.controls #touchReload{bottom:75px}.controls #touchSwap{bottom:140px}.controls #touchSupply{bottom:124px}}
+@media(max-width:650px){.mapTag{display:none}.hero p{margin:16px 0 19px}.instructions{margin-top:15px}.plate{min-width:90px;padding:7px 9px}.plate strong{font-size:24px}.healthBar{width:75px}.mapSelect{margin-top:12px}.mapChoice{min-height:34px;padding:4px 8px}}
+@media(max-height:520px){.header{top:9px;padding-bottom:7px}.menuFoot{bottom:9px;padding-top:7px}.hero{padding:25px 0 6px}.hero h1{font-size:clamp(35px,8vw,67px);margin:8px 0}.hero p{margin:8px 0 11px}.instructions{margin-top:8px}.primary,.subtle{min-height:38px}#hud{padding:7px 12px}.mapTag{display:none}.mapSelect{margin-top:7px}.mapChoice{min-height:29px;padding:3px 7px}.controls #stick{bottom:68px}.controls #touchFire{bottom:71px}.controls #touchReload{bottom:75px}.controls #touchSwap{bottom:140px}.controls #touchSupply{bottom:124px}}
 /* Rain-soaked freight yard */
 :root{--ink:#0c1517;--paper:#f6f2e8;--muted:#a6b7ba;--acid:#d6f56f;--orange:#ffb675;--line:#c4e6dc37}
 body{background:#0b1c23}
@@ -87,13 +91,20 @@ body{background:#0b1c23}
   <div class="hero">
     <div class="label">单人生存 / ZOMBIE SURVIVAL</div>
     <h1>破晓守望</h1><div class="en">DAWNWATCH</div>
-    <p>雨夜货运港已失守。穿过集装箱区、维修站和装卸场，守住八波感染者。</p>
+    <p id="menuBlurb">雨夜货运港已失守。穿过集装箱区、维修站和装卸场，守住八波感染者。</p>
     <div class="actions"><button class="primary" id="start">进入隔离区 <span aria-hidden="true">↗</span></button><button class="subtle" id="mute">声音 开</button><button class="subtle" id="openGuide">感染者图鉴</button></div>
+    <div class="mapSelect" id="mapSelect" role="group" aria-label="选择战区">
+      <button type="button" class="mapChoice active" data-map="yard" aria-pressed="true"><small>07</small><b>货运港</b></button>
+      <button type="button" class="mapChoice" data-map="subway" aria-pressed="false"><small>11</small><b>地铁站</b></button>
+      <button type="button" class="mapChoice" data-map="tunnel" aria-pressed="false"><small>03</small><b>隧道</b></button>
+      <button type="button" class="mapChoice" data-map="hospital" aria-pressed="false"><small>22</small><b>医院</b></button>
+      <button type="button" class="mapChoice" data-map="prison" aria-pressed="false"><small>18</small><b>监狱</b></button>
+    </div>
     <div class="instructions" id="desktopHelp"><span><b class="key">WASD</b>移动</span><span><b class="key">鼠标</b>瞄准 / 射击</span><span><b class="key">R</b>换弹</span><span><b class="key">1 / 2</b>切枪</span><span><b class="key">E</b>补给</span></div>
     <div class="instructions" id="touchHelp" hidden>左摇杆移动 · 滑动战场瞄准 · 右侧按钮射击</div>
   </div>
-  <div class="mapTag"><small class="mono">SECTOR 07 / 43 × 31</small><b>雨夜货运港</b></div>
-  <footer class="menuFoot"><span>战区 07 / 雨夜货运港</span><span id="best"></span></footer>
+  <div class="mapTag"><small class="mono" id="sectorTag">SECTOR 07 / 43 × 31</small><b id="sectorName">雨夜货运港</b></div>
+  <footer class="menuFoot"><span id="footSector">SECTOR 07 / 雨夜货运港</span><span id="best"></span></footer>
 </section>
 <div id="hud" hidden aria-label="战斗状态">
   <div class="hudTop"><div class="plate"><div class="label">感染波次</div><strong id="wave">01</strong> <small>/ 08</small><br><small id="remaining"></small></div><div class="mapHud"><canvas id="radar" width="144" height="144" aria-label="小地图"></canvas><span class="label" id="zone"></span></div></div>
@@ -123,12 +134,8 @@ const radar = $('radar').getContext('2d'), keys = new Set();
 const mobile = matchMedia('(pointer:coarse)').matches;
 $('desktopHelp').hidden = mobile;
 $('touchHelp').hidden = !mobile;
-const columns=43,rows=31;
-const worldStart={x:21.5,y:26.5,angle:-Math.PI/2};
-const layout=Array.from({length:rows},(_,y)=>Array.from({length:columns},(_,x)=>
- x===0||y===0||x===columns-1||y===rows-1?'#':'.'
-));
-const blocks=[
+const COLS=43, ROWS=31;
+const yardBlocks=[
  [2,2,9,3],[12,2,18,3],[24,2,32,4],[35,2,40,3],
  [4,5,5,10],[8,7,13,8],[8,9,8,11],[14,6,17,7],
  [26,6,30,7],[34,6,39,7],[36,9,40,10],[32,10,33,13],
@@ -139,31 +146,384 @@ const blocks=[
  [3,25,6,27],[10,25,13,28],[26,26,29,28],[34,24,40,25],
  [34,27,35,28],[38,27,40,28]
 ];
-for(const [x0,y0,x1,y1] of blocks) {
- for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++) layout[y][x]='#';
-}
-for(const [x,y] of [[3,8],[10,5],[16,9],[20,4],[28,9],[38,5],[6,12],[11,12],
+const yardCrates=[[3,8],[10,5],[16,9],[20,4],[28,9],[38,5],[6,12],[11,12],
  [3,17],[7,17],[11,17],[28,17],[32,16],[39,16],[19,14],[22,11],[23,18],
- [31,24],[32,26],[6,24],[11,23],[20,22],[18,26],[24,25],[7,28],[24,28],[38,23]]) layout[y][x]='C';
-const map=layout.map(row=>row.join(''));
-const supplies=[[22.5,24.5],[12.5,16.5],[22.5,8.5],[33.5,15.5],[6.5,23.5]];
-const spawnPoints=[[2.5,7.5],[7.5,4.5],[19.5,5.5],[33.5,5.5],[40.5,7.5],
- [14.5,11.5],[23.5,11.5],[38.5,12.5],[2.5,16.5],[8.5,16.5],
- [27.5,16.5],[41.5,19.5],[4.5,24.5],[11.5,21.5],[16.5,28.5],
- [24.5,20.5],[33.5,22.5],[41.5,27.5],[6.5,11.5]];
+ [31,24],[32,26],[6,24],[11,23],[20,22],[18,26],[24,25],[7,28],[24,28],[38,23]];
+function yardRows() {
+ const grid=Array.from({length:ROWS},(_,y)=>Array.from({length:COLS},(_,x)=>
+  x===0||y===0||x===COLS-1||y===ROWS-1?'#':'.'
+ ));
+ for(const [x0,y0,x1,y1] of yardBlocks) for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++) grid[y][x]='#';
+ for(const [x,y] of yardCrates) grid[y][x]='C';
+ return grid.map(row=>row.join(''));
+}
+const MAPS={
+ yard:{
+  name:'雨夜货运港', code:'SECTOR 07', short:'港口', tagline:'雨夜 · 集装箱码头',
+  blurb:'雨夜货运港已失守。穿过集装箱区、维修站和装卸场，守住八波感染者。',
+  rows:yardRows(),
+  supplies:[[22.5,24.5],[12.5,16.5],[22.5,8.5],[33.5,15.5],[6.5,23.5]],
+  spawnPoints:[[2.5,7.5],[7.5,4.5],[19.5,5.5],[33.5,5.5],[40.5,7.5],
+   [14.5,11.5],[23.5,11.5],[38.5,12.5],[2.5,16.5],[8.5,16.5],
+   [27.5,16.5],[41.5,19.5],[4.5,24.5],[11.5,21.5],[16.5,28.5],
+   [24.5,20.5],[33.5,22.5],[41.5,27.5],[6.5,11.5]],
+  start:{x:21.5,y:26.5,angle:-Math.PI/2},
+  preview:{x:20.55,y:27.75,angle:-1.46},
+  previewEnemies:[
+   {x:21.92,y:23.32,type:'shield',anim:.6,flash:0},
+   {x:23.87,y:22.86,type:'spitter',anim:2.5,flash:0},
+   {x:20.7,y:19.82,type:'brute',anim:3,flash:0},
+   {x:19.35,y:21.5,type:'screamer',anim:4,flash:0}
+  ],
+  zones:[
+   {name:'南侧闸门',x0:14,y0:24,x1:30,y1:30},
+   {name:'集装箱区',x0:31,y0:0,x1:42,y1:30},
+   {name:'维修站',x0:0,y0:0,x1:13,y1:14},
+   {name:'卸货仓',x0:0,y0:15,x1:13,y1:30},
+   {name:'北侧泵站',x0:0,y0:0,x1:30,y1:9},
+   {name:'中央装卸区',x0:0,y0:0,x1:42,y1:30}
+  ],
+  signs:[
+   [17.55,24.8,22.58,'中央装卸区','CARGO TRANSFER  /  07',true,3.94],
+   [17.55,25.4,13.38,'北侧泵站','PUMP STATION  /  08',false,4.44],
+   [31.48,36.32,20.56,'集装箱区','CONTAINER STACK  /  03',false,4.52],
+   [5.15,10.65,20.54,'卸货仓','SERVICE BAY  /  02',true,3.98]
+  ],
+  lights:[[21.6,22.2,2.9,2.7],[22.4,18.9,2.2,-2.1],[20.6,12.5,3.1,-2.4],[20.9,7.5,2.8,2.1],
+   [11.5,16.0,2.85,2.3],[7.1,11.3,2.5,-2.2],[34.2,15.8,2.8,2.55],[34.7,22.0,2.95,-2.3],
+   [6.4,23.5,2.7,1.9],[33.5,8.7,2.65,-2.6],[23.5,27.8,2.05,2.55],[12.8,5.7,2.7,-2.2]],
+  decor:[],
+  theme:{style:'yard',ground:[.255,.274,.274],fog:[.104,.184,.190],ambient:[.34,.44,.47],
+   sky:['#07141d','#142731','#354f57','#16252a'],floor:['#635946','#3c3d33','#171b17'],
+   weather:'rain',clouds:true,moon:true,wallHeight:3.35,outerHeight:4.6,crateHeight:1.55,
+   trainHeight:4.4,woodHeight:1.2,metalHeight:2.55,wall:[.39,.43,.45],outer:[.32,.36,.37],
+   crate:[.53,.38,.25],wood:[.53,.40,.27],metal:[.37,.48,.50],train:[.31,.48,.47]}
+ },
+ subway:{
+  name:'地铁站',code:'SECTOR 11',short:'地铁',tagline:'停摆列车 · 候车月台',
+  blurb:'末班车停在了站台之间。沿两侧月台穿行，借列车和立柱躲避感染者。',
+  rows:[
+   '###########################################',
+   '#........#.......................#........#',
+   '#.W....W.#.......................#.W....W.#',
+   '#........#.......................#........#',
+   '#........#.......................#........#',
+   '####.####.........................####.####',
+   '#.........................................#',
+   '#.........................................#',
+   '#.....C.....C.....C.....C.....C.....C.....#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.....TTTTTTTT.TTTTTTT.TTTTTTT.TTTTTTT....#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.....C.....C.....C.....C.....C.....C.....#',
+   '#.........................................#',
+   '#.........................................#',
+   '####.####.........................####.####',
+   '#........#.......................#........#',
+   '#........#.......................#........#',
+   '#.W....W.#.......................#.W....W.#',
+   '#........#.......................#........#',
+   '###########################################',
+  ],
+  supplies:[[4.5,2.5],[38.5,2.5],[4.5,28.5],[38.5,28.5],[21.5,8.5]],
+  spawnPoints:[[1.5,15.5],[41.5,15.5],[4.5,1.5],[38.5,1.5],[4.5,29.5],[38.5,29.5],
+   [2.5,8.5],[40.5,8.5],[2.5,22.5],[40.5,22.5],[14.5,20.5],[30.5,11.5],[22.5,11.5]],
+  start:{x:21.5,y:24.5,angle:0},
+  preview:{x:9.5,y:23.6,angle:0},
+  previewEnemies:[
+   {x:15.5,y:22.5,type:'shield',anim:.6,flash:0},
+   {x:21.5,y:23.5,type:'spitter',anim:2.4,flash:0},
+   {x:27.5,y:22.5,type:'runner',anim:3.2,flash:0},
+   {x:33.5,y:23.5,type:'brute',anim:4.1,flash:0}
+  ],
+  zones:[
+   {name:'站厅夹层',x0:0,y0:0,x1:42,y1:5},
+   {name:'换乘通道',x0:0,y0:25,x1:42,y1:30},
+   {name:'二号站台',x0:0,y0:21,x1:42,y1:24},
+   {name:'一号站台',x0:0,y0:6,x1:42,y1:10},
+   {name:'停摆列车',x0:0,y0:11,x1:42,y1:20}
+  ],
+  signs:[
+   [5.5,12.5,10.62,'一号站台','PLATFORM 1  /  L2',false,3.98],
+   [30.2,37.2,10.62,'二号站台','PLATFORM 2  /  L2',false,3.98],
+   [18.0,25.0,20.52,'停摆列车','TRAIN 07  /  STOPPED',true,4.18],
+   [2.6,8.4,24.62,'检票大厅','TICKET HALL',true,3.88]
+  ],
+  lights:[[6.5,9.6,3.05,-2.5],[12.5,9.6,3.05,-2.5],[18.5,9.6,3.05,-2.5],[24.5,9.6,3.05,-2.5],
+   [30.5,9.6,3.05,-2.5],[36.5,9.6,3.05,-2.5],[6.5,21.4,3.05,-2.3],[12.5,21.4,3.05,-2.3],
+   [18.5,21.4,3.05,-2.3],[24.5,21.4,3.05,2.2],[30.5,21.4,3.05,2.2],[36.5,21.4,3.05,2.2]],
+  decor:[[1.5,11.34,40,.14,[.66,.55,.24]],[1.5,20.52,40,.14,[.66,.55,.24]],
+   [21.2,6.2,.18,17,[.33,.40,.40]]],
+  theme:{style:'subway',ground:[.225,.245,.245],fog:[.072,.100,.106],ambient:[.31,.37,.38],
+   sky:['#090d0f','#131a1d','#222c2e','#0f1517'],floor:['#3b4748','#26302f','#111817'],
+   weather:'none',clouds:false,moon:false,wallHeight:3.35,outerHeight:4.6,crateHeight:1.5,
+   trainHeight:3.0,woodHeight:1.15,metalHeight:2.6,wall:[.42,.48,.48],outer:[.27,.33,.34],
+   crate:[.57,.57,.52],wood:[.43,.36,.27],metal:[.34,.40,.42],train:[.30,.43,.47]}
+ },
+ tunnel:{
+  name:'地下隧道',code:'SECTOR 03',short:'隧道',tagline:'检修管廊 · 应急照明',
+  blurb:'城市地下的检修隧道已经断电。沿着应急灯走，在侧室之间寻找补给。',
+  rows:[
+   '###########################################',
+   '###########################################',
+   '################........###################',
+   '###.....C.######......W.#######........####',
+   '###.......######......C.#######.....W..####',
+   '###...C...######.C......#######.C......####',
+   '###.......######........#######........####',
+   '###.......######........#######.......C####',
+   '#####...###########..##########........####',
+   '#####...###########..#############..#######',
+   '#..##...###########..#############..#######',
+   '#..#C...###########..#############..#######',
+   '#..##...###########..#############..#######',
+   '#..##...###########..#############..#######',
+   '#.........................................#',
+   '#.........C...............C...........C...#',
+   '#.............C...............C...........#',
+   '#.........................................#',
+   '####...###########...##############...##..#',
+   '####...###########...##############...##..#',
+   '####...###########...##############...##C.#',
+   '####...###########...##############...##..#',
+   '####...#########.......########.........###',
+   '###......#######....W..########.........###',
+   '###.C....#######.C.....########.C.......###',
+   '###..W...#######.......########.........###',
+   '###......#######.....C.########.........###',
+   '###....C.#######.......########.......C.###',
+   '###......######################.........###',
+   '###########################################',
+   '###########################################',
+  ],
+  supplies:[[6.5,6.5],[20.5,5.5],[35.5,6.5],[5.5,26.5],[19.5,24.5],[36.5,26.5]],
+  spawnPoints:[[4.5,3.5],[8.5,6.5],[18.5,3.5],[22.5,6.5],[32.5,4.5],[37.5,7.5],
+   [4.5,27.5],[7.5,23.5],[17.5,26.5],[21.5,23.5],[32.5,27.5],[38.5,23.5],
+   [1.5,15.5],[41.5,16.5]],
+  start:{x:21.5,y:15.5,angle:0},
+  preview:{x:21.5,y:16.5,angle:0},
+  previewEnemies:[
+   {x:24.5,y:15.5,type:'walker',anim:.8,flash:0},
+   {x:28.5,y:16.5,type:'runner',anim:2.2,flash:0},
+   {x:18.5,y:15.5,type:'spitter',anim:3.4,flash:0},
+   {x:12.5,y:16.5,type:'brute',anim:4.3,flash:0}
+  ],
+  zones:[
+   {name:'北侧检修室',x0:0,y0:0,x1:42,y1:13},
+   {name:'南侧排水室',x0:0,y0:18,x1:42,y1:30},
+   {name:'西段主隧道',x0:0,y0:14,x1:13,y1:17},
+   {name:'东段主隧道',x0:31,y0:14,x1:42,y1:17},
+   {name:'中央联络段',x0:0,y0:14,x1:42,y1:17}
+  ],
+  signs:[
+   [7.5,15.0,13.36,'主隧道','SERVICE TUNNEL  /  B2',true,3.8],
+   [23.5,31.0,13.36,'排水暗渠','DRAINAGE  /  B3',false,3.8],
+   [16.0,23.0,21.84,'风机房','AIR SHAFT  /  B2',true,3.6],
+   [2.0,8.5,17.5,'西侧检修口','MAINTENANCE',false,3.4]
+  ],
+  lights:[[5.0,15.0,2.7,2.3],[11.0,16.0,2.7,-2.1],[17.0,15.0,2.7,2.3],[23.0,16.0,2.7,-2.1],
+   [29.0,15.0,2.7,2.3],[35.0,16.0,2.7,-2.1],[6.0,5.0,2.6,1.9],[20.0,4.0,2.6,-1.7],
+   [35.0,6.0,2.6,1.9],[6.0,26.0,2.6,-1.7],[19.0,24.0,2.6,1.9],[36.0,26.0,2.6,-1.7]],
+  decor:[[1.5,17.35,40,.16,[.20,.32,.31]],[1.5,13.68,40,.11,[.40,.33,.16]],
+   [3.5,6.4,5,.08,[.22,.30,.29]],[16.5,4.4,6,.08,[.22,.30,.29]]],
+  theme:{style:'tunnel',ground:[.195,.205,.190],fog:[.055,.072,.058],ambient:[.235,.255,.220],
+   sky:['#080a08','#121510','#23251b','#0c0e0b'],floor:['#3b3a2d','#25251c','#10110c'],
+   weather:'drip',clouds:false,moon:false,wallHeight:3.2,outerHeight:4.6,crateHeight:1.35,
+   trainHeight:4.2,woodHeight:1.1,metalHeight:2.5,wall:[.32,.31,.26],outer:[.24,.24,.20],
+   crate:[.40,.35,.26],wood:[.42,.33,.22],metal:[.30,.32,.29],train:[.32,.34,.30]}
+ },
+ hospital:{
+  name:'医院',code:'SECTOR 22',short:'医院',tagline:'白炽病房 · 封锁病区',
+  blurb:'病区已经封锁，走廊只剩应急灯。穿过病房和护士站，守住每一扇门。',
+  rows:[
+   '###########################################',
+   '#.........................................#',
+   '#.################.......################.#',
+   '#.#W....W....W...#.......#W....W....W...#.#',
+   '#.#W....W....W..W#.......#W....W....W..W#.#',
+   '#.#..............#.......#..............#.#',
+   '#.#..............#.......#..............#.#',
+   '#.#######..#######.......########..######.#',
+   '#.........................................#',
+   '#.################.......################.#',
+   '#.#..............#.......#..............#.#',
+   '#.#W....W....W..W#.......#W....W....W..W#.#',
+   '#.#..............#.......#..............#.#',
+   '#.#######..#######.......#######..#######.#',
+   '#.........................................#',
+   '#..................CC.CC..................#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.#######..#######.......#######..#######.#',
+   '#.#..............#.......#..............#.#',
+   '#.#W....W....W..W#.......#W....W....W..W#.#',
+   '#.#..............#.......#..............#.#',
+   '#.#..............#.......#..............#.#',
+   '#.################.......################.#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.........................................#',
+   '#.........................................#',
+   '###########################################',
+  ],
+  supplies:[[6.5,5.5],[30.5,5.5],[6.5,11.5],[30.5,11.5],[6.5,22.5]],
+  spawnPoints:[[4.5,3.5],[16.5,6.5],[27.5,3.5],[39.5,6.5],[3.5,10.5],[16.5,12.5],
+   [26.5,10.5],[39.5,12.5],[3.5,20.5],[16.5,23.5],[26.5,20.5],[39.5,23.5],
+   [21.5,1.5],[21.5,29.5],[1.5,15.5],[41.5,16.5]],
+  start:{x:21.5,y:16.5,angle:0},
+  preview:{x:21.5,y:16.5,angle:0},
+  previewEnemies:[
+   {x:28.5,y:15.5,type:'walker',anim:.7,flash:0},
+   {x:32.5,y:16.5,type:'runner',anim:2.1,flash:0},
+   {x:25.5,y:14.5,type:'screamer',anim:3.3,flash:0},
+   {x:35.5,y:15.5,type:'brute',anim:4.2,flash:0}
+  ],
+  zones:[
+   {name:'西侧住院部',x0:0,y0:0,x1:18,y1:8},
+   {name:'东侧住院部',x0:24,y0:0,x1:42,y1:8},
+   {name:'西侧诊疗区',x0:0,y0:18,x1:18,y1:30},
+   {name:'东侧诊疗区',x0:24,y0:18,x1:42,y1:30},
+   {name:'门诊西走廊',x0:0,y0:9,x1:18,y1:17},
+   {name:'门诊东走廊',x0:24,y0:9,x1:42,y1:17},
+   {name:'中央护士站',x0:0,y0:0,x1:42,y1:30}
+  ],
+  signs:[
+   [17.4,24.6,13.62,'中央走廊','CENTRAL WARD  /  L3',false,4.05],
+   [4.0,15.0,8.52,'西侧住院部','WARD WEST',false,3.9],
+   [26.0,37.0,8.52,'东侧住院部','WARD EAST',false,3.9],
+   [4.0,15.0,18.22,'门诊诊疗区','CLINIC',true,3.9]
+  ],
+  lights:[[21.5,5.0,3.2,-2.8],[21.5,11.0,3.2,-2.6],[21.5,17.0,3.2,-2.6],[21.5,23.0,3.2,-2.6],
+   [21.5,29.0,3.2,-2.4],[6.0,5.0,3.0,-2.3],[30.0,5.0,3.0,-2.3],[6.0,11.0,3.0,-2.3],
+   [30.0,11.0,3.0,-2.3],[6.0,22.0,3.0,1.8],[30.0,22.0,3.0,1.8],[21.5,15.0,3.2,2.0]],
+  decor:[[18.9,9.5,.13,18,[.38,.14,.12]],[24.9,9.5,.13,18,[.38,.14,.12]],
+   [1.5,14.4,40,.10,[.34,.38,.36]]],
+  theme:{style:'hospital',ground:[.300,.325,.315],fog:[.095,.125,.126],ambient:[.40,.45,.44],
+   sky:['#0b1011','#161d1e','#293231','#111819'],floor:['#5b625b','#3a413c','#181d1a'],
+   weather:'none',clouds:false,moon:false,wallHeight:3.3,outerHeight:4.6,crateHeight:1.35,
+   trainHeight:4.2,woodHeight:1.1,metalHeight:2.5,wall:[.58,.62,.58],outer:[.38,.42,.40],
+   crate:[.44,.50,.47],wood:[.55,.50,.41],metal:[.42,.47,.48],train:[.42,.47,.48]}
+ },
+ prison:{
+  name:'监狱',code:'SECTOR 18',short:'监狱',tagline:'放风场 · 高压探照灯',
+  blurb:'监狱的封锁门全部打开。穿过牢房区和中央放风场，挡住从两翼涌来的感染者。',
+  rows:[
+   '###########################################',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#.W.W..#.W.W.#.W.W.#.W.W.#.W.W.#.W.W.#.WW.#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#.W.W..#.W.W.#.W.W.#.W.W.#.W.W.#.W.W.#.WW.#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '###.######.#####.#####.#####.#####.####.###',
+   '#.........................................#',
+   '#.........................................#',
+   '#.................C.......................#',
+   '#....#....C.........................#.....#',
+   '#....#........................C.....#.....#',
+   '#....#..............MMM.............#.....#',
+   '#...................MMM...................#',
+   '#....#..............MMM.............#.....#',
+   '#....#......C....................C..#.....#',
+   '#....#..............................#.....#',
+   '#.......................C.................#',
+   '#.........................................#',
+   '#.........................................#',
+   '###.######.#####.#####.#####.#####.####.###',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#.W.W..#.W.W.#.W.W.#.W.W.#.W.W.#.W.W.#.WW.#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#......#.....#.....#.....#.....#.....#....#',
+   '#.W.W..#.W.W.#.W.W.#.W.W.#.W.W.#.W.W.#.WW.#',
+   '###########################################',
+  ],
+  supplies:[[17.5,18.5],[2.5,16.5],[39.5,16.5],[10.5,10.5],[28.5,21.5]],
+  spawnPoints:[[3.5,4.5],[10.5,6.5],[16.5,3.5],[22.5,6.5],[28.5,3.5],[34.5,6.5],[39.5,4.5],
+   [3.5,26.5],[10.5,27.5],[16.5,25.5],[22.5,27.5],[28.5,25.5],[34.5,27.5],[39.5,26.5],
+   [2.5,14.5],[39.5,18.5],[1.5,10.5],[41.5,21.5]],
+  start:{x:10.5,y:19.5,angle:-Math.PI/2},
+  preview:{x:10.5,y:19.5,angle:-Math.PI/2},
+  previewEnemies:[
+   {x:11.5,y:15.5,type:'walker',anim:.7,flash:0},
+   {x:9.5,y:16.5,type:'runner',anim:2.2,flash:0},
+   {x:12.5,y:14.5,type:'shield',anim:3.1,flash:0},
+   {x:10.5,y:12.5,type:'brute',anim:4.2,flash:0}
+  ],
+  zones:[
+   {name:'A 区牢房',x0:0,y0:0,x1:42,y1:11},
+   {name:'B 区牢房',x0:0,y0:21,x1:42,y1:30},
+   {name:'洗衣房',x0:0,y0:12,x1:6,y1:20},
+   {name:'工场',x0:35,y0:12,x1:42,y1:20},
+   {name:'中央放风场',x0:0,y0:12,x1:42,y1:20}
+  ],
+  signs:[
+   [7.0,14.0,11.62,'中央放风场','PRISON YARD  /  A',true,4.2],
+   [27.0,35.0,11.62,'工场','WORKSHOP  /  B',true,4.2],
+   [15.0,29.0,21.62,'B 区牢房','BLOCK B',false,3.9],
+   [15.0,29.0,9.38,'A 区牢房','BLOCK A',false,3.9]
+  ],
+  lights:[[21.5,12.0,4.0,2.4],[21.5,20.0,4.0,2.4],[10.5,16.0,3.6,2.2],[32.5,16.0,3.6,2.2],
+   [3.0,10.0,3.0,-1.9],[21.0,10.0,3.0,-1.9],[39.0,10.0,3.0,-1.9],[3.0,21.0,3.0,-1.9],
+   [21.0,21.0,3.0,-1.9],[39.0,21.0,3.0,-1.9],[21.5,14.0,3.2,-2.0],[21.5,18.0,3.2,-2.0]],
+  decor:[[7.5,12.5,27,.12,[.54,.45,.22]],[7.5,19.5,27,.12,[.54,.45,.22]],
+   [14.5,15.5,.10,2,[.42,.47,.49]],[27.5,15.5,.10,2,[.42,.47,.49]]],
+  theme:{style:'prison',ground:[.235,.250,.255],fog:[.068,.085,.100],ambient:[.29,.33,.37],
+   sky:['#070a0d','#11171c','#232d35','#0d1318'],floor:['#41474b','#292f33','#13181c'],
+   weather:'none',clouds:false,moon:false,wallHeight:3.45,outerHeight:5.0,crateHeight:1.5,
+   trainHeight:4.2,woodHeight:1.1,metalHeight:2.7,wall:[.37,.41,.44],outer:[.23,.27,.30],
+   crate:[.43,.45,.43],wood:[.37,.33,.27],metal:[.30,.35,.39],train:[.32,.36,.39]}
+ }
+};
+let MAP=MAPS.yard,selectedMap='yard',columns=COLS,rows=ROWS,layout,map,supplies,spawnPoints,worldStart,preview,previewEnemies=[];
+let yard3D=null,best=0;
+function bestKey(id) {return 'blackout-best-'+id;}
+function applyMap(id,interactive=true) {
+ const def=MAPS[id]||MAPS.yard;
+ selectedMap=def===MAPS[id]?id:'yard';MAP=def;
+ columns=COLS;rows=ROWS;
+ layout=def.rows.map(row=>row.split(''));
+ map=def.rows.slice();
+ supplies=def.supplies;spawnPoints=def.spawnPoints;worldStart=def.start;
+ preview=def.preview;previewEnemies=def.previewEnemies||[];
+ best=Number(read(bestKey(selectedMap),selectedMap==='yard'?read('blackout-best','0'):'0'))||0;
+ if(interactive) {
+  if(typeof resize==='function') resize();
+  if(yard3D) yard3D.rebuild();
+  syncMenu();
+ }
+}
+applyMap('yard',false);
 function zone(x,y) {
- if(y>=24 && x>=14 && x<31) return '南侧闸门';
- if(x>=31) return '集装箱区';
- if(x<14) return y<15?'维修站':'卸货仓';
- if(y<10) return '北侧泵站';
- return '中央装卸区';
+ const cx=Math.floor(x),cy=Math.floor(y);
+ for(const area of MAP.zones) if(cx>=area.x0&&cx<=area.x1&&cy>=area.y0&&cy<=area.y1) return area.name;
+ return '隔离区';
 }
 function coverHeight(x,y) {
- if(cell(x,y)==='C') return 1.55;
- if(x===0 || y===0 || x===columns-1 || y===rows-1) return 4.6;
- if(x>=31) return (Math.floor(y/3)+Math.floor(x/4))%3===0?4.7:3.05;
- if(x<14) return y<15?3.3:3.75;
- return 3.35;
+ const tile=cell(x,y),t=MAP.theme;
+ if(tile==='T') return t.trainHeight??4.2;
+ if(tile==='C') return t.crateHeight??1.55;
+ if(tile==='W') return t.woodHeight??1.2;
+ if(tile==='M') return t.metalHeight??2.55;
+ if(tile==='#') {
+  const out=x===0||y===0||x===columns-1||y===rows-1;
+  return out?(t.outerHeight??4.6):(t.wallHeight??3.35);
+ }
+ return 0;
 }
 const TAU = 2 * Math.PI, MAX_WAVE = 8;
 const guns = [
@@ -195,13 +555,12 @@ let firing=false, aimPointer=null, joyId=null, joyX=0, joyY=0, pressed=false, pi
 let frames=0, last=performance.now(), routeClock=0, route=[], lastSpawn=-1, spawnHistory=[], audio=null, noise=null;
 const specialGate={spitter:0,screamer:0};
 let muted=read('blackout-muted','0')==='1';
-let best=Number(read('blackout-best','0')) || 0;
 let depth, rays, focal, sky, floor;
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 function read(key,fallback) { try {return localStorage.getItem(key) || fallback;} catch {return fallback;} }
 function save(key,value) { try {localStorage.setItem(key,String(value));} catch {} }
 function cell(x,y) {return map[y]?.[x] ?? '#';}
-function solid(x,y) {return cell(x,y)==='#' || cell(x,y)==='C';}
+function solid(x,y) {return cell(x,y)!=='.';}
 function fits(x,y,r) {
  return !solid(Math.floor(x-r),Math.floor(y-r)) && !solid(Math.floor(x+r),Math.floor(y-r)) &&
         !solid(Math.floor(x-r),Math.floor(y+r)) && !solid(Math.floor(x+r),Math.floor(y+r));
@@ -250,10 +609,11 @@ function resize() {
  focal=W.width*.76;
  depth=new Float32Array(W.width);
  rays=Array.from({length:W.width},(_,i)=>(i+.5-W.width/2)/focal);
+ const theme=MAP.theme;
  sky=ctx.createLinearGradient(0,0,0,W.height*.64);
- sky.addColorStop(0,'#171e22');sky.addColorStop(.56,'#313c39');sky.addColorStop(1,'#8b7854');
+ sky.addColorStop(0,theme.sky[0]);sky.addColorStop(.56,theme.sky[2]);sky.addColorStop(1,theme.sky[3]);
  floor=ctx.createLinearGradient(0,W.height*.41,0,W.height);
- floor.addColorStop(0,'#635946');floor.addColorStop(.38,'#3c3d33');floor.addColorStop(1,'#171b17');
+ floor.addColorStop(0,theme.floor[0]);floor.addColorStop(.38,theme.floor[1]);floor.addColorStop(1,theme.floor[2]);
 }
 addEventListener('resize',resize);resize();
 function rng(seed) {
@@ -423,7 +783,25 @@ function setMode(next) {
   $('stick').firstElementChild.style.transform='none';
   if (document.pointerLockElement===W) document.exitPointerLock();
  }
- if(mode==='menu') $('best').textContent=best?'最佳纪录 / 通过 '+best+' 波':'最佳纪录 / —';
+ if(mode==='menu') syncMenu();
+}
+function syncMenu() {
+ const def=MAPS[selectedMap];
+ $('menuBlurb').textContent=def.blurb;
+ $('sectorTag').textContent=def.code+' / 43 × 31';
+ $('sectorName').textContent=def.name;
+ $('footSector').textContent=def.code+' / '+def.name;
+ $('best').textContent=best?'最佳纪录 / 通过 '+best+' 波':'最佳纪录 / —';
+ for(const button of document.querySelectorAll('.mapChoice')) {
+  const on=button.dataset.map===selectedMap;
+  button.classList.toggle('active',on);
+  button.setAttribute('aria-pressed',String(on));
+ }
+}
+function selectMap(id) {
+ if(!MAPS[id]||id===selectedMap) return;
+ applyMap(id,true);
+ tone(320,.09,'triangle',.045,470);
 }
 function lockAim() {
  if(mobile || document.pointerLockElement===W || !W.requestPointerLock) return;
@@ -503,9 +881,9 @@ function updateRoute() {
 }
 function waveCleared() {
  acidShots.length=0;
- if (best<wave) {best=wave;save('blackout-best',best);}
+ if (best<wave) {best=wave;save(bestKey(selectedMap),best);}
  if (wave===MAX_WAVE) {
-  modal('over','行动完成 / SURVIVED','你守住了战区','通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。','再打一局');
+  modal('over','行动完成 / SURVIVED','你守住了'+MAP.name,'通过全部 '+MAX_WAVE+' 波 · 击倒 '+kills+' 名感染者。','再打一局');
   return;
  }
  waveTime=10;used.fill(0);setNotice('战区暂时安全 · 趁现在补给',2.4);
@@ -895,8 +1273,9 @@ function makeYardRenderer() {
  uniform vec2 uCamera;
  uniform float uTime,uFlash;
  uniform vec4 uLights[12];
+ uniform vec3 uFog,uAmbient;
  vec3 illum(vec3 p,vec3 n) {
-   vec3 ambient=vec3(.34,.44,.47)+max(0.,dot(n,normalize(vec3(-.4,.8,-.25))))*vec3(.14,.18,.19);
+   vec3 ambient=uAmbient+max(0.,dot(n,normalize(vec3(-.4,.8,-.25))))*vec3(.14,.18,.19);
    for(int i=0;i<12;i++) {
      vec4 l=uLights[i];
      vec3 d=vec3(l.x,l.z,l.y)-p;
@@ -911,7 +1290,7 @@ function makeYardRenderer() {
  vec3 fog(vec3 finalColor,vec3 p) {
    float d=distance(p.xz,uCamera);
    float fade=1.-exp(-d*(.024+.016*exp(-p.y*.38)));
-   return mix(finalColor,vec3(.104,.184,.190),fade*.87);
+   return mix(finalColor,uFog,fade*.87);
  }`;
  const sceneFragment=`precision highp float;
  varying vec3 vPosition,vNormal,vColor;
@@ -1010,7 +1389,7 @@ function makeYardRenderer() {
   const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,v));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,f));gl.linkProgram(p);
   if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
   const uniforms={};
-  for(const name of ['uCamera','uForward','uScale','uPitch','uTime','uFlash','uLights[0]','uType']) uniforms[name]=gl.getUniformLocation(p,name);
+  for(const name of ['uCamera','uForward','uScale','uPitch','uTime','uFlash','uLights[0]','uType','uFog','uAmbient']) uniforms[name]=gl.getUniformLocation(p,name);
   return {p,uniforms};
  }
  const scene=program(sceneVertex,sceneFragment),spritesProgram=program(spriteVertex,spriteFragment);
@@ -1035,12 +1414,8 @@ function makeYardRenderer() {
   };
   if(yardPhotography[name]) photo.src=yardPhotography[name];
  }
- const verts=[], lights=[
-  [21.6,22.2,2.9,2.7],[22.4,18.9,2.2,-2.1],[20.6,12.5,3.1,-2.4],[20.9,7.5,2.8,2.1],
-  [11.5,16.0,2.85,2.3],[7.1,11.3,2.5,-2.2],[34.2,15.8,2.8,2.55],[34.7,22.0,2.95,-2.3],
-  [6.4,23.5,2.7,1.9],[33.5,8.7,2.65,-2.6],[23.5,27.8,2.05,2.55],[12.8,5.7,2.7,-2.2]
- ];
- const lightData=new Float32Array(lights.flat());
+ const verts=[], lights=[];
+ const lightData=new Float32Array(48);
  const steel=[.37,.48,.50], black=[.23,.27,.28], hazard=[.78,.56,.27];
  const signObjects=[];
  function face(a,b,c,d,n,color,mat) {
@@ -1053,65 +1428,8 @@ function makeYardRenderer() {
   face(a,b,f,e,[0,0,-1],color,mat);face(c,d0,h0,g,[0,0,1],color,mat);
   face(d0,a,e,h0,[-1,0,0],color,mat);face(b,c,g,f,[1,0,0],color,mat);
  }
- const ground=[.255,.274,.274];
- face([1,0,1],[columns-1,0,1],[columns-1,0,rows-1],[1,0,rows-1],[0,1,0],ground,0);
- const rand=rng(90210);
- const metalColors=[[.31,.48,.47],[.42,.45,.51],[.53,.30,.248],[.52,.43,.305],[.32,.36,.42]];
- for(let y=0;y<rows;y++) for(let x=0;x<columns;x++) {
-  const tile=cell(x,y);
-  if(tile==='.') continue;
-  const wallHeight=coverHeight(x,y),out=x===0||y===0||x===columns-1||y===rows-1;
-  if(tile==='C') {
-   box(x,.02,y,1,wallHeight-.02,1,3,[.53,.38,.25]);
-   for(const offset of [.06,.88]) {
-    box(x+offset,.025,y+.012,.06,wallHeight-.005,.976,5,black);
-    box(x+.012,.025,y+offset,.976,wallHeight-.005,.06,5,black);
-   }
-   box(x,.14,y,1,.15,1,4,hazard);
-  } else {
-   const container=!out&&(x>=28||y>=23||(x>=14&&y>=10));
-   const color=container?metalColors[(Math.floor(x/4)*3+Math.floor(y/3))%metalColors.length]:[.39+rand()*.065,.43+rand()*.047,.45+rand()*.04];
-   box(x,0,y,1,wallHeight,1,container?2:1,color);
-   if(out) continue;
-   const edgeNorth=!solid(x,y-1),edgeSouth=!solid(x,y+1),edgeEast=!solid(x+1,y),edgeWest=!solid(x-1,y);
-   if(edgeNorth||edgeSouth||edgeEast||edgeWest) box(x,wallHeight-.15,y,1.006,.153,1.006,5,black);
-   const bandH=container?.28:.17,bandY=container?.27:.58,bandMat=container?4:5;
-   if(edgeNorth) box(x,bandY,y-.016,1,bandH,.019,bandMat,container?hazard:steel);
-   if(edgeSouth) box(x,bandY,y+.995,1,bandH,.020,bandMat,container?hazard:steel);
-   if(edgeWest) box(x-.016,bandY,y,.019,bandH,1,bandMat,container?hazard:steel);
-   if(edgeEast) box(x+.995,bandY,y,.020,bandH,1,bandMat,container?hazard:steel);
-   if(container&&edgeSouth) {
-    const frame=[.25,.272,.25],bolt=[.39,.372,.31];
-    box(x+.038,.51,y+.999,.039,wallHeight-.65,.036,5,frame);
-    box(x+.929,.51,y+.999,.039,wallHeight-.65,.036,5,frame);
-    if(x%3===1) {
-     box(x+.26,.49,y+1.007,.047,wallHeight-.72,.051,5,frame);
-     for(const lift of [.62,1.17,wallHeight-.32]) box(x+.20,lift,y+1.023,.16,.068,.064,5,bolt);
-    }
-   }
-   if(container&&edgeWest) for(const offset of [.09,.91]) {
-    box(x-.033,.52,y+offset,.036,wallHeight-.70,.044,5,[.245,.257,.236]);
-   }
-  }
- }
- for(const x of [17.31,24.63]) {
-  box(x,3.17,13.20,.09,.09,3.7,2,[.29,.31,.29]);
-  box(x-.03,3.142,15.02,.15,.15,.11,5,[.31,.31,.286]);
- }
- for(const [x,z] of [[16.50,22.18],[26.12,22.16],[31.65,18.02],[13.25,17.30]]) {
-  box(x,0,z,.12,.72,.13,4,[.64,.454,.225]);
-  box(x-.023,.015,z-.023,.167,.081,.177,5,[.293,.30,.283]);
- }
  function paintLine(x,z,w,d,color) {
   face([x,.010,z],[x+w,.010,z],[x+w,.010,z+d],[x,.010,z+d],[0,1,0],color,5);
- }
- for(let y=1.5;y<29;y+=1.65) {
-  if(!solid(21,Math.floor(y))) paintLine(21.43,y,.13,.68,[.64,.54,.32]);
-  if(!solid(20,Math.floor(y))) paintLine(20.05,y,.035,1.28,[.41,.50,.49]);
- }
- for(const [x,y] of supplies) {
-  paintLine(x-.68,y-.68,1.36,.055,[.5,.67,.45]);paintLine(x-.68,y+.63,1.36,.055,[.5,.67,.45]);
-  paintLine(x-.68,y-.68,.055,1.36,[.5,.67,.45]);paintLine(x+.63,y-.68,.055,1.36,[.5,.67,.45]);
  }
  function makeSign(cap,sub,accent) {
   const img=document.createElement('canvas');img.width=384;img.height=96;
@@ -1130,27 +1448,130 @@ function makeYardRenderer() {
   box(x1-.72,post-.02,z+.26,.61,.052,.055,6,clr);
   signObjects.push({x:(x0+x1)*.5,y:post-.05,z:z+.276,width:2.88,height:.72,data:makeSign(title,sub,warm?'#e9a85f':'#89e8ed')});
  }
- gantry(17.55,24.8,22.58,'中央装卸区','CARGO TRANSFER  /  07',true,3.94);
- gantry(17.55,25.4,13.38,'北侧泵站','PUMP STATION  /  08',false,4.44);
- gantry(31.48,36.32,20.56,'集装箱区','CONTAINER STACK  /  03',false,4.52);
- gantry(5.15,10.65,20.54,'卸货仓','SERVICE BAY  /  02',true,3.98);
- for(const [x,z,y,w] of lights) {
-  const clr=w>0?[1,.66,.35]:[.38,.94,1];
-  let arm=null;
-  for(let dist=1;dist<12&&!arm;dist++) {
-   arm=[[dist,0],[-dist,0],[0,dist],[0,-dist]].find(([dx,dz])=>solid(Math.floor(x+dx),Math.floor(z+dz)));
+ const metalColors=[[.31,.48,.47],[.42,.45,.51],[.53,.30,.248],[.52,.43,.305],[.32,.36,.42]];
+ const mesh=gl.createBuffer();
+ function rebuild() {
+  verts.length=0;signObjects.length=0;lights.length=0;
+  const theme=MAP.theme,style=theme.style,rand=rng(90210);
+  for(const item of MAP.lights.slice(0,12)) lights.push(item);
+  while(lights.length<12) lights.push([-20,-20,0,0]);
+  lightData.set(lights.flat());
+  face([1,0,1],[columns-1,0,1],[columns-1,0,rows-1],[1,0,rows-1],[0,1,0],theme.ground,0);
+  for(let y=0;y<rows;y++) for(let x=0;x<columns;x++) {
+   const tile=cell(x,y);
+   if(tile==='.') continue;
+   const wallHeight=coverHeight(x,y),out=x===0||y===0||x===columns-1||y===rows-1;
+   const edgeNorth=!solid(x,y-1),edgeSouth=!solid(x,y+1),edgeEast=!solid(x+1,y),edgeWest=!solid(x-1,y);
+   if(tile==='C') {
+    if(style==='yard') {
+     box(x,.02,y,1,wallHeight-.02,1,3,theme.crate);
+     for(const offset of [.06,.88]) {
+      box(x+offset,.025,y+.012,.06,wallHeight-.005,.976,5,black);
+      box(x+.012,.025,y+offset,.976,wallHeight-.005,.06,5,black);
+     }
+     box(x,.14,y,1,.15,1,4,hazard);
+    } else {
+     box(x,.02,y,1,wallHeight-.02,1,3,theme.crate);
+     box(x,.13,y,1,.13,1,4,hazard);
+     box(x,wallHeight-.13,y,1.004,.13,1.004,5,black);
+     if(style==='subway') for(const offset of [.10,.84]) box(x+offset,.04,y+.01,.06,wallHeight-.08,.98,5,[.30,.34,.34]);
+    }
+    continue;
+   }
+   if(tile==='T') {
+    box(x,0,y,1,wallHeight,1,2,theme.train);
+    for(const [bx,bz,bw,bd] of [[x-.014,y,.019,1],[x+.995,y,.019,1],[x,y-.014,1,.019],[x,y+.995,1,.019]])
+     box(bx,1.42,bz,bw,.58,bd,5,[.10,.14,.15]);
+    for(const [bx,bz,bw,bd] of [[x-.016,y,.022,1],[x+.994,y,.022,1],[x,y-.016,1,.022],[x,y+.994,1,.022]])
+     box(bx,3.46,bz,bw,.09,bd,5,steel);
+    continue;
+   }
+   if(tile==='W') {
+    box(x,0,y,1,wallHeight,1,3,theme.wood);
+    box(x,wallHeight-.10,y,1.004,.10,1.004,5,black);
+    continue;
+   }
+   if(tile==='M') {
+    box(x,0,y,1,wallHeight,1,2,theme.metal);
+    box(x,wallHeight-.16,y,1.006,.16,1.006,5,black);
+    if(edgeNorth) box(x,wallHeight*.46,y-.016,1,.12,.019,5,hazard);
+    if(edgeSouth) box(x,wallHeight*.46,y+.995,1,.12,.020,5,hazard);
+    continue;
+   }
+   if(style==='yard') {
+    const container=!out&&(x>=28||y>=23||(x>=14&&y>=10));
+    const color=container?metalColors[(Math.floor(x/4)*3+Math.floor(y/3))%metalColors.length]:[.39+rand()*.065,.43+rand()*.047,.45+rand()*.04];
+    box(x,0,y,1,wallHeight,1,container?2:1,color);
+    if(out) continue;
+    if(edgeNorth||edgeSouth||edgeEast||edgeWest) box(x,wallHeight-.15,y,1.006,.153,1.006,5,black);
+    const bandH=container?.28:.17,bandY=container?.27:.58,bandMat=container?4:5;
+    if(edgeNorth) box(x,bandY,y-.016,1,bandH,.019,bandMat,container?hazard:steel);
+    if(edgeSouth) box(x,bandY,y+.995,1,bandH,.020,bandMat,container?hazard:steel);
+    if(edgeWest) box(x-.016,bandY,y,.019,bandH,1,bandMat,container?hazard:steel);
+    if(edgeEast) box(x+.995,bandY,y,.020,bandH,1,bandMat,container?hazard:steel);
+    if(container&&edgeSouth) {
+     const frame=[.25,.272,.25],bolt=[.39,.372,.31];
+     box(x+.038,.51,y+.999,.039,wallHeight-.65,.036,5,frame);
+     box(x+.929,.51,y+.999,.039,wallHeight-.65,.036,5,frame);
+     if(x%3===1) {
+      box(x+.26,.49,y+1.007,.047,wallHeight-.72,.051,5,frame);
+      for(const lift of [.62,1.17,wallHeight-.32]) box(x+.20,lift,y+1.023,.16,.068,.064,5,bolt);
+     }
+    }
+    if(container&&edgeWest) for(const offset of [.09,.91]) {
+     box(x-.033,.52,y+offset,.036,wallHeight-.70,.044,5,[.245,.257,.236]);
+    }
+   } else {
+    const color=out?theme.outer:theme.wall;
+    box(x,0,y,1,wallHeight,1,1,color);
+    if(out) continue;
+    if(edgeNorth||edgeSouth||edgeEast||edgeWest) box(x,wallHeight-.15,y,1.006,.153,1.006,5,black);
+    const bandY=wallHeight*.47,bandMat=style==='prison'?4:5,bandColor=style==='prison'?hazard:steel;
+    if(edgeNorth) box(x,bandY,y-.016,1,.12,.019,bandMat,bandColor);
+    if(edgeSouth) box(x,bandY,y+.995,1,.12,.020,bandMat,bandColor);
+    if(edgeWest) box(x-.016,bandY,y,.019,.12,1,bandMat,bandColor);
+    if(edgeEast) box(x+.995,bandY,y,.020,.12,1,bandMat,bandColor);
+   }
   }
-  if(arm) {
-   const [dx,dz]=arm;
-   box(Math.min(x,x+dx)-.03,y+.36,Math.min(z,z+dz)-.03,Math.abs(dx)+.06,.061,Math.abs(dz)+.06,5,black);
-   box(x+dx-.039,0,z+dz-.039,.078,y+.42,.078,5,black);
-   box(x-.033,y+.085,z-.033,.066,.33,.066,5,black);
+  if(style==='yard') {
+   for(const x of [17.31,24.63]) {
+    box(x,3.17,13.20,.09,.09,3.7,2,[.29,.31,.29]);
+    box(x-.03,3.142,15.02,.15,.15,.11,5,[.31,.31,.286]);
+   }
+   for(const [x,z] of [[16.50,22.18],[26.12,22.16],[31.65,18.02],[13.25,17.30]]) {
+    box(x,0,z,.12,.72,.13,4,[.64,.454,.225]);
+    box(x-.023,.015,z-.023,.167,.081,.177,5,[.293,.30,.283]);
+   }
+   for(let y=1.5;y<29;y+=1.65) {
+    if(!solid(21,Math.floor(y))) paintLine(21.43,y,.13,.68,[.64,.54,.32]);
+    if(!solid(20,Math.floor(y))) paintLine(20.05,y,.035,1.28,[.41,.50,.49]);
+   }
   }
-  box(x-.23,y-.01,z-.085,.46,.11,.17,5,black);
-  box(x-.18,y-.026,z-.068,.36,.035,.136,6,clr);
-  box(x-.14,y+.025,z+.06,.28,.038,.055,6,clr);
+  for(const [x,z,w,d,color] of MAP.decor) paintLine(x,z,w,d,color);
+  for(const [x,y] of supplies) {
+   paintLine(x-.68,y-.68,1.36,.055,[.5,.67,.45]);paintLine(x-.68,y+.63,1.36,.055,[.5,.67,.45]);
+   paintLine(x-.68,y-.68,.055,1.36,[.5,.67,.45]);paintLine(x+.63,y-.68,.055,1.36,[.5,.67,.45]);
+  }
+  for(const [x0,x1,z,title,sub,warm,level] of MAP.signs) gantry(x0,x1,z,title,sub,warm,level);
+  for(const [x,z,y,w] of lights) {
+   const clr=w>0?[1,.66,.35]:[.38,.94,1];
+   let arm=null;
+   for(let dist=1;dist<12&&!arm;dist++) {
+    arm=[[dist,0],[-dist,0],[0,dist],[0,-dist]].find(([dx,dz])=>solid(Math.floor(x+dx),Math.floor(z+dz)));
+   }
+   if(arm) {
+    const [dx,dz]=arm;
+    box(Math.min(x,x+dx)-.03,y+.36,Math.min(z,z+dz)-.03,Math.abs(dx)+.06,.061,Math.abs(dz)+.06,5,black);
+    box(x+dx-.039,0,z+dz-.039,.078,y+.42,.078,5,black);
+    box(x-.033,y+.085,z-.033,.066,.33,.066,5,black);
+   }
+   box(x-.23,y-.01,z-.085,.46,.11,.17,5,black);
+   box(x-.18,y-.026,z-.068,.36,.035,.136,6,clr);
+   box(x-.14,y+.025,z+.06,.28,.038,.055,6,clr);
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER,mesh);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
  }
- const mesh=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,mesh);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+ rebuild();
  const spriteBuffer=gl.createBuffer(), textures=new WeakMap();
  const shadowImage=document.createElement('canvas');shadowImage.width=shadowImage.height=48;
  const shadowCtx=shadowImage.getContext('2d');
@@ -1320,6 +1741,7 @@ function makeYardRenderer() {
   gl.uniform2f(u.uScale,focal*2/W.width,focal*2/W.height);
   gl.uniform1f(u.uPitch,look*2);gl.uniform1f(u.uTime,frames/60);
   gl.uniform1f(u.uFlash,muzzle>0?.66:0);gl.uniform4fv(u['uLights[0]'],lightData);
+  gl.uniform3fv(u.uFog,MAP.theme.fog);gl.uniform3fv(u.uAmbient,MAP.theme.ambient);
  }
  function draw(view,dx,dy,look,drawables) {
   if(canvas.width!==W.width||canvas.height!==W.height) {canvas.width=W.width;canvas.height=W.height;}
@@ -1353,18 +1775,10 @@ function makeYardRenderer() {
   drawModels(view,dx,dy,look,modelItems);
   return canvas;
  }
- return {draw,canvas,lights,hasModels:()=>!!modelProgram&&!gl.isContextLost(),photoCount:()=>loadedPhotos};
+ return {draw,canvas,lights,rebuild,hasModels:()=>!!modelProgram&&!gl.isContextLost(),photoCount:()=>loadedPhotos};
 }
-let yard3D;
 try {yard3D=makeYardRenderer();} catch(error) {console.warn('WebGL renderer unavailable:',error.message);}
 
-const preview={x:20.55,y:27.75,angle:-1.46};
-const previewEnemies=[
- {x:21.92,y:23.32,type:'shield',anim:.6,flash:0},
- {x:23.87,y:22.86,type:'spitter',anim:2.5,flash:0},
- {x:20.7,y:19.82,type:'brute',anim:3,flash:0},
- {x:19.35,y:21.5,type:'screamer',anim:4,flash:0}
-];
 const rainRandom=rng(2117);
 const rainDrops=Array.from({length:73},()=>[rainRandom(),rainRandom(),rainRandom(),rainRandom()]);
 const cloudRandom=rng(621);
@@ -1384,11 +1798,11 @@ function yardActors(demo) {
  return out;
 }
 function paintSky(view,look) {
- const w=W.width,h=W.height,mid=h*(.5+look);
+ const w=W.width,h=W.height,mid=h*(.5+look),theme=MAP.theme;
  const fill=ctx.createLinearGradient(0,0,0,Math.max(1,mid+h*.32));
- fill.addColorStop(0,'#07141d');fill.addColorStop(.43,'#142731');fill.addColorStop(.81,'#354f57');fill.addColorStop(1,'#16252a');
+ fill.addColorStop(0,theme.sky[0]);fill.addColorStop(.43,theme.sky[1]);fill.addColorStop(.81,theme.sky[2]);fill.addColorStop(1,theme.sky[3]);
  ctx.fillStyle=fill;ctx.fillRect(0,0,w,h);
- for(const [left,level,size] of cloudBanks) {
+ if(theme.clouds) for(const [left,level,size] of cloudBanks) {
   const x=((left*w*1.8+w*4-view.angle*w*.55)%(w*1.8))-w*.35;
   const y=mid-h*(.095+level*.5),radius=w*(.13+size*.25);
   ctx.save();ctx.translate(x,y);ctx.scale(1,.21);
@@ -1396,13 +1810,15 @@ function paintSky(view,look) {
   cloud.addColorStop(0,level>.45?'#28444d84':'#48686e65');cloud.addColorStop(1,'#20333b00');
   ctx.fillStyle=cloud;ctx.fillRect(-radius,-radius,radius*2,radius*2);ctx.restore();
  }
- const moonAngle=-1.01,delta=Math.atan2(Math.sin(moonAngle-view.angle),Math.cos(moonAngle-view.angle));
- if(Math.abs(delta)<.70) {
-  const x=w*.5+Math.tan(delta)*focal,y=mid-focal*.39/Math.cos(delta),radius=Math.max(w*.020,7);
-  const glow=ctx.createRadialGradient(x,y,1,x,y,radius*4.2);
-  glow.addColorStop(0,'#a5d5da71');glow.addColorStop(.25,'#9dcbcf41');glow.addColorStop(1,'#8ebdc400');
-  ctx.fillStyle=glow;ctx.fillRect(x-radius*5,y-radius*5,radius*10,radius*10);
-  ctx.beginPath();ctx.arc(x,y,radius*.40,0,TAU);ctx.fillStyle='#b5d9d0ad';ctx.fill();
+ if(theme.moon) {
+  const moonAngle=-1.01,delta=Math.atan2(Math.sin(moonAngle-view.angle),Math.cos(moonAngle-view.angle));
+  if(Math.abs(delta)<.70) {
+   const x=w*.5+Math.tan(delta)*focal,y=mid-focal*.39/Math.cos(delta),radius=Math.max(w*.020,7);
+   const glow=ctx.createRadialGradient(x,y,1,x,y,radius*4.2);
+   glow.addColorStop(0,'#a5d5da71');glow.addColorStop(.25,'#9dcbcf41');glow.addColorStop(1,'#8ebdc400');
+   ctx.fillStyle=glow;ctx.fillRect(x-radius*5,y-radius*5,radius*10,radius*10);
+   ctx.beginPath();ctx.arc(x,y,radius*.40,0,TAU);ctx.fillStyle='#b5d9d0ad';ctx.fill();
+  }
  }
 }
 function paintYard() {
@@ -1425,12 +1841,22 @@ function paintYard() {
   ctx.fillRect(sx-size,sy-size,size*2,size*2);
  }
  ctx.globalCompositeOperation='source-over';
- ctx.lineWidth=.65;
- for(const [u,v,s,offset] of rainDrops) {
-  const x=((u*w+frames*(s+.23)*.58+view.angle*w*.09)%w+w)%w;
-  const y=(v*h+frames*(s+.26)*5.9)%h;
-  ctx.strokeStyle=s>.75?'#b7e9e341':'#a3bac621';ctx.beginPath();ctx.moveTo(x,y);
-  ctx.lineTo(x-2-s*3,y+4+s*14+offset*3);ctx.stroke();
+ const weather=MAP.theme.weather;
+ if(weather!=='none') {
+  ctx.lineWidth=.65;
+  const drops=weather==='drip'?rainDrops.slice(0,24):rainDrops;
+  for(const [u,v,s,offset] of drops) {
+   const x=((u*w+frames*(s+.23)*.58+view.angle*w*.09)%w+w)%w;
+   if(weather==='drip') {
+    const y=(v*h+frames*(s+.20)*1.7+offset*h)%h;
+    ctx.strokeStyle=s>.7?'#a8d4d02e':'#93aaa62a';ctx.beginPath();ctx.moveTo(x,y);
+    ctx.lineTo(x-.5,y+6+s*9);ctx.stroke();
+   } else {
+    const y=(v*h+frames*(s+.26)*5.9)%h;
+    ctx.strokeStyle=s>.75?'#b7e9e341':'#a3bac621';ctx.beginPath();ctx.moveTo(x,y);
+    ctx.lineTo(x-2-s*3,y+4+s*14+offset*3);ctx.stroke();
+   }
+  }
  }
  const vignette=ctx.createRadialGradient(w*.50,h*.48,Math.min(w,h)*.36,w*.50,h*.48,Math.max(w,h)*.65);
  vignette.addColorStop(0,'#0b161600');vignette.addColorStop(1,'#04121a65');
@@ -1603,6 +2029,9 @@ function toggleMute() {
  if(!muted) activateAudio();
 }
 $('start').onclick=start;
+for(const button of document.querySelectorAll('.mapChoice')) button.onclick=()=>{
+ if(mode==='menu') selectMap(button.dataset.map);
+};
 $('openGuide').onclick=()=>$('guide').showModal();
 $('closeGuide').onclick=()=>$('guide').close();
 $('mute').onclick=toggleMute;
@@ -1678,6 +2107,8 @@ $('touchSwap').onclick=()=>switchGun(1-gun);
 $('touchReload').onclick=reload;
 $('touchSupply').onclick=resupply;
 $('touchPause').onclick=pause;
+const requestedMap=new URLSearchParams(location.search).get('map') || location.hash.replace(/^#/,'');
+if(MAPS[requestedMap] && requestedMap!=='yard') applyMap(requestedMap,true);
 setMode('menu');
 function loop(now) {
  const dt=Math.min(.048,Math.max(0,(now-last)/1000));last=now;frames++;
